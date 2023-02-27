@@ -1,45 +1,47 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import './App.css'
+import { Fragment, Suspense, useRef, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
-import Background from './Background'
+import Theme from "./themes/DomainWarpTheme";
+import Theme2 from "./themes/SmileyTheme";
+import { Html, OrbitControls, useProgress } from '@react-three/drei';
+import { useControls } from 'leva';
+import Toolbar from './components/Toolbar';
+import Content from './components/Content';
 
 function App() {
-  const [count, setCount] = useState(0)
 
-  return (
-    <div className="App">
-      <Canvas
-          style={{
-            position: "absolute",
-            height: `100vh`,
-            width: "100vw",
-            left: "0",
-            top: "0"
-          }}>
-            <Background/>
-      </Canvas>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+  const themes = [Theme, Theme2];
+  const canvasRef = useRef<HTMLDivElement>(null);
+  function Loader() {
+    const { progress } = useProgress()
+    return <Html center>{progress} % loaded</Html>
+  }
+
+  const {theme} = useControls("Theme",
+    {theme: {options:{ "Domain-Warp": 0, "Smiley":1}}
+    }
+  );
+
+  const ThemeLoader = (idx:number) => {
+    const ActiveTheme = themes[idx];
+    return <Suspense fallback={<Loader />}>
+    {<ActiveTheme elementRef={canvasRef} />}
+  </Suspense>
+  }
+
+  return (<div className="w-screen h-screen flex flex-col">
+      <div className="canvas-holder absolute w-screen h-screen z-[-1]" ref={canvasRef}>
+        <div className="fixed w-full h-full bg-slate-900/70"/>
+        <Canvas shadows="percentage" className="z-[-2]">
+          <OrbitControls/>
+          {ThemeLoader(theme)}
+        </Canvas>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+      <div id="header" className="w-screen flex h-20 z-10">
+        <Toolbar/>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </div>
+      <Content/>
+  </div>
+    
   )
 }
 
