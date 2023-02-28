@@ -1,14 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;600&family=Work+Sans:wght@300;400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
 
 @font-face {
   font-family: Work-Sans;
   src: url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500&display=swap');
 }
 
+
+@font-face {
+  font-family: Source Sans Pro;
+  src: url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;600&family=Work+Sans:wght@300;400;500&display=swap');
+}
+
 @layer base {
   input[type='text']{
+    /* Leva styling TODO: overwrite to fit rest of styling */
     outline: none;
     font-size: inherit;
     font-weight: inherit;
@@ -23,10 +34,20 @@
     flex: 1 1 0%;
     height: 100%;
   }
+
+  .title {
+    font-family: Source Sans Pro;
+    @apply font-normal text-xl tracking-tight leading-tight
+  }
+
+  .mainText {
+    font-family: Work Sans;
+    @apply font-light text-base tracking-tight leading-tight
+  }
 }
 
 :root {
-  font-family: Work-Sans, Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: Source Sans Pro, Work Sans, Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
@@ -41,26 +62,15 @@
   -webkit-text-size-adjust: 100%;
 }
 
-
-
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-
-
-
 @media (prefers-color-scheme: light) {
   :root {
-    color: #213547;
-    background-color: #ffffff;
+    /* color: #213547;
+    background-color: #ffffff; */
   }
   a:hover {
     color: #747bff;
   }
   button {
-    background-color: #f9f9f9;
+    /* background-color: #f9f9f9; */
   }
 }

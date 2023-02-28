@@ -1,3 +1,4 @@
+import About from "../pages/About";
 import Menu from "./Menu";
 
 function Content(){
@@ -7,7 +8,7 @@ function Content(){
         <div className="flex gap-6 w-10/12 h-2/3">
             <Menu/>
             <div className="flex bg-slate-200/20 w-full h-full mr-48">
-                look at this bullshit here
+                <About/>
             </div>
         </div>
     </div>; 
