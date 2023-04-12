@@ -4,11 +4,10 @@ import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader'
 import {Mesh, Vector2, Shape, Group, Color, Uniform, Side, DoubleSide } from "three";
 import { useFrame, useLoader, useThree } from "@react-three/fiber";
 import { EffectComposer, Bloom, Noise, Scanline, Vignette } from "@react-three/postprocessing";
-import Smiley from "@/assets/smile1.svg";
+import Smiley from "@src/assets/smile1.svg";
 import { Effect } from "postprocessing";
 import { useControls } from "leva";
-import { Backdrop, MeshReflectorMaterial, Plane, SpotLight } from "@react-three/drei";
-// import { DebugLayerMaterial, Fresnel, Normal, LayerMaterial, Displace } from "lamina";
+import { Html } from "@react-three/drei";
 
 class DistortEffect extends Effect {
   u_resolution: Vector2;
@@ -32,7 +31,8 @@ class DistortEffect extends Effect {
   }
 }
 
-export default function Background(props: {elementRef: React.RefObject<HTMLDivElement>}) {
+export default function Background(props: {}) {
+
   const NUM_ICONS = 28;
   const ROW_PER_ICON = 4;
 
@@ -44,6 +44,7 @@ export default function Background(props: {elementRef: React.RefObject<HTMLDivEl
     camera.position.set(7, -4, 5);
     return {size};
   });
+
   const [meshs, setMeshes] = useState<Mesh[]>([]);
 
   const { speed, offSet, scale, horizontalOffset, verticalOffset, distort } = useControls(
@@ -71,6 +72,9 @@ export default function Background(props: {elementRef: React.RefObject<HTMLDivEl
     // reflection
     delta:145.,
   })
+
+  React.useEffect(() => {
+  }, [])
 
   useEffect(() => {
     let curMeshes: Mesh[] = []
@@ -117,13 +121,16 @@ export default function Background(props: {elementRef: React.RefObject<HTMLDivEl
 
   const Distort = forwardRef(({}, ref) => {
     const resolution = new Vector2(size.width, size.height);
-    const effect = useMemo(() => new DistortEffect({time: time.current, resolution, ...shaderConfigs}), [time]);
+    const effect = useMemo(() => new DistortEffect({time: time.current, resolution, ...shaderConfigs}), []);
     return <primitive ref={ref} object={effect} dispose={null} />
   })
 
   return (<>
       <ambientLight/>
-
+      <Html
+        center
+          className="w-screen h-screen bg-base opacity-75"
+        />
       <group position={[-3,-6,0]} ref={groupRef} castShadow >
         {smileys}
 

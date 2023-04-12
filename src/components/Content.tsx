@@ -1,14 +1,23 @@
-import About from "../pages/About";
+import { forwardRef, useEffect, useRef } from "react";
+import Home from "../pages/Home";
+import Contact from "../pages/Contact";
+import ProjectsPage from "../pages/Projects";
+import Work from "../pages/Work";
 import Menu from "./Menu";
 
 function Content(){
 
-    return <div className="flex justify-center items-center w-full h-max px-10 z-10 grow">
-        
-        <div className="flex gap-6 w-10/12 h-2/3">
+    const Projects = forwardRef((props, ref) => <ProjectsPage {...{props}} ref={ref}/>)
+    const pageRefs = new Array(2).map(() => useRef<HTMLDivElement>(null));
+
+    return <div className="flex justify-center items-start z-10 pb-96">
+        <div className="flex gap-10 2xl:w-7/12 xl:w-9/12 lg:w-11/12 sm:w-11/12 transition-[width] max-w-screen-xl px-10">
             <Menu/>
-            <div className="flex bg-slate-200/20 w-full h-full mr-48">
-                <About/>
+            <div className="flex flex-col w-full px-5 gap-[20vh]">
+                <Home/>
+                <Projects/>
+                <Work/>
+                <Contact/>
             </div>
         </div>
     </div>; 

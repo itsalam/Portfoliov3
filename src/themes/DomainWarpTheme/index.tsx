@@ -1,13 +1,12 @@
-import React, { forwardRef, useCallback, useState } from "react";
+import React, { forwardRef } from "react";
 import { useMemo, useRef } from "react";
 import fragmentShader from "./fragment.glsl";
-import {Mesh, Vector2, Vector3, SpotLight as ThreeSpotLight, MeshNormalMaterial, Shader, WebGLRenderer, UniformsLib, MeshStandardMaterial, MeshPhongMaterial, DoubleSide, MeshDepthMaterial, MeshDistanceMaterial, NoBlending, Color, NormalBlending, MeshPhysicalMaterial, ShaderMaterial, UniformsUtils, ObjectSpaceNormalMap, Uniform } from "three";
-import { extend, Size, useFrame, useThree } from "@react-three/fiber";
-import THREE, { Box, SpotLight, OrbitControls, useAspect, Plane, RandomizedLight, Sphere, BakeShadows, ContactShadows, Environment } from "@react-three/drei/core";
-import { EffectComposer, Bloom, Scanline, TiltShift, Noise, Vignette } from "@react-three/postprocessing";
+import {Vector2, Color, Uniform } from "three";
+import { useFrame, useThree } from "@react-three/fiber";
+import { EffectComposer, Bloom, Vignette } from "@react-three/postprocessing";
 import { Effect } from "postprocessing";
 import { useControls } from "leva";
-// import { DebugLayerMaterial, Fresnel, Normal, LayerMaterial, Displace } from "lamina";
+import { Html } from "@react-three/drei";
 
 class DomainWarpEffect extends Effect {
   u_resolution: Vector2;
@@ -29,29 +28,28 @@ class DomainWarpEffect extends Effect {
   }
 }
 
-export default function Background(props: {elementRef: React.RefObject<HTMLDivElement>}) {
-  
+export default function Background(props: {}) {
+
   const effectRef = useRef<DomainWarpEffect>(null);
   const time = useRef<number>(0);
-  const {viewport, size} = useThree();
+  const {size} = useThree();
 
   const configs = useControls({
     color1: "#00aa58",
     color2: "#e3aa00",
     color3: "#00cc69",
     color4: "#664e00",
-    alpha: 7.0,
+    alpha: 3.0,
 
   })
 
   const DomainWarp = forwardRef(({}, ref) => {
     const resolution = new Vector2(size.width, size.height);
-    const effect = useMemo(() => new DomainWarpEffect({time: time.current, resolution, ...configs}), [time]);
+    const effect = useMemo(() => new DomainWarpEffect({time: time.current, resolution, ...configs}), []);
     return <primitive ref={ref} object={effect} dispose={null} />
   })
 
   useFrame((state, delta) => {
-    // console.log(effectRef.current)
     if (effectRef.current) {
       time.current += delta;
       effectRef.current.u_time = time.current;
@@ -60,14 +58,15 @@ export default function Background(props: {elementRef: React.RefObject<HTMLDivEl
 
   return (
     <group>
+        <Html
+        center
+          className="w-screen h-screen bg-base opacity-[85%]"
+        />
         <EffectComposer>
         <DomainWarp ref={effectRef}/>
-        {/* <Noise opacity={0.25} /> */}
         <Bloom intensity={0.8} luminanceThreshold={0.1} />
-        <Vignette offset={0.5} darkness={0.6}/>
+        <Vignette offset={0.5} darkness={0.7}/>
         </EffectComposer>
     </group>
-
-
   );
 }
