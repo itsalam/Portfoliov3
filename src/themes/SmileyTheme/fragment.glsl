@@ -25,22 +25,22 @@ uniform float gain;
 // ===================================================
 
 
-  float col(vec2 coord,float time)
+float col(vec2 coord,float time)
+{
+  float delta_theta = 2.0 * PI / float(angle);
+  float col = 0.0;
+  float theta = 0.0;
+  for (int i = 0; i < steps; i++)
   {
-    float delta_theta = 2.0 * PI / float(angle);
-    float col = 0.0;
-    float theta = 0.0;
-    for (int i = 0; i < steps; i++)
-    {
-      vec2 adjc = coord;
-      theta = delta_theta*float(i);
-      float adjTime= time/1000.;
-      adjc.x += cos(theta)*adjTime*speed + adjTime * speed_x;
-      adjc.y -= sin(theta)*adjTime*speed - adjTime * speed_y;
-      col = col + cos( (adjc.x*cos(theta) - adjc.y*sin(theta))*frequency)*intensity;
-    }
-    return cos(col);
+    vec2 adjc = coord;
+    theta = delta_theta*float(i);
+    float adjTime= time/1000.;
+    adjc.x += cos(theta)*adjTime*speed + adjTime * speed_x;
+    adjc.y -= sin(theta)*adjTime*speed - adjTime * speed_y;
+    col = col + cos( (adjc.x*cos(theta) - adjc.y*sin(theta))*frequency)*intensity;
   }
+  return cos(col);
+}
 
 void mainUv(inout vec2 uv){
     float time = u_time*1.3;

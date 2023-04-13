@@ -1,53 +1,73 @@
-import { Fragment, Suspense, useEffect, useRef, useState } from 'react'
-import { Canvas } from '@react-three/fiber'
-import { Html, OrbitControls, useProgress } from '@react-three/drei';
-import { useControls } from 'leva';
+import { Suspense, useCallback, useEffect } from 'react';
+import { Canvas } from '@react-three/fiber';
+import { Html, OrbitControls } from '@react-three/drei';
 import Toolbar from './components/Toolbar';
 import Content from './components/Content';
 import { VechaiProvider } from '@vechaiui/react';
 import useStore from './store';
-import cn from 'classnames';
+import { cx } from "@vechaiui/react";
 
 function App() {
-  const { vechaiTheme, themeOptions } = useStore.getState();
-  const [darkMode, setDarkMode] = useState(localStorage.theme == "dark")
+  const { vechaiTheme, themes } = useStore.getState();
+  const { isLoading, activeTheme, bgOpacity, darkMode, setDarkMode } = useStore();
 
-  function Loader() {
-    const { progress } = useProgress()
-    console.log(progress)
-    return <Html center>{progress} % loaded</Html>
+
+  function AppLoader() {
+    return (
+      <div className="flex h-screen w-full flex-col items-center justify-center">
+        <div className="h-20 w-20 animate-spin rounded-full border-t-4 border-gray-200"></div>
+      </div>
+    );
   }
 
-  const { theme } = useControls("Theme", themeOptions);
+  const colorSchemeId = `${activeTheme}${darkMode ? 'Dark' : 'Light'}`;
   useEffect(() => {
-    localStorage.theme = darkMode? "dark" : "light"
-  }, [darkMode])
+    localStorage.theme = darkMode ? 'dark' : 'light';
+  }, [darkMode]);
 
-  const ThemeLoader = () => {
-    const Background = theme.background;
-    return <Suspense fallback={<Loader />}>
-      <Background />
-    </Suspense>
-  }
+  const Theme = useCallback(() => {
+    function ThreeJsLoader() {
+      return <Html center><AppLoader /></Html>;
+    }
+
+    const Background = themes[activeTheme].background;
+    return (
+      <Suspense fallback={<ThreeJsLoader />}>
+        <Background />
+      </Suspense>
+
+    );
+  }, [activeTheme]);
 
   return (
-    <div className={cn("w-full h-screen flex flex-col transition snap-y snap-mandatory overflow-x-clip", darkMode? "dark" : "light")}>
-      <Suspense fallback={<Loader />}>
-        
-        <VechaiProvider theme={vechaiTheme} colorScheme={`${theme.id}${darkMode? "Dark" : "Light"}`}>
-            <div className="canvas-holder fixed w-screen h-screen z-[-1]" >
-              <Canvas shadows="percentage" className="z-[-2]">
-                <OrbitControls />
-                <ThemeLoader />
-              </Canvas>
-            </div>
-            <Toolbar {...{darkMode, setDarkMode}} />
-            <Content />
-        </VechaiProvider>
-      
-      </Suspense>
+    <div
+      className={cx(
+        'w-full h-screen flex flex-col transition snap-y snap-mandatory overflow-x-clip',
+        darkMode ? 'dark' : 'light'
+      )}
+    >
+      {
+        isLoading ? <AppLoader /> :
+          <Suspense fallback={<AppLoader />}>
+            <VechaiProvider
+              theme={vechaiTheme}
+              colorScheme={colorSchemeId}
+            >
+              <div className="canvas-holder bg-base fixed z-[-1] h-screen w-screen" style={{ opacity: bgOpacity }}>
+
+                <Canvas id="canvas" shadows="percentage" className="intro-revealer z-[-2]" style={{ opacity: 0 }}>
+                  <OrbitControls />
+                  <Theme />
+                </Canvas>
+              </div>
+              <Toolbar {...{ darkMode, setDarkMode }} />
+              <Content />
+            </VechaiProvider>
+          </Suspense>
+      }
+
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

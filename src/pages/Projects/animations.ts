@@ -1,147 +1,184 @@
-import anime from "animejs";
+import anime, { AnimeTimelineInstance } from 'animejs';
 
 export const scrollAnimation = anime({
-  targets: ".project img",
-  objectPosition: ["center 100%", "center 0%"],
-  easing: "linear",
+  targets: '.project img',
+  objectPosition: ['center 100%', 'center 0%'],
+  easing: 'linear'
 });
 
-export const animateProject = (index: number) =>
-  anime
+export const animateProject = (index: number): AnimeTimelineInstance => {
+  const targets = `.project:nth-of-type(${index + 1})`;
+  return anime
     .timeline({
       autoplay: true,
+      complete: (anim) => {
+        // anime({
+        //   targets: `.project:nth-of-type(${index + 1}) .carousel`,
+        //   translateY: ['0%', '-80%'],
+        //   duration: 1000,
+        //   easing: 'linear'
+        // });
+      }
     })
     .add(
       {
-        targets: `.project:nth-of-type(${index + 1})`,
+        targets: `${targets}:not(.mobile)`,
         keyframes: [
           {
-            easing: "easeInOutCirc",
-            height: ["30vh", "55vh"],
-            duration: 750,
+            easing: 'easeInOutCirc',
+            height: ['40vh', '55vh'],
+            duration: 750
           },
           {
-            easing: "easeInOutCirc",
-            width: ["66.667%", "100%"],
-            duration: 450,
-            delay: 50,
-          },
-        ],
+            easing: 'easeInOutCirc',
+            width: ['66.667%', '100%'],
+            duration: 650,
+            delay: 650
+          }
+        ]
       },
       0
     )
     .add(
       {
-        targets: `.project:nth-of-type(${index + 1})>.carousel`,
-        opacity: ["0%", "100%"],
-        easing: "easeInOutCirc",
-        delay: 1250,
-        duration: 450,
+        targets: `${targets}.mobile>div`,
+        keyframes: [
+          {
+            easing: 'easeInOutCirc',
+            height: ['8rem', '28rem'],
+            duration: 750
+          }
+        ]
       },
       0
     )
     .add(
       {
-        targets: `.project:nth-of-type(${index + 1}) .fullDescription`,
+        targets: `${targets}:not(.mobile)>.carousel`,
+        opacity: ['0%', '100%'],
+        easing: 'easeInOutCirc',
+        delay: 1650,
+        duration: 450
+      },
+      0
+    )
+    .add(
+      {
+        targets: `${targets} .fullDescription`,
         keyframes: [
           {
-            easing: "easeOutCirc",
-            opacity: ["0%"],
-            duration: 0,
+            easing: 'easeInOutCirc',
+            height: ['0%', '100%'],
+            delay: 1250,
+            duration: 550
           },
           {
-            easing: "easeOutCirc",
-            height: ["0%", "100%"],
-            delay: 400,
-            duration: 500,
-          },
-          {
-            easing: "easeOutCirc",
-            opacity: ["100%"],
-            duration: 0,
-          },
-        ],
+            easing: 'linear',
+            opacity: ['100%'],
+            delay: 150,
+            duration: 250
+          }
+        ]
       },
       0
     )
     .add(
       {
         targets: `.project:not(.focused)`,
-        opacity: ["100%", "50%"],
-        duration: 250,
+        opacity: ['100%', '66%'],
+        duration: 250
       },
       0
     )
     .add(
       {
-        targets: `div.project:nth-of-type(${index + 1}) .revealer>*`,
-        delay: anime.stagger(150, { easing: "easeInQuad" }),
+        targets: `div${targets} .revealer>*`,
+        delay: anime.stagger(250, { easing: 'easeInQuad' }),
         keyframes: [
           {
-            translateY: ["0%", "100%"],
-            duration: 450,
+            translateY: ['0%', '100%'],
+            duration: 250
           },
           {
-            translateY: ["-100%", "0%"],
-            delay: 1000,
+            translateY: ['-100%', '0%'],
+            delay: 250,
             duration: 450,
             begin(anim) {
               setTimeout(() => {
-                const elem = anim as unknown as Element;
-                elem.style.textAlign = "start";
-                if (elem.classList.contains("subTitle")) {
-                  elem.classList.toggle("text-5xl", true);
+                const elem = anim as unknown as HTMLElement;
+                elem.style.textAlign = 'start';
+                if (elem.classList.contains('subTitle')) {
+                  elem.classList.toggle('expanded', true);
                 }
-                if (elem.classList.contains("description")) {
-                  elem.style.height = "0";
+                if (elem.classList.contains('description')) {
+                  elem.style.height = '0';
                 }
               }, 600);
-            },
-          },
+            }
+          }
         ],
-        easing: "easeInOutCirc",
+        easing: 'easeInOutCirc'
       },
       0
     );
+};
 
-export const animateProjectReverse = (index: number) =>
+export const animateProjectReverse = (index: number) => {
+  const targets = `.project:nth-of-type(${index + 1})`;
   anime
     .timeline({
-      autoplay: true,
+      autoplay: true
     })
     .add(
       {
-        targets: `.project:nth-of-type(${index + 1})`,
+        targets: `${targets}:not(.mobile)`,
         keyframes: [
           {
-            easing: "easeInOutCirc",
-            height: ["55vh", "30vh"],
-            width: ["100%", "66.667%"],
-            duration: 750,
-          },
-        ],
+            easing: 'easeInOutCirc',
+            height: ['55vh', '40vh'],
+            width: ['100%', '66.667%'],
+            duration: 750
+          }
+        ]
       },
       0
     )
     .add(
       {
-        targets: `.project:nth-of-type(${index + 1})>.carousel`,
-        opacity: ["100%", "0%"],
-        easing: "easeInOutCirc",
-        duration: 250,
+        targets: `${targets}.mobile>div`,
+        keyframes: [
+          {
+            easing: 'easeInOutCirc',
+            height: ['28rem', '8rem'],
+            duration: 750
+          }
+        ]
       },
       0
     )
     .add(
       {
-        targets: `.project:nth-of-type(${index + 1}) .fullDescription`,
+        targets: `${targets}:not(.mobile)>.carousel`,
+        opacity: ['100%', '0%'],
+        easing: 'easeInOutCirc',
+        duration: 250
+      },
+      0
+    )
+    .add(
+      {
+        targets: `${targets} .fullDescription`,
         keyframes: [
           {
-            height: ["100%", "0%"],
-            duration: 750,
-            easing: "easeOutCirc",
+            opacity: ['0%'],
+            duration: 0
           },
-        ],
+          {
+            height: ['100%', '0%'],
+            duration: 750,
+            easing: 'easeOutCirc'
+          }
+        ]
       },
       0
     )
@@ -150,42 +187,40 @@ export const animateProjectReverse = (index: number) =>
         targets: `.project:not(.focused)`,
         keyframes: [
           {
-            opacity: ["50%", "100%"],
+            opacity: ['66%', '100%'],
             duration: 250,
-            easing: "easeOutCirc",
-          },
-        ],
+            easing: 'easeOutCirc'
+          }
+        ]
       },
       0
     )
     .add(
       {
-        targets: `.project:nth-of-type(${index + 1}) .revealer>*`,
+        targets: `${targets} .revealer>*`,
         delay: anime.stagger(100, { start: 0 }),
         keyframes: [
-          // {
-          //   opacity: ["0%"],
-          //   duration: 0,
-          // },
           {
-            opacity: ["100%"],
-            translateY: ["-100%", "0%"],
+            translateY: ['-100%', '0%'],
             duration: 250,
             delay: 800,
-
-            begin(anim) {
-              const elem = anim as unknown as Element;
-              elem.style.textAlign = "";
-              if (elem.classList.contains("subTitle")) {
-                elem.classList.toggle("text-5xl", false);
-              }
-              if (elem.classList.contains("description")) {
-                elem.style.height = "";
-              }
+            opacity: (el: Element) => {
+              return el.classList.contains('fullDescription') ? '0%' : '100%';
             },
-          },
+            begin(anim) {
+              const elem = anim as unknown as HTMLElement;
+              elem.style.textAlign = '';
+              if (elem.classList.contains('subTitle')) {
+                elem.classList.toggle('expanded', false);
+              }
+              if (elem.classList.contains('description')) {
+                elem.style.height = '';
+              }
+            }
+          }
         ],
-        easing: "easeInOutCirc",
+        easing: 'easeInOutCirc'
       },
       0
     );
+};

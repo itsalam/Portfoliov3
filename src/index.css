@@ -6,54 +6,75 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
-@layer base {
+.leva-c-kWgxhW [type='text'] {
+  /* Leva styling TODO: overwrite to fit rest of styling */
+  display: flex;
+  align-items: center;
+  position: relative;
+  border-radius: var(--leva-radii-sm);
+  overflow: hidden;
+  color: inherit;
+  height: var(--leva-sizes-rowHeight);
+  background-color: var(--leva-colors-elevation3);
+  outline: none;
+  font-size: inherit;
+  font-weight: inherit;
+  font-family: inherit;
+  appearance: none;
+  padding: 0 var(--leva-space-sm);
+  width: 0px;
+  min-width: 0px;
+  flex: 1 1 0%;
+}
 
+body {
+  background-color: var(--vc-colors-bg-base, rgb(0, 0, 0));
+}
+
+@layer base {
   html {
     scroll-behavior: smooth;
-    /* scroll-snap-type: y proximity; */
-
-  }
-
-  #leva__root input[type='text']{
-    /* Leva styling TODO: overwrite to fit rest of styling */
-    outline: none;
-    font-size: inherit;
-    font-weight: inherit;
-    color: inherit;
-    font-family: inherit;
-    border: none;
-    background-color: transparent;
-    appearance: none;
-    padding: 0 var(--leva-space-sm);
-    width: 0px;
-    min-width: 0px;
-    flex: 1 1 0%;
-    height: 100%;
   }
 
   .title {
     font-family: Source Sans Pro;
-    @apply font-normal text-8xl leading-tight
+    @apply font-normal 2xl:text-8xl md:text-7xl text-6xl leading-tight;
   }
 
   .subTitle {
     font-family: Source Sans Pro;
-    @apply font-normal text-4xl leading-tight
+    @apply font-normal 2xl:text-4xl md:text-3xl text-2xl leading-tight;
+  }
+
+  .subTitle.expanded {
+    @apply 2xl:text-5xl md:text-4xl text-3xl;
   }
 
   .mainText {
     font-family: Source Sans Pro;
     white-space: break-spaces;
-    @apply font-light text-3xl leading-tight
+    @apply font-light 2xl:text-3xl md:text-2xl text-xl leading-tight;
+  }
+
+  .subText {
+    font-family: Source Sans Pro;
+    white-space: break-spaces;
+    @apply font-light 2xl:text-2xl md:text-lg text-base leading-tight;
   }
 
   .bg-foreground {
     --tw-text-opacity: 1;
-    background-color: rgba(var(--vc-colors-text-foreground), var(--tw-text-opacity));
+    background-color: rgba(
+      var(--vc-colors-text-foreground),
+      var(--tw-text-opacity)
+    );
   }
 
   .border-foreground {
-    border-color: rgba(var(--vc-colors-text-foreground), var(--tw-text-opacity));
+    border-color: rgba(
+      var(--vc-colors-text-foreground),
+      var(--tw-text-opacity)
+    );
   }
 
   .icon svg {
@@ -61,19 +82,33 @@
   }
 
   .revealer {
-    @apply relative w-full overflow-x-clip overflow-y-hidden
+    @apply relative w-full overflow-x-clip overflow-y-hidden;
   }
 
   .titleContent {
-    @apply h-full w-full absolute overflow-y-visible top-0 left-0
+    @apply h-full w-full absolute overflow-y-visible top-0 left-0;
+  }
+
+  .text-w-full {
+    word-spacing: 100%;
   }
 
   .homeTitle {
-    @apply flex absolute title
+    @apply flex absolute title;
   }
 
   .revealerSpan {
-    @apply flex relative transform-none
+    @apply flex relative transform-none;
+  }
+
+  .project img {
+    filter: blur(2px);
+    transition: 0.2s filter linear;
+  }
+
+  .centered img,
+  .focused img {
+    filter: blur(0px);
   }
 
   .project.right {
@@ -81,50 +116,52 @@
   }
 
   .project.left {
-    margin-left: auto;
-    flex-direction: row-reverse;
+    @apply md:ml-auto md:flex-row-reverse;
   }
 
   .project.centered {
-    background-color: rgba(var(--vc-colors-bg-fill), 0.2);
-    opacity: 100% !important; 
+    background-color: rgba(var(--vc-colors-bg-base), 0.6);
+    opacity: 100% !important;
   }
 
   .focused:not(.centered) .carousel {
-    opacity: 0% !important; 
+    opacity: 0% !important;
   }
 
   .project:not(.focused) .carousel {
     display: none;
   }
 
-  input::placeholder,textarea::placeholder {
+  input::placeholder,
+  textarea::placeholder {
     color: rgba(var(--vc-colors-text-muted), 0.4);
   }
 
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 3px;
+    height: 3px;
   }
+
   ::-webkit-scrollbar-track {
-    border-radius: 10px;
-    background: rgba(var(--vc-colors-text-foreground),0.1);
+    border-radius: 3px;
+    background: transparent;
   }
-  ::-webkit-scrollbar-thumb{
-    border-radius: 10px;
-    background: rgba(var(--vc-colors-text-foreground),0.5);
+
+  ::-webkit-scrollbar-thumb {
+    border-radius: 3px;
+    background: rgba(var(--vc-colors-text-foreground));
   }
-  ::-webkit-scrollbar-thumb:hover{
-  	background: rgba(var(--vc-colors-text-foreground),0.7);
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(var(--vc-colors-text-foreground));
   }
-  ::-webkit-scrollbar-thumb:active{
-  	background: rgba(var(--vc-colors-text-foreground),.9);
+  ::-webkit-scrollbar-thumb:active {
+    background: rgba(var(--vc-colors-text-foreground), 0.9);
   }
 }
 
-
 :root {
-  font-family: Source Sans Pro, Work Sans, Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: Source Sans Pro, Work Sans, Inter, system-ui, Avenir, Helvetica,
+    Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
@@ -133,7 +170,4 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
-
-
 }
- 

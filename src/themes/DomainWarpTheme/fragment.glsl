@@ -78,9 +78,9 @@ float pattern_pt2(vec2 q, out vec2 o, out vec2 n){
     q += 0.05*sin(vec2(0.05)*time);
     q *= 0.7 + 0.2*cos(0.005*time);
     o = 0.5 + 0.5*fbm_2( q, vec2(1., 6.2), -1., 2., 4 );
-    o += 0.02*sin(vec2(.13, .11)*time);
+    o += .02*sin(vec2(.13, .11)*time);
     n = fbm_2( 5.0*o, vec2(9.2, 5.7), 6);
-    n *= 0.8 + 0.1*cos(time * 0.2);
+    n *= .85 + 0.10*cos(time * 0.2);
     vec2 p = q + n*4.;
     float f = 0.75 + 0.25*fbm(2.0*p, -1., 2., 6);
     // Multiply the point to darken, 
