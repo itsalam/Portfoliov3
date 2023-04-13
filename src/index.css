@@ -7,14 +7,12 @@
 @import 'tailwindcss/utilities';
 
 @layer base {
-
   html {
     scroll-behavior: smooth;
     /* scroll-snap-type: y proximity; */
-
   }
 
-  #leva__root input[type='text']{
+  #leva__root input[type='text'] {
     /* Leva styling TODO: overwrite to fit rest of styling */
     outline: none;
     font-size: inherit;
@@ -33,27 +31,43 @@
 
   .title {
     font-family: Source Sans Pro;
-    @apply font-normal text-8xl leading-tight
+    @apply font-normal xl:text-8xl text-6xl leading-tight;
   }
 
   .subTitle {
     font-family: Source Sans Pro;
-    @apply font-normal text-4xl leading-tight
+    @apply font-normal xl:text-4xl text-2xl leading-tight;
+  }
+
+  .subTitle.expanded {
+    @apply xl:text-5xl text-3xl;
   }
 
   .mainText {
     font-family: Source Sans Pro;
     white-space: break-spaces;
-    @apply font-light text-3xl leading-tight
+    @apply font-light xl:text-3xl text-xl leading-tight;
+  }
+
+  .subText {
+    font-family: Source Sans Pro;
+    white-space: break-spaces;
+    @apply font-light xl:text-2xl text-base leading-tight;
   }
 
   .bg-foreground {
     --tw-text-opacity: 1;
-    background-color: rgba(var(--vc-colors-text-foreground), var(--tw-text-opacity));
+    background-color: rgba(
+      var(--vc-colors-text-foreground),
+      var(--tw-text-opacity)
+    );
   }
 
   .border-foreground {
-    border-color: rgba(var(--vc-colors-text-foreground), var(--tw-text-opacity));
+    border-color: rgba(
+      var(--vc-colors-text-foreground),
+      var(--tw-text-opacity)
+    );
   }
 
   .icon svg {
@@ -61,19 +75,23 @@
   }
 
   .revealer {
-    @apply relative w-full overflow-x-clip overflow-y-hidden
+    @apply relative w-full overflow-x-clip overflow-y-hidden;
   }
 
   .titleContent {
-    @apply h-full w-full absolute overflow-y-visible top-0 left-0
+    @apply h-full w-full absolute overflow-y-visible top-0 left-0;
+  }
+
+  .text-w-full {
+    word-spacing: 100%;
   }
 
   .homeTitle {
-    @apply flex absolute title
+    @apply flex absolute title;
   }
 
   .revealerSpan {
-    @apply flex relative transform-none
+    @apply flex relative transform-none;
   }
 
   .project.right {
@@ -81,24 +99,24 @@
   }
 
   .project.left {
-    margin-left: auto;
-    flex-direction: row-reverse;
+    @apply xl:ml-auto xl:flex-row-reverse;
   }
 
   .project.centered {
     background-color: rgba(var(--vc-colors-bg-fill), 0.2);
-    opacity: 100% !important; 
+    opacity: 100% !important;
   }
 
   .focused:not(.centered) .carousel {
-    opacity: 0% !important; 
+    opacity: 0% !important;
   }
 
   .project:not(.focused) .carousel {
     display: none;
   }
 
-  input::placeholder,textarea::placeholder {
+  input::placeholder,
+  textarea::placeholder {
     color: rgba(var(--vc-colors-text-muted), 0.4);
   }
 
@@ -108,23 +126,23 @@
   }
   ::-webkit-scrollbar-track {
     border-radius: 10px;
-    background: rgba(var(--vc-colors-text-foreground),0.1);
+    background: rgba(var(--vc-colors-text-foreground), 0.1);
   }
-  ::-webkit-scrollbar-thumb{
+  ::-webkit-scrollbar-thumb {
     border-radius: 10px;
-    background: rgba(var(--vc-colors-text-foreground),0.5);
+    background: rgba(var(--vc-colors-text-foreground), 0.5);
   }
-  ::-webkit-scrollbar-thumb:hover{
-  	background: rgba(var(--vc-colors-text-foreground),0.7);
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(var(--vc-colors-text-foreground), 0.7);
   }
-  ::-webkit-scrollbar-thumb:active{
-  	background: rgba(var(--vc-colors-text-foreground),.9);
+  ::-webkit-scrollbar-thumb:active {
+    background: rgba(var(--vc-colors-text-foreground), 0.9);
   }
 }
 
-
 :root {
-  font-family: Source Sans Pro, Work Sans, Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: Source Sans Pro, Work Sans, Inter, system-ui, Avenir, Helvetica,
+    Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
@@ -133,7 +151,4 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
-
-
 }
- 

@@ -1,14 +1,13 @@
-import useStore from "@src/store";
-import { debounce } from "lodash";
-import { useCallback, useEffect, useRef } from "react";
-
+import useStore from '@src/store';
+import { debounce } from 'lodash';
+import { useCallback, useEffect, useRef } from 'react';
 
 const { setProgress, pages, setActivePage } = useStore.getState();
 
 export const getScrollProgress = (containerElem: Element): number => {
   const rect = containerElem.getBoundingClientRect();
   return containerElem
-    ? -(rect.top) / (containerElem.clientHeight- window.innerHeight)
+    ? -rect.top / (containerElem.clientHeight - window.innerHeight)
     : -1;
 };
 
@@ -27,7 +26,7 @@ export const updateScrollProgress = (
 
     containerRef.current = node;
     if (containerRef.current) {
-      window.addEventListener("scroll", onScroll);
+      window.addEventListener('scroll', onScroll);
     }
 
     callbacks.forEach((callback) => callback(node));
@@ -36,24 +35,33 @@ export const updateScrollProgress = (
   return { containerRef, containerCallback };
 };
 
-let observer = new IntersectionObserver(
-  (entries, observer) => {
-    const {activePage} = useStore.getState();
-    entries.forEach((entry) => {
-
-    //   console.log(entry);
-      // if (entry.intersectionRatio === .40) {
-      //   setProgress(0);
-      // }
-    });
-    const focusedEntry = entries.reduce((prev, curr, i, arr) => {
-        return prev.intersectionRatio > curr.intersectionRatio? prev: curr;
-    })
-    const index = pages.findIndex( page => page.toLocaleLowerCase() === focusedEntry.target.id);
-    if (index !== activePage){
-      setActivePage(index)
+const debounceSetActivePage = debounce(
+  (entries: IntersectionObserverEntry[]) => {
+    const { activePage } = useStore.getState();
+    entries = entries.filter((e) => e.isIntersecting);
+    if (entries) {
+      const focusedEntry = entries.reduce((prev, curr) =>
+        prev.intersectionRatio > curr.intersectionRatio ? prev : curr
+      );
+      if (focusedEntry) {
+        const index = pages.findIndex(
+          (page) => page.toLocaleLowerCase() === focusedEntry.target.id
+        );
+        if (index !== activePage) {
+          setActivePage(index);
+        }
+      }
     }
-  }, {threshold: .3}
+  },
+  200,
+  { maxWait: 500 }
+);
+
+const observer = new IntersectionObserver(
+  (entries) => {
+    debounceSetActivePage(entries);
+  },
+  { threshold: 0.3 }
 );
 
 export const pageRef = (
@@ -72,4 +80,9 @@ export const pageRef = (
   }, []);
 
   return { containerRef, containerCallback };
+};
+
+export const isWide = () => {
+  console.log(window.innerWidth);
+  return window.innerWidth >= 768;
 };
