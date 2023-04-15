@@ -1,4 +1,4 @@
-import { StateCreator, StoreApi, create } from 'zustand';
+import { StateCreator, create } from 'zustand';
 import createThemeSlice, { ThemeStore } from '../themes';
 import createCMSSlice from './client';
 import { CMSStore } from './types';
@@ -12,15 +12,12 @@ interface AppStore {
   setProgress: (progress: number) => void;
 }
 
-const createAppSlice: StateCreator<any, [], [], AppStore> = (set) => ({
+const createAppSlice: StateCreator<AppStore> = (set) => ({
   activePage: 0,
   pages: ['Home', 'Projects', 'Work', 'Contact'],
-  setActivePage: debounce(
-    (index: number) => set((state) => ({ activePage: index })),
-    300
-  ),
+  setActivePage: debounce((index: number) => set({ activePage: index }), 300),
   progress: 0,
-  setProgress: (progress: number) => set((state) => ({ progress }))
+  setProgress: (progress: number) => set({ progress })
 });
 
 export default create<AppStore & CMSStore & ThemeStore>((...a) => ({

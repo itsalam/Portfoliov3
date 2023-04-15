@@ -1,33 +1,52 @@
 import cn from 'classnames';
 import anime from 'animejs';
-import { debounce, now } from 'lodash';
+import { debounce } from 'lodash';
 import useStore from '@src/store';
 import {
     ReactNode,
     useRef,
     useState,
     useEffect,
-    memo,
-    forwardRef,
-    useMemo,
-    useCallback
+    useCallback,
+    SVGProps
 } from 'react';
 import React from 'react';
+import { isWideListener } from '@src/etc/helper';
 
-function Selector(props) {
-    const { radius, stroke, progress, innerRef, ...otherProps } = props;
+interface SelectorProps {
+    radius: number,
+    strokeWidth: number,
+    progress: number,
+}
 
-    const normalizedRadius = radius - stroke * 2;
+function Selector(props: SelectorProps & SVGProps<SVGSVGElement>) {
+    const { radius, strokeWidth, progress, ...otherProps } = props;
+
+    const normalizedRadius = radius - strokeWidth * 2;
     const circumference = normalizedRadius * 2 * Math.PI;
-    const strokeDashoffset = circumference - progress * circumference;
+    const svgProperties = {
+        normalizedRadius: radius - strokeWidth * 2,
+        circumference: normalizedRadius * 2 * Math.PI,
+        strokeDashoffset: circumference - progress * circumference,
+    };
+
+    useEffect(() => {
+        anime({
+            targets: svgProperties,
+            strokeDashoffset: circumference - progress * circumference,
+            round: 1,
+            easing: 'easeOutQuad',
+        });
+    }, [progress])
+
     return (
-        <svg ref={innerRef} {...otherProps} height={radius * 2} width={radius * 2}>
+        <svg {...otherProps} height={radius * 2} width={radius * 2}>
             <circle
                 stroke={'currentColor'}
                 fill="transparent"
-                strokeWidth={stroke / 2}
+                strokeWidth={strokeWidth / 2}
                 strokeDasharray={circumference + ' ' + circumference}
-                style={{ strokeDashoffset }}
+                style={{ strokeDashoffset: svgProperties.strokeDashoffset }}
                 transform={`rotate(-90, ${radius}, ${radius})`}
                 r={normalizedRadius}
                 cx={radius}
@@ -36,7 +55,7 @@ function Selector(props) {
             <circle
                 stroke={'currentColor'}
                 fill="transparent"
-                strokeWidth={stroke / 2}
+                strokeWidth={strokeWidth / 2}
                 strokeDasharray={circumference + ' ' + circumference}
                 r={normalizedRadius}
                 cx={radius}
@@ -54,11 +73,11 @@ function Selector(props) {
 }
 
 const RADIUS = 12;
+const STROKE = 3;
 
-function Menu({ vertical = window.innerWidth > 1280 }) {
+function Menu({ vertical = isWideListener(), isToolBar = false }) {
     const START = vertical ? 'top' : 'left';
     const END = vertical ? 'bottom' : 'right';
-    const SIZE = vertical ? 'height' : 'width';
 
     const storeProgress = useStore().progress;
     const [progress, setProgress] = useState(0);
@@ -75,9 +94,9 @@ function Menu({ vertical = window.innerWidth > 1280 }) {
             <Selector
                 id="selector"
                 progress={progress}
-                stroke={3}
+                strokeWidth={STROKE}
                 radius={RADIUS}
-                className={cn(`absolute brightness-125 xl:translate-y-3 translate-y-4`)}
+                className={cn(`absolute brightness-125 translate-y-4 xl:translate-y-3`)}
                 style={currCoords !== undefined ? { [START]: `${currCoords}px` } : {}}
             />
         ),
@@ -85,12 +104,14 @@ function Menu({ vertical = window.innerWidth > 1280 }) {
     );
 
     const getMenuCoord = (index: number) => {
-        if (!menuItemRef[index]?.current) {
+        const currMenuItem = menuItemRef[index].current
+        if (currMenuItem !== null) {
+            const menuCoords = currMenuItem.getBoundingClientRect();
+            const offset = menuRef.current?.getBoundingClientRect()[START] ?? 0;
+            return (menuCoords[START] + menuCoords[END]) / 2 - RADIUS - offset;
+        } else {
             return 0;
         }
-        const menuCoords = menuItemRef[index]?.current?.getBoundingClientRect();
-        const offset = menuRef.current?.getBoundingClientRect()[START] ?? 0;
-        return (menuCoords[START] + menuCoords[END]) / 2 - RADIUS - offset;
     };
 
     const moveSelector = debounce(
@@ -103,11 +124,10 @@ function Menu({ vertical = window.innerWidth > 1280 }) {
                 duration: 350,
                 easing: 'easeOutQuart',
                 complete: () => {
-                    const oldCoord = currCoords;
                     setSelectorMoving(false);
                     setCurrCoords(moveVal);
-                    if (fromScroll) {
-                        setProgress(oldCoord < currCoords ? 0 : 100);
+                    if (fromScroll && currCoords) {
+                        setProgress(currCoords < moveVal ? 0 : 100);
                     }
                 }
             });
@@ -118,7 +138,6 @@ function Menu({ vertical = window.innerWidth > 1280 }) {
 
     useEffect(() => {
         if (!selectorMoving) {
-
             setProgress(storeProgress);
         }
     }, [storeProgress]);
@@ -132,7 +151,7 @@ function Menu({ vertical = window.innerWidth > 1280 }) {
     }, []);
 
     const Divider = () => (
-        <div className={'sm:visible invisible w-[2px] h-4 bg-foreground m-auto brightness-75'} />
+        <div className={'bg-foreground invisible m-auto h-4 w-[2px] brightness-75 lg:visible'} />
     );
 
     const onMouseClick = (
@@ -151,7 +170,7 @@ function Menu({ vertical = window.innerWidth > 1280 }) {
         isBottom: boolean;
         text: string;
     }) => {
-        const { index, isTop, isBottom, text } = props;
+        const { index, text } = props;
 
         return (
             <a
@@ -161,14 +180,14 @@ function Menu({ vertical = window.innerWidth > 1280 }) {
                 onMouseEnter={() => moveSelector(index)}
                 href={`#${text.toLocaleLowerCase()}`}
                 className={cn(
-                    `flex items-center justify-center w-full px-0.5 py-3 hover:brightness-125 text-base sm:text-lg`,
+                    `flex items-center justify-center w-full px-0.5 hover:brightness-125 text-base sm:text-lg`,
                     {
-                        'rounded-t-[1em]': isTop,
-                        'rounded-b-[1em]': isBottom,
                         'brightness-125': index === activePage,
-                        'brightness-75': index !== activePage
+                        'brightness-75': index !== activePage,
+                        "py-3": !isToolBar,
+                        "": isToolBar
                     },
-                    "xl:py-6"
+                    "xl:py-6 sm:h-full"
                 )}
             >
                 <p className={cn(`xl:-translate-y-2 -translate-y-0.5`)}>{text.toUpperCase()}</p>
@@ -190,7 +209,7 @@ function Menu({ vertical = window.innerWidth > 1280 }) {
                         />
                     );
                 })
-                .reduce((prev, curr, i) => [prev, <Divider key={`divider-i`} />, curr])}
+                .reduce((prev, curr) => [prev, <Divider key={`divider-i`} />, curr])}
         </>
     );
 
@@ -199,10 +218,12 @@ function Menu({ vertical = window.innerWidth > 1280 }) {
             ref={menuRef}
             onMouseLeave={() => moveSelector(activePage)}
             className={cn(
-                "flex group fixed bg-fill/20  items-center w-40 font-normal font-display text-lg my-auto shadow-2xl py-2 z-50",
-                "flex-row bottom-0 w-full m-auto left-0 right-0 -translate-y-1/4 ",
-                "sm:w-2/3 sm:rounded-xl ",
-                "xl:flex-col xl:-translate-x-full xl:-translate-y-1/2 xl:top-1/2 xl:w-40 xl:bottom-auto xl:left-auto xl:right-auto"
+                "flex group flex-row  items-center font-display my-auto  py-2 z-50",
+                "xl:rounded-xl xl:flex-col xl:-translate-x-full xl:-translate-y-1/2 xl:top-1/2 xl:w-40 xl:bottom-auto xl:left-auto xl:right-auto",
+                {
+                    "fixed bg-fill/10 left-0 bottom-0 m-auto right-0 flex-shrink-1 w-full -translate-y-1/4 shadow-2xl": !isToolBar,
+                    "sticky flex-1": isToolBar
+                }
             )}
         >
             <MenuContent />

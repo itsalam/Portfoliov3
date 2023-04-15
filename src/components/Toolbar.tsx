@@ -1,9 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
+import cn from 'classnames';
 import useStore from '@src/store';
 import anime from 'animejs';
+import Menu from './Menu';
+import { isMobileListener, isWideListener } from '@src/etc/helper';
 
-function ThemeSwitch({ darkMode, setDarkMode }) {
-    const toggleRef = useRef(null);
+function ThemeSwitch(props: { darkMode: boolean, setDarkMode: (arg: boolean) => void }) {
+    const { darkMode, setDarkMode } = props;
+    const toggleRef = useRef<HTMLDivElement>(null);
 
     const sunIcon = (
         <path
@@ -32,15 +36,18 @@ function ThemeSwitch({ darkMode, setDarkMode }) {
         setTimeout(() => {
             setDarkMode(!darkMode);
         }, 250);
-        toggleRef.current.classList.remove(
-            ...(darkMode ? moonClasses : sunClasses)
-        );
-        toggleRef.current.classList.add(...(darkMode ? sunClasses : moonClasses));
+        const currElem = toggleRef.current
+        if (currElem) {
+            currElem.classList.remove(
+                ...(darkMode ? moonClasses : sunClasses)
+            );
+            currElem.classList.add(...(darkMode ? sunClasses : moonClasses));
+        }
     }
 
     return (
         <button
-            className={`w-12 h-7 p-1 rounded-full flex items-center transition duration-150 focus:outline-none shadow ${darkMode
+            className={`flex h-7 w-12 items-center rounded-full p-1 shadow transition duration-150 focus:outline-none ${darkMode
                 ? 'bg-slate-600/15 hover:bg-primary-300/20'
                 : 'bg-slate-300/15 hover:bg-slate-300/40'
                 }`}
@@ -60,7 +67,7 @@ function ThemeSwitch({ darkMode, setDarkMode }) {
                     viewBox="0 0 24 24"
                     strokeWidth={1.25}
                     stroke="currentColor"
-                    className="w-4 h-4"
+                    className="h-4 w-4"
                 >
                     {darkMode ? moonIcon : sunIcon}
                 </svg>
@@ -69,14 +76,17 @@ function ThemeSwitch({ darkMode, setDarkMode }) {
     );
 }
 
-function Toolbar({ darkMode, setDarkMode }) {
+function Toolbar(props: { darkMode: boolean, setDarkMode: (arg: boolean) => void }) {
     const { activePage, pages } = useStore();
     const [currPage, setCurrPage] = useState<number>();
 
-    const animationVals = (isDownwards: false) => [
+    const animationVals = (isDownwards?: boolean) => [
         ['0%', `${isDownwards ? '' : '-'}100%`],
         [`${isDownwards ? '-' : ''}100%`, '0%']
     ];
+
+    const isWide = isWideListener();
+    const isMobile = isMobileListener();
 
     useEffect(() => {
         if (currPage === undefined) {
@@ -87,7 +97,7 @@ function Toolbar({ darkMode, setDarkMode }) {
             targets: `#toolbar .titleContent>div`,
             keyframes: [
                 {
-                    translateY: (_el: any, i: number) => {
+                    translateY: (_: Element, i: number) => {
                         return animationVals(activePage > currPage)[i];
                     },
                     duration: 650
@@ -102,21 +112,21 @@ function Toolbar({ darkMode, setDarkMode }) {
 
     return (
         <div
-            className="rounded  fixed flex justify-between items-center w-full p-4 space-x-4 z-20"
+            className={cn("fixed z-20 flex w-full items-center justify-between space-x-4 rounded p-4", { "": !isWide && !isMobile })}
             id="toolbar"
         >
-            <div className="text-foreground text-xl tracking-widest pl-4 flex">
+            <div className="text-foreground flex flex-1 pl-4 text-xl tracking-widest">
                 Vincent Lam /
                 <div className="revealer w-24">
-                    <div className="titleContent whitespace-pre w-24">
-                        <div className="absolute"> {pages[currPage]}</div>
+                    <div className="titleContent w-24 whitespace-pre">
+                        <div className="absolute"> {pages[currPage ?? 0]}</div>
                         <div className="absolute"> {pages[activePage]}</div>
                     </div>
                 </div>
             </div>
-
+            {!isWide && !isMobile && <Menu isToolBar />}
             <div className="flex ">
-                <ThemeSwitch {...{ darkMode, setDarkMode }} />
+                <ThemeSwitch {...props} />
             </div>
         </div>
     );

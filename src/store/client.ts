@@ -1,5 +1,5 @@
 import { createClient } from '@sanity/client';
-import { StateCreator, StoreApi } from 'zustand';
+import { StateCreator } from 'zustand';
 import imageUrlBuilder from '@sanity/image-url';
 import { CMSStore } from './types';
 
@@ -34,12 +34,7 @@ const works = await getSchema('works');
 const contact = await getSchema('contact');
 const resume = await getResume();
 
-const createCMSSlice: StateCreator<any, [], [], CMSStore> = (
-  set:
-    | StoreApi<unknown>
-    | ((partial: unknown, replace?: boolean | undefined) => void)
-    | (() => unknown)
-): CMSStore => ({
+const createCMSSlice: StateCreator<CMSStore> = () => ({
   technologies: techs,
   projects,
   works,

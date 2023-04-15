@@ -1,15 +1,14 @@
 import { AnimeTimelineInstance } from 'animejs';
 import cn from 'classnames';
-import React, { HTMLProps, useCallback } from 'react';
-import { useEffect, useRef, useState } from 'react';
+import React, { HTMLProps } from 'react';
+import { useEffect, useState } from 'react';
 import useStore from '@src/store';
 import { debounce } from 'lodash';
 import {
     animateProject,
-    animateProjectReverse,
-    scrollAnimation
+    animateProjectReverse
 } from './animations';
-import { getScrollProgress, isWide, pageRef, updateScrollProgress } from '../../etc/helper';
+import { isMobileListener, pageRef, updateScrollProgress } from '../../etc/helper';
 
 const isElementCentered = (e: Element) => {
     const rect = e.getBoundingClientRect();
@@ -26,22 +25,19 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
     const [focusedAni, setFocusedAni] = useState<AnimeTimelineInstance>();
     const [centeredElem, setCenteredElem] = useState<Element>();
 
-    const focusedRef = useRef<number>();
-
     const { containerRef: intersectRef, containerCallback: intersectCallback } =
         pageRef();
     const { containerRef, containerCallback } = updateScrollProgress(
         intersectRef,
         intersectCallback
     );
+    const isMobile = isMobileListener()
 
-    focusedRef.current = focusedProj;
-
-    const { imageBuilder, projects, setProgress } = useStore();
+    const { projects } = useStore();
     const subProjects = new Array(5).fill(projects[0]);
 
     const toggleCentered = debounce(
-        (event: any) => {
+        () => {
             if (containerRef.current) {
                 const centeredElem = Array.from(containerRef.current?.children).find(
                     isElementCentered
@@ -56,6 +52,10 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
     useEffect(() => {
         addEventListener('scroll', toggleCentered);
     });
+
+    useEffect(() => {
+        document.querySelectorAll('.project, .project *')?.forEach(elem => (elem as HTMLElement).setAttribute("style", ""));
+    }, [isMobile]);
 
     useEffect(() => {
         document.querySelector('.centered')?.classList.toggle('centered', false);
@@ -98,61 +98,61 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
 
     return (
         <div
-            className="relative py-32 flex flex-col flex-grow w-full items-center gap-20 projectTrack justify-center h-auto"
+            className="projectTrack relative flex h-auto w-full grow flex-col items-center justify-center gap-20 py-32"
             ref={containerCallback}
             id="projects"
             {...props}
         >
-            <h1 className="title relative left-0 w-full flex items-center gap-10">
+            <h1 className="title relative left-0 flex w-full items-center gap-10">
                 Projects
-                <div className="h-[2px] w-1/3 bg-foreground" />
+                <div className="bg-foreground h-[2px] w-1/3" />
             </h1>
             {subProjects.map((project, i) => {
-                const imgUrl = imageBuilder.image(project.thumbnails[0]).url();
+                // const imgUrl = imageBuilder.image(project.thumbnails[0]).url();
                 return (
                     <div
                         key={`p-${i}`}
                         onClick={(e) => onProjectClick(e, i)}
                         className={cn(
                             'snap-center transition md:h-[30vh] relative project rounded-md shadow-md flex hover:bg-fill/20 bg-base/10 hover:opacity-100',
-                            'xl:w-10/12 md:p-4 md:gap-6',
-                            'flex-col xl:flex-row',
-                            { right: i % 2 === 0, left: i % 2 === 1, wide: isWide() }
+                            'md:p-4 md:w-2/3',
+                            'flex-col md:flex-row',
+                            { right: i % 2 === 0, left: i % 2 === 1, mobile: isMobile }
                         )}
                     >
                         <img
                             src={`https://source.unsplash.com/random/800x1600sig=${i}`}
                             className={cn(
-                                'xl:w-1/4 object-cover object-center rounded-md z-10',
+                                'md:w-1/4 object-cover object-center rounded-md z-10',
                                 'md:min-w-[14rem]',
                                 'w-full'
                             )}
                         />
                         <div
                             className={cn(
-                                'cursor-pointer flex flex-col md:py-10 py-4 justify-center md:w-3/4 px-4 xl:px-0 xl:h-auto h-32',
+                                'cursor-pointer flex flex-col md:py-10 p-4 justify-center md:w-3/4 px-4  md:h-auto h-32',
                                 {
-                                    'xl:items-start xl:right-0': i % 2 === 0,
-                                    'xl:items-end xl:text-end xl:left-0': i % 2 === 1
+                                    'md:items-start md:right-0': i % 2 === 0,
+                                    'md:items-end md:text-end md:left-0': i % 2 === 1
                                 }
                             )}
                         >
-                            <div className="revealer flex-shrink-0 ">
+                            <div className="revealer shrink-0 ">
                                 <h1 className="subTitle">{project.name}</h1>
                             </div>
-                            <div className="revealer flex-shrink-0">
+                            <div className="revealer shrink-0">
                                 <p className="subText description">
                                     {project.description}
                                 </p>
                             </div>
-                            <div className="h-[1px] w-[95%] bg-foreground my-3" />
-                            <div className="revealer fullDescription flex-shrink-1 h-0 opacity-0">
+                            <div className="bg-foreground my-3 h-[1px] w-full" />
+                            <div className="revealer fullDescription shrink-1 h-0 opacity-0">
                                 <div className="subText absolute ">
                                     <p>{project.fullDescription}</p>
                                 </div>
                             </div>
                         </div>
-                        <div className="absolute w-1/3 transition-all h-screen 2md:-right-[3%] md:-right-[5%] -right-[7%] translate-x-full -top-[28vh] opacity-0 carousel flex flex-col gap-5">
+                        <div className="carousel absolute right-[-7%] top-[-28vh] flex h-screen w-1/3 translate-x-full flex-col gap-5 opacity-0 transition-all md:right-[-5%]">
                             {[...Array(4).keys()].map((i) => {
                                 return (
                                     <img

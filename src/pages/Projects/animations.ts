@@ -1,4 +1,4 @@
-import anime from 'animejs';
+import anime, { AnimeTimelineInstance } from 'animejs';
 
 export const scrollAnimation = anime({
   targets: '.project img',
@@ -6,15 +6,15 @@ export const scrollAnimation = anime({
   easing: 'linear'
 });
 
-export const animateProject = (index: number) => {
+export const animateProject = (index: number): AnimeTimelineInstance => {
   const targets = `.project:nth-of-type(${index + 1})`;
-  anime
+  return anime
     .timeline({
       autoplay: true
     })
     .add(
       {
-        targets: `${targets}.wide`,
+        targets: `${targets}:not(.mobile)`,
         keyframes: [
           {
             easing: 'easeInOutCirc',
@@ -33,7 +33,7 @@ export const animateProject = (index: number) => {
     )
     .add(
       {
-        targets: `${targets}>div`,
+        targets: `${targets}.mobile>div`,
         keyframes: [
           {
             easing: 'easeInOutCirc',
@@ -46,7 +46,7 @@ export const animateProject = (index: number) => {
     )
     .add(
       {
-        targets: `${targets}.wide>.carousel`,
+        targets: `${targets}:not(.mobile)>.carousel`,
         opacity: ['0%', '100%'],
         easing: 'easeInOutCirc',
         delay: 1250,
@@ -97,7 +97,7 @@ export const animateProject = (index: number) => {
             duration: 450,
             begin(anim) {
               setTimeout(() => {
-                const elem = anim as unknown as Element;
+                const elem = anim as unknown as HTMLElement;
                 elem.style.textAlign = 'start';
                 if (elem.classList.contains('subTitle')) {
                   elem.classList.toggle('expanded', true);
@@ -123,7 +123,7 @@ export const animateProjectReverse = (index: number) => {
     })
     .add(
       {
-        targets: `${targets}.wide`,
+        targets: `${targets}:not(.mobile)`,
         keyframes: [
           {
             easing: 'easeInOutCirc',
@@ -137,7 +137,7 @@ export const animateProjectReverse = (index: number) => {
     )
     .add(
       {
-        targets: `${targets}>div`,
+        targets: `${targets}.mobile>div`,
         keyframes: [
           {
             easing: 'easeInOutCirc',
@@ -150,7 +150,7 @@ export const animateProjectReverse = (index: number) => {
     )
     .add(
       {
-        targets: `${targets}.wide>.carousel`,
+        targets: `${targets}:not(.mobile)>.carousel`,
         opacity: ['100%', '0%'],
         easing: 'easeInOutCirc',
         duration: 250
@@ -201,7 +201,7 @@ export const animateProjectReverse = (index: number) => {
               return el.classList.contains('fullDescription') ? '0%' : '100%';
             },
             begin(anim) {
-              const elem = anim as unknown as Element;
+              const elem = anim as unknown as HTMLElement;
               elem.style.textAlign = '';
               if (elem.classList.contains('subTitle')) {
                 elem.classList.toggle('expanded', false);

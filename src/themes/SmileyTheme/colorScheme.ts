@@ -6,7 +6,7 @@ const smileyThemeDark: ColorScheme = {
   colors: {
     bg: {
       base: colors.trueGray['900'],
-      fill: colors.trueGray['900']
+      fill: colors.trueGray['700']
     },
     text: {
       foreground: colors.indigo['200'],
@@ -23,7 +23,7 @@ const smileyThemeLight: ColorScheme = {
   colors: {
     bg: {
       base: colors.white,
-      fill: colors.coolGray['100']
+      fill: colors.coolGray['200']
     },
     text: {
       foreground: colors.indigo['800'],

@@ -6,53 +6,56 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
+.leva-c-kWgxhW [type='text'] {
+  /* Leva styling TODO: overwrite to fit rest of styling */
+  display: flex;
+  align-items: center;
+  position: relative;
+  border-radius: var(--leva-radii-sm);
+  overflow: hidden;
+  color: inherit;
+  height: var(--leva-sizes-rowHeight);
+  background-color: var(--leva-colors-elevation3);
+  outline: none;
+  font-size: inherit;
+  font-weight: inherit;
+  font-family: inherit;
+  appearance: none;
+  padding: 0 var(--leva-space-sm);
+  width: 0px;
+  min-width: 0px;
+  flex: 1 1 0%;
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;
-    /* scroll-snap-type: y proximity; */
-  }
-
-  #leva__root input[type='text'] {
-    /* Leva styling TODO: overwrite to fit rest of styling */
-    outline: none;
-    font-size: inherit;
-    font-weight: inherit;
-    color: inherit;
-    font-family: inherit;
-    border: none;
-    background-color: transparent;
-    appearance: none;
-    padding: 0 var(--leva-space-sm);
-    width: 0px;
-    min-width: 0px;
-    flex: 1 1 0%;
-    height: 100%;
   }
 
   .title {
     font-family: Source Sans Pro;
-    @apply font-normal xl:text-8xl text-6xl leading-tight;
+    @apply font-normal 2xl:text-8xl md:text-7xl text-6xl leading-tight;
   }
 
   .subTitle {
     font-family: Source Sans Pro;
-    @apply font-normal xl:text-4xl text-2xl leading-tight;
+    @apply font-normal 2xl:text-4xl md:text-3xl text-2xl leading-tight;
   }
 
   .subTitle.expanded {
-    @apply xl:text-5xl text-3xl;
+    @apply 2xl:text-5xl md:text-4xl text-3xl;
   }
 
   .mainText {
     font-family: Source Sans Pro;
     white-space: break-spaces;
-    @apply font-light xl:text-3xl text-xl leading-tight;
+    @apply font-light 2xl:text-3xl md:text-2xl text-xl leading-tight;
   }
 
   .subText {
     font-family: Source Sans Pro;
     white-space: break-spaces;
-    @apply font-light xl:text-2xl text-base leading-tight;
+    @apply font-light 2xl:text-2xl md:text-lg text-base leading-tight;
   }
 
   .bg-foreground {
@@ -94,12 +97,21 @@
     @apply flex relative transform-none;
   }
 
+  .project img {
+    filter: blur(2px);
+    transition: 0.4s filter linear;
+  }
+
+  .centered img {
+    filter: blur(0px);
+  }
+
   .project.right {
     margin-right: auto;
   }
 
   .project.left {
-    @apply xl:ml-auto xl:flex-row-reverse;
+    @apply md:ml-auto md:flex-row-reverse;
   }
 
   .project.centered {
@@ -121,19 +133,21 @@
   }
 
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 3px;
+    height: 3px;
   }
+
   ::-webkit-scrollbar-track {
-    border-radius: 10px;
-    background: rgba(var(--vc-colors-text-foreground), 0.1);
+    border-radius: 3px;
+    background: transparent;
   }
+
   ::-webkit-scrollbar-thumb {
-    border-radius: 10px;
-    background: rgba(var(--vc-colors-text-foreground), 0.5);
+    border-radius: 3px;
+    background: rgba(var(--vc-colors-text-foreground));
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(var(--vc-colors-text-foreground), 0.7);
+    background: rgba(var(--vc-colors-text-foreground));
   }
   ::-webkit-scrollbar-thumb:active {
     background: rgba(var(--vc-colors-text-foreground), 0.9);

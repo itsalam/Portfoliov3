@@ -3,7 +3,8 @@ import smileyThemes from './SmileyTheme/colorScheme';
 import { extendTheme, VechaiTheme } from '@vechaiui/react';
 import DWBackground from './DomainWarpTheme';
 import SmileyBackground from './SmileyTheme';
-import { create, StateCreator, StoreApi } from 'zustand';
+import { StateCreator } from 'zustand';
+import { GroupProps } from '@react-three/fiber';
 
 const theme = extendTheme({
   cursor: 'pointer',
@@ -13,22 +14,16 @@ const theme = extendTheme({
   }
 });
 
-interface ThemeState {
-  theme: string;
-}
-
 export const initDarkMode = (): boolean =>
   localStorage.theme === 'dark' ||
   (!('theme' in localStorage) &&
     window.matchMedia('(prefers-color-scheme: dark)').matches);
 
 export const checkDarkMode = (): boolean => {
-  console.log(document.documentElement.classList);
   return document.documentElement.classList.contains('dark');
 };
 
 export const toggleDarkMode = (): void => {
-  console.log('o');
   if (checkDarkMode()) {
     document.documentElement.classList.add('dark');
   } else {
@@ -42,24 +37,19 @@ export type ThemeStore = {
     theme: {
       options: Record<
         string,
-        { id: string; background: (props: {}) => JSX.Element }
+        { id: string; background: (props: GroupProps) => JSX.Element }
       >;
     };
   };
 };
 
-const createThemeSlice: StateCreator<any, [], [], ThemeStore> = (
-  set:
-    | StoreApi<unknown>
-    | ((partial: unknown, replace?: boolean | undefined) => void)
-    | (() => unknown)
-): ThemeStore => ({
+const createThemeSlice: StateCreator<ThemeStore> = (): ThemeStore => ({
   vechaiTheme: theme,
   themeOptions: {
     theme: {
       options: {
-        'Domain-Warp': { id: 'dwTheme', background: DWBackground },
-        Smiley: { id: 'smileyTheme', background: SmileyBackground }
+        Smiley: { id: 'smileyTheme', background: SmileyBackground },
+        'Domain-Warp': { id: 'dwTheme', background: DWBackground }
       }
     }
   }

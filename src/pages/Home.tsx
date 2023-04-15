@@ -1,8 +1,8 @@
-import { HTMLProps, useEffect, useRef } from 'react';
+import { HTMLProps, useEffect } from 'react';
 import anime from 'animejs';
 import cn from 'classnames';
 import useStore from '../store';
-import { pageRef, updateScrollProgress } from '../etc/helper';
+import { pageRef } from '../etc/helper';
 
 const SPIN_DURATION = 1500;
 const LOOP_DELAY = 3500;
@@ -20,7 +20,7 @@ const getLoopValue = (i: number, offset: number) => {
 };
 
 const translateY = (offset: number) => ({
-  translateY: (_el: any, i: number) => getLoopValue(i, offset),
+  translateY: (_el: Element, i: number) => getLoopValue(i, offset),
   duration: SPIN_DURATION
 });
 
@@ -63,7 +63,7 @@ const titleLoop = () => {
 // };
 
 const GREETING = 'Hey there, I’m';
-const TITLES = ['Vincent\nLam', 'Full-Stack Developer', 'Front-end Developer'];
+const TITLES = ['Vincent\nLam', 'Full-Stack\nDeveloper', 'Front-end\nDeveloper'];
 const BODY =
   'I’m a developer based in Vancouver with a knack for developing web applications for internal company use. I like building things that are both elegant and robust with the most modern tools available.';
 
@@ -71,20 +71,14 @@ export default function Home(props: HTMLProps<HTMLDivElement>) {
   const { imageBuilder, technologies } = useStore.getState();
   const { containerCallback } = pageRef();
 
-  const icon = useRef();
-
   useEffect(() => {
     titleLoop();
   }, []);
 
-  useEffect(() => {
-    // console.log(icon.current.children)
-  }, [icon]);
-
   return (
     <div
       className={
-        'flex flex-col m-auto h-screen w-full justify-center snap-center'
+        'm-auto flex h-screen w-full snap-center flex-col justify-center'
       }
       ref={containerCallback}
       id="home"
@@ -97,7 +91,7 @@ export default function Home(props: HTMLProps<HTMLDivElement>) {
         </span>
       </div>
       <div className={cn(['revealer flex xl:my-2'])}>
-        <span className={cn(['revealerSpan', 'opacity-0 xl:h-28 h-40 w-full'])}></span>
+        <span className={cn(['revealerSpan', 'opacity-0 2xl:h-28 sm:h-20 h-40 w-full'])}></span>
         <div className={'titleContent text-w-full'}>
           {TITLES.map((text, i) => (
             <div
@@ -108,7 +102,7 @@ export default function Home(props: HTMLProps<HTMLDivElement>) {
               })}
               key={text}
             >
-              <span className="flex relative xl:whitespace-nowrap whitespace-pre-wrap">
+              <span className="relative flex whitespace-pre-wrap sm:whitespace-nowrap">
                 {`${text} /`}
                 <br />
               </span>
@@ -119,16 +113,16 @@ export default function Home(props: HTMLProps<HTMLDivElement>) {
       <div className={cn(['revealer mainText mix-blend-difference'])}>
         <span>{BODY}</span>
       </div>
-      <div className={cn(['revealer subTitle text-muted p-5 xl:pt-10'])}>
+      <div className={cn(['revealer subTitle text-muted p-5 md:pt-10'])}>
         Things I like Using:
-        <div className="flex flex-wrap xl:flex-nowrap w-full justify-evenly p-4">
+        <div className="flex w-full flex-wrap justify-evenly p-4 xl:flex-nowrap">
           {technologies &&
-            technologies.map((tech, i) => {
+            technologies.map((tech) => {
               const svgUrl = imageBuilder.image(tech.thumbnail).url();
               return (
-                <div className="w-16 h-16 m-2 text-foreground flex flex-col items-center">
+                <div key={svgUrl} className="text-foreground m-2 flex h-16 w-16 flex-col items-center">
                   <svg
-                    className="icon w-12 h-12"
+                    className="icon h-12 w-12"
                     data-src={svgUrl}
                     {...{
                       [tech.thumbnail.stroke ? 'stroke' : 'fill']:

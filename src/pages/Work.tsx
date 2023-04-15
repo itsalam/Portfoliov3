@@ -1,11 +1,11 @@
+/* eslint-disable tailwindcss/no-custom-classname */
 import useStore from '@src/store';
-import { useCallback, useEffect, useState } from 'react';
-import cn from 'classnames';
+import { Work } from '@src/store/types';
+import { HTMLProps, useState } from 'react';
 import { Tab } from '@headlessui/react';
 import { cx } from '@vechaiui/react';
 import { pageRef, updateScrollProgress } from '../etc/helper';
 import anime, { AnimeParams } from 'animejs';
-import { debounce } from 'lodash';
 
 const convertDate = (date: string) => {
   return new Date(date).toLocaleDateString('default', {
@@ -14,28 +14,16 @@ const convertDate = (date: string) => {
   });
 };
 
-const handleProgressChange = debounce(
-  (index, activeWork, callback) => {
-    if (index !== activeWork) {
-      callback();
-    }
-  },
-  50,
-  { leading: true }
-);
-
-export default function Work(props: HTMLProps<HTMLDivElement>) {
+export default function Works(props: HTMLProps<HTMLDivElement>) {
   const [activeWork, setActiveWork] = useState<number>(0);
 
   const { containerRef: intersectRef, containerCallback: intersectCallback } =
     pageRef();
-  const { containerRef, containerCallback } = updateScrollProgress(
+  const { containerCallback } = updateScrollProgress(
     intersectRef,
     intersectCallback
   );
-  const { works, activePage, pages, progress } = useStore();
-
-  const THRESHOLD = 1 / works.length;
+  const { works } = useStore();
 
   const tabAnimation = (configs: AnimeParams) =>
     anime({
@@ -45,13 +33,6 @@ export default function Work(props: HTMLProps<HTMLDivElement>) {
       duration: 250,
       ...configs
     });
-
-  useEffect(() => {
-    if (pages[activePage] === 'Work') {
-      const index = Math.floor(progress / THRESHOLD);
-      handleProgressChange(index, activeWork, () => setActiveWork(index));
-    }
-  }, [progress]);
 
   const handleTabChange = (index: number) => {
     tabAnimation({
@@ -66,18 +47,16 @@ export default function Work(props: HTMLProps<HTMLDivElement>) {
     });
   };
 
-  const renderWork = (work) => {
+  const renderWork = (work: Work) => {
     return (
       <Tab.Panel
-        className="w-full flex flex-col gap-8 mainText transition-all "
+        className="mainText flex w-full flex-col gap-8 transition-all "
         key={work.companyName}
-        value={work.companyName}
       >
         {work.experiences.map((experience, i) => (
           <div className="flex flex-col gap-3 xl:px-4" key={i}>
-            <h1 className="subTitle text-muted">
-              <span>{experience.title}</span><br />
-              <span className="text-foreground"> @ {work.companyName}</span>
+            <h1 className="subTitle text-muted whitespace-pre-wrap sm:whitespace-nowrap">
+              <span>{experience.title}<span className="text-foreground">{"\n @ "}{work.companyName}</span></span>
             </h1>
             <p className="mainText text-muted">
               {convertDate(experience.from)} - {convertDate(experience.to)}
@@ -99,23 +78,23 @@ export default function Work(props: HTMLProps<HTMLDivElement>) {
 
   return (
     <div
-      className="h-[300vh] bg-base/10 relative xl:mt-40"
+      className="bg-base/10 relative h-[150vh] xl:mt-40"
       id="work"
       {...props}
       ref={containerCallback}
     >
       <Tab.Group
         as="div"
-        className="sticky h-[75vh] flex flex-col gap-5 px-4 xl:top-[15%] top-[10%]"
+        className="sticky top-[10%] flex h-[75vh] flex-col gap-5 px-4 xl:top-[15%]"
         selectedIndex={activeWork}
         onChange={handleTabChange}
       >
-        <h1 className="title relative left-0 w-full flex items-center gap-10">
+        <h1 className="title relative left-0 flex w-full items-center gap-10">
           Work
-          <div className="h-[2px] w-1/3 bg-foreground" />
+          <div className="bg-foreground h-[2px] w-1/3" />
         </h1>
         <Tab.List className={cx('flex subText font-works gap-1')}>
-          {works.map((work, i) => (
+          {works.map((work) => (
             <Tab
               key={work.companyName}
               value={work.companyName}
