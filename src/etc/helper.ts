@@ -11,30 +11,6 @@ export const getScrollProgress = (containerElem?: Element): number => {
     : -1;
 };
 
-export const updateScrollProgress = (
-  ref?: React.MutableRefObject<Element | undefined>,
-  ...callbacks: ((node: Element) => void)[]
-) => {
-  const containerRef = ref || useRef<Element>();
-  const containerCallback = useCallback((node: Element) => {
-    const onScroll = debounce(() => {
-      const scrollProgress: number = getScrollProgress(containerRef.current);
-      if (scrollProgress < 1 && scrollProgress > 0) {
-        setProgress(scrollProgress);
-      }
-    });
-
-    containerRef.current = node;
-    if (containerRef.current) {
-      window.addEventListener('scroll', onScroll);
-    }
-
-    callbacks.forEach((callback) => callback(node));
-  }, []);
-
-  return { containerRef, containerCallback };
-};
-
 const debounceSetActivePage = debounce(
   (entries: IntersectionObserverEntry[]) => {
     const { activePage } = useStore.getState();
@@ -64,20 +40,40 @@ const observer = new IntersectionObserver(
   { threshold: 0.25 }
 );
 
-export const pageRef = (
-  ref?: React.MutableRefObject<Element | undefined>,
-  ...callbacks: ((node: Element) => void)[]
-) => {
-  const containerRef = ref || useRef<Element>();
+export const updateScrollProgress = () => {
+  const containerRef = useRef<Element>();
+  const containerCallback = useCallback<React.RefCallback<Element>>(
+    (node: Element) => {
+      const onScroll = debounce(() => {
+        const scrollProgress: number = getScrollProgress(containerRef.current);
+        if (scrollProgress < 1 && scrollProgress > 0) {
+          setProgress(scrollProgress);
+        }
+      });
 
-  const containerCallback = useCallback((node: Element) => {
-    containerRef.current = node;
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
-    }
+      containerRef.current = node;
+      if (containerRef.current) {
+        window.addEventListener('scroll', onScroll);
+      }
+    },
+    []
+  );
 
-    callbacks.forEach((callback) => callback(node));
-  }, []);
+  return { containerRef, containerCallback };
+};
+
+export const pageRef = () => {
+  const containerRef = useRef<Element>();
+
+  const containerCallback = useCallback<React.RefCallback<Element>>(
+    (node: Element) => {
+      containerRef.current = node;
+      if (containerRef.current) {
+        observer.observe(containerRef.current);
+      }
+    },
+    []
+  );
 
   return { containerRef, containerCallback };
 };
@@ -112,6 +108,35 @@ export const isWideListener = () => {
 
   return isWide;
 };
+
+export function useScreenSize() {
+  const isClient = typeof window === 'object';
+
+  function getSize() {
+    return {
+      width: isClient ? window.innerWidth : undefined,
+      height: isClient ? window.innerHeight : undefined
+    };
+  }
+
+  const [windowSize, setWindowSize] = useState(getSize);
+
+  useEffect(() => {
+    if (!isClient) {
+      return;
+    }
+
+    function handleResize() {
+      setWindowSize(getSize());
+    }
+    console.log(getSize());
+    setWindowSize(getSize());
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  return windowSize;
+}
 
 const valToHex = (color: string): string => {
   const hexadecimal = parseInt(color).toString(16);

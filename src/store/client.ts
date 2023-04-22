@@ -1,7 +1,7 @@
 import { createClient } from '@sanity/client';
-import { StateCreator } from 'zustand';
+import { StateCreator, create } from 'zustand';
 import imageUrlBuilder from '@sanity/image-url';
-import { CMSStore } from './types';
+import { AsyncCMSStore, CMSStore } from './types';
 
 export const client = createClient({
   projectId: 'tjaus1w5',
@@ -26,21 +26,30 @@ export async function getResume() {
   return schema[0];
 }
 
-const builder = imageUrlBuilder(client);
+const createCMSSlice: StateCreator<AsyncCMSStore> = (setState) => {
+  const initialState: AsyncCMSStore = {
+    technologies: [],
+    projects: [],
+    works: [],
+    contact: [],
+    imageBuilder: imageUrlBuilder(client),
+    isLoading: true
+  };
+  async function fetchData() {
+    const schema: CMSStore = await {
+      technologies: await getSchema('technology'),
+      projects: await getSchema('project'),
+      works: await getSchema('works'),
+      contact: await getSchema('contact'),
+      resume: await getResume(),
+      imageBuilder: imageUrlBuilder(client),
+      isLoading: false
+    };
+    setState(schema);
+  }
+  fetchData();
 
-const techs = await getSchema('technology');
-const projects = await getSchema('project');
-const works = await getSchema('works');
-const contact = await getSchema('contact');
-const resume = await getResume();
-
-const createCMSSlice: StateCreator<CMSStore> = () => ({
-  technologies: techs,
-  projects,
-  works,
-  contact,
-  resume,
-  imageBuilder: builder
-});
+  return initialState;
+};
 
 export default createCMSSlice;

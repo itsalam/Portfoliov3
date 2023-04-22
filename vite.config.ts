@@ -1,6 +1,6 @@
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vite';
 import path from 'path';
-import react from '@vitejs/plugin-react-swc'
+import react from '@vitejs/plugin-react-swc';
 import glsl from 'vite-plugin-glsl';
 import svgr from 'vite-plugin-svgr';
 
@@ -11,5 +11,5 @@ export default defineConfig({
       '@src': path.resolve(__dirname, 'src')
     }
   },
-  plugins: [react(), glsl(), svgr()],
-})
+  plugins: [react(), glsl(), svgr()]
+});

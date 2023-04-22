@@ -4,7 +4,7 @@ import { Work } from '@src/store/types';
 import { HTMLProps, useState } from 'react';
 import { Tab } from '@headlessui/react';
 import { cx } from '@vechaiui/react';
-import { pageRef, updateScrollProgress } from '../etc/helper';
+import { pageRef } from '../etc/helper';
 import anime, { AnimeParams } from 'animejs';
 
 const convertDate = (date: string) => {
@@ -17,12 +17,8 @@ const convertDate = (date: string) => {
 export default function Works(props: HTMLProps<HTMLDivElement>) {
   const [activeWork, setActiveWork] = useState<number>(0);
 
-  const { containerRef: intersectRef, containerCallback: intersectCallback } =
-    pageRef();
-  const { containerCallback } = updateScrollProgress(
-    intersectRef,
-    intersectCallback
-  );
+  const { containerCallback } = pageRef();
+
   const { works } = useStore();
 
   const tabAnimation = (configs: AnimeParams) =>
@@ -93,23 +89,25 @@ export default function Works(props: HTMLProps<HTMLDivElement>) {
           Work
           <div className="bg-foreground h-[2px] w-1/3" />
         </h1>
-        <Tab.List className={cx('flex subText font-works gap-1')}>
-          {works.map((work) => (
-            <Tab
-              key={work.companyName}
-              value={work.companyName}
-              className={cx(
-                'xl:px-12 xl:py-4 p-4 hover:border-foreground hover:brightness-100 border-2 transition-all border-transparent brightness-75',
-                'selected:border-foreground selected:bg-fill/30 selected:brightness-110'
-              )}
-            >
-              {work.companyName}
-            </Tab>
-          ))}
-        </Tab.List>
-        <Tab.Panels className="tabPanel flex-1 overflow-y-auto">
-          {works.map((work) => renderWork(work))}
-        </Tab.Panels>
+        {works && <>
+          <Tab.List className={cx('flex subText font-works gap-1')}>
+            {works.map((work) => (
+              <Tab
+                key={work.companyName}
+                value={work.companyName}
+                className={cx(
+                  'xl:px-12 xl:py-4 p-4 hover:border-foreground hover:brightness-100 border-2 transition-all border-transparent brightness-75',
+                  'selected:border-foreground selected:bg-fill/30 selected:brightness-110'
+                )}
+              >
+                {work.companyName}
+              </Tab>
+            ))}
+          </Tab.List>
+          <Tab.Panels className="tabPanel flex-1 overflow-y-auto">
+            {works.map((work) => renderWork(work))}
+          </Tab.Panels>
+        </>}
       </Tab.Group>
     </div>
   );

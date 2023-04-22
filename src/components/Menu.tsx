@@ -1,4 +1,4 @@
-import cn from 'classnames';
+import { cx } from "@vechaiui/react";
 import anime from 'animejs';
 import { debounce } from 'lodash';
 import useStore from '@src/store';
@@ -16,11 +16,11 @@ import { isWideListener } from '@src/etc/helper';
 interface SelectorProps {
     radius: number,
     strokeWidth: number,
-    progress: number,
 }
 
 function Selector(props: SelectorProps & SVGProps<SVGSVGElement>) {
-    const { radius, strokeWidth, progress, ...otherProps } = props;
+    const { radius, strokeWidth, ...otherProps } = props;
+    const { progress } = useStore();
 
     const normalizedRadius = radius - strokeWidth * 2;
     const circumference = normalizedRadius * 2 * Math.PI;
@@ -79,9 +79,6 @@ function Menu({ vertical = isWideListener(), isToolBar = false }) {
     const START = vertical ? 'top' : 'left';
     const END = vertical ? 'bottom' : 'right';
 
-    const storeProgress = useStore().progress;
-    const [progress, setProgress] = useState(0);
-    const [selectorMoving, setSelectorMoving] = useState(false);
     const { activePage, pages, setActivePage } = useStore.getState();
 
     const menuRef = useRef<HTMLDivElement>(null);
@@ -93,14 +90,13 @@ function Menu({ vertical = isWideListener(), isToolBar = false }) {
         () => (
             <Selector
                 id="selector"
-                progress={progress}
                 strokeWidth={STROKE}
                 radius={RADIUS}
-                className={cn(`absolute brightness-125 translate-y-4 xl:translate-y-3`)}
+                className={cx(`absolute brightness-125 translate-y-4 xl:translate-y-3`)}
                 style={currCoords !== undefined ? { [START]: `${currCoords}px` } : {}}
             />
         ),
-        [progress]
+        []
     );
 
     const getMenuCoord = (index: number) => {
@@ -115,43 +111,30 @@ function Menu({ vertical = isWideListener(), isToolBar = false }) {
     };
 
     const moveSelector = debounce(
-        (i: number, fromScroll?: boolean) => {
+        (i: number) => {
             const moveVal = getMenuCoord(i);
-            setSelectorMoving(true);
-            return anime({
-                targets: '#selector',
-                [START]: moveVal,
-                duration: 350,
-                easing: 'easeOutQuart',
-                complete: () => {
-                    setSelectorMoving(false);
-                    setCurrCoords(moveVal);
-                    if (fromScroll && currCoords) {
-                        setProgress(currCoords < moveVal ? 0 : 100);
-                    }
-                }
-            });
+            document.querySelector('#selector')?.animate(vertical ? {
+                top: `${moveVal}px`
+            } : {
+                left: `${moveVal}px`
+            }, { duration: 250, fill: "forwards", easing: "ease-out" })
         },
         150,
         { leading: true }
     );
 
-    useEffect(() => {
-        if (!selectorMoving) {
-            setProgress(storeProgress);
-        }
-    }, [storeProgress]);
 
     useEffect(() => {
-        moveSelector(activePage, true);
+        moveSelector(activePage);
     }, [activePage]);
 
     useEffect(() => {
+        moveSelector(activePage);
         setCurrCoords(getMenuCoord(activePage));
-    }, []);
+    }, [vertical]);
 
     const Divider = () => (
-        <div className={'bg-foreground invisible m-auto h-4 w-[2px] brightness-75 lg:visible'} />
+        <div className={'bg-foreground invisible m-auto h-4 w-[2px] brightness-75 xl:visible'} />
     );
 
     const onMouseClick = (
@@ -166,8 +149,6 @@ function Menu({ vertical = isWideListener(), isToolBar = false }) {
 
     const MenuButton = (props: {
         index: number;
-        isTop: boolean;
-        isBottom: boolean;
         text: string;
     }) => {
         const { index, text } = props;
@@ -179,8 +160,8 @@ function Menu({ vertical = isWideListener(), isToolBar = false }) {
                 onMouseDown={(event) => onMouseClick(index, event)}
                 onMouseEnter={() => moveSelector(index)}
                 href={`#${text.toLocaleLowerCase()}`}
-                className={cn(
-                    `flex items-center justify-center w-full px-0.5 hover:brightness-125 text-base sm:text-lg`,
+                className={cx(
+                    `flex items-center justify-center w-full px-1.5 hover:brightness-125 text-base sm:text-lg`,
                     {
                         'brightness-125': index === activePage,
                         'brightness-75': index !== activePage,
@@ -190,7 +171,7 @@ function Menu({ vertical = isWideListener(), isToolBar = false }) {
                     "xl:py-6 sm:h-full"
                 )}
             >
-                <p className={cn(`xl:-translate-y-2 -translate-y-0.5`)}>{text.toUpperCase()}</p>
+                <p className={cx(`xl:-translate-y-2 -translate-y-0.5`)}>{text.toUpperCase()}</p>
             </a>
         );
     };
@@ -203,8 +184,6 @@ function Menu({ vertical = isWideListener(), isToolBar = false }) {
                         <MenuButton
                             key={`${i}`}
                             index={i}
-                            isTop={i == 0}
-                            isBottom={i == pages.length - 1}
                             text={item}
                         />
                     );
@@ -217,8 +196,8 @@ function Menu({ vertical = isWideListener(), isToolBar = false }) {
         <div
             ref={menuRef}
             onMouseLeave={() => moveSelector(activePage)}
-            className={cn(
-                "flex group flex-row  items-center font-display my-auto  py-2 z-50",
+            className={cx(
+                "intro-revealer flex group flex-row  items-center font-display my-auto py-2 z-50",
                 "xl:rounded-xl xl:flex-col xl:-translate-x-full xl:-translate-y-1/2 xl:top-1/2 xl:w-40 xl:bottom-auto xl:left-auto xl:right-auto",
                 {
                     "fixed bg-fill/10 left-0 bottom-0 m-auto right-0 flex-shrink-1 w-full -translate-y-1/4 shadow-2xl": !isToolBar,

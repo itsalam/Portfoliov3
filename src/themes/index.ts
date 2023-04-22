@@ -1,10 +1,11 @@
 import dwThemes from './DomainWarpTheme/colorScheme';
 import smileyThemes from './SmileyTheme/colorScheme';
 import { extendTheme, VechaiTheme } from '@vechaiui/react';
-import DWBackground from './DomainWarpTheme';
-import SmileyBackground from './SmileyTheme';
 import { StateCreator } from 'zustand';
 import { GroupProps } from '@react-three/fiber';
+import { ComponentType, lazy, LazyExoticComponent } from 'react';
+import React from 'react';
+import anime from 'animejs';
 
 const theme = extendTheme({
   cursor: 'pointer',
@@ -14,45 +15,68 @@ const theme = extendTheme({
   }
 });
 
-export const initDarkMode = (): boolean =>
-  localStorage.theme === 'dark' ||
-  (!('theme' in localStorage) &&
-    window.matchMedia('(prefers-color-scheme: dark)').matches);
-
-export const checkDarkMode = (): boolean => {
-  return document.documentElement.classList.contains('dark');
+export type Theme = {
+  id: string;
+  background: LazyExoticComponent<ComponentType<GroupProps>>;
 };
 
-export const toggleDarkMode = (): void => {
-  if (checkDarkMode()) {
-    document.documentElement.classList.add('dark');
-  } else {
-    document.documentElement.classList.remove('dark');
-  }
-};
-
-export type ThemeStore = {
-  vechaiTheme: VechaiTheme;
-  themeOptions: {
-    theme: {
-      options: Record<
-        string,
-        { id: string; background: (props: GroupProps) => JSX.Element }
-      >;
-    };
+export type BgColorScheme = {
+  colors: {
+    hightlight1: string;
+    hightlight2: string;
   };
 };
 
-const createThemeSlice: StateCreator<ThemeStore> = (): ThemeStore => ({
+export type ThemeStore = {
+  darkMode: boolean;
+  setDarkMode: (darkMode: boolean) => void;
+  vechaiTheme: VechaiTheme;
+  themes: Record<string, Theme>;
+  themeIds: string[];
+  activeTheme: string;
+  setActiveTheme: (id: string) => void;
+  bgOpacity: number;
+  setBgOpacity: (opacity: number) => void;
+};
+
+const createThemeSlice: StateCreator<ThemeStore> = (set, get) => ({
+  darkMode: localStorage.theme == 'dark',
+  setDarkMode: (darkMode: boolean) => set((state) => ({ ...state, darkMode })),
   vechaiTheme: theme,
-  themeOptions: {
-    theme: {
-      options: {
-        Smiley: { id: 'smileyTheme', background: SmileyBackground },
-        'Domain-Warp': { id: 'dwTheme', background: DWBackground }
-      }
+  themes: {
+    Smiley: {
+      id: 'smileyTheme',
+      background: lazy(() => import('../themes/SmileyTheme'))
+    },
+    DomainWarp: {
+      id: 'dwTheme',
+      background: lazy(() => import('../themes/DomainWarpTheme'))
     }
-  }
+  },
+  themeIds: ['Smiley', 'DomainWarp'],
+  activeTheme: 'Smiley',
+  setActiveTheme: async (id: string) => {
+    if (get().activeTheme !== id) {
+      const animation = (configs?: {}) =>
+        anime({
+          targets: '#canvas',
+          opacity: [1, 0],
+          duration: 600,
+          easing: 'linear',
+          ...configs
+        });
+      animation()
+        .finished.then(() =>
+          set({
+            activeTheme: id
+          })
+        )
+        .then(() => animation({ opacity: [0, 1] }));
+    }
+  },
+  bgOpacity: 100,
+  setBgOpacity: (opacity: number) =>
+    set((state) => ({ ...state, bgOpacity: opacity }))
 });
 
 export default createThemeSlice;

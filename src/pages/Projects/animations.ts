@@ -10,7 +10,15 @@ export const animateProject = (index: number): AnimeTimelineInstance => {
   const targets = `.project:nth-of-type(${index + 1})`;
   return anime
     .timeline({
-      autoplay: true
+      autoplay: true,
+      complete: (anim) => {
+        // anime({
+        //   targets: `.project:nth-of-type(${index + 1}) .carousel`,
+        //   translateY: ['0%', '-80%'],
+        //   duration: 1000,
+        //   easing: 'linear'
+        // });
+      }
     })
     .add(
       {
@@ -18,14 +26,14 @@ export const animateProject = (index: number): AnimeTimelineInstance => {
         keyframes: [
           {
             easing: 'easeInOutCirc',
-            height: ['30vh', '55vh'],
+            height: ['40vh', '55vh'],
             duration: 750
           },
           {
             easing: 'easeInOutCirc',
             width: ['66.667%', '100%'],
-            duration: 450,
-            delay: 50
+            duration: 650,
+            delay: 650
           }
         ]
       },
@@ -49,7 +57,7 @@ export const animateProject = (index: number): AnimeTimelineInstance => {
         targets: `${targets}:not(.mobile)>.carousel`,
         opacity: ['0%', '100%'],
         easing: 'easeInOutCirc',
-        delay: 1250,
+        delay: 1650,
         duration: 450
       },
       0
@@ -61,7 +69,7 @@ export const animateProject = (index: number): AnimeTimelineInstance => {
           {
             easing: 'easeInOutCirc',
             height: ['0%', '100%'],
-            delay: 1050,
+            delay: 1250,
             duration: 550
           },
           {
@@ -77,7 +85,7 @@ export const animateProject = (index: number): AnimeTimelineInstance => {
     .add(
       {
         targets: `.project:not(.focused)`,
-        opacity: ['100%', '50%'],
+        opacity: ['100%', '66%'],
         duration: 250
       },
       0
@@ -127,7 +135,7 @@ export const animateProjectReverse = (index: number) => {
         keyframes: [
           {
             easing: 'easeInOutCirc',
-            height: ['55vh', '30vh'],
+            height: ['55vh', '40vh'],
             width: ['100%', '66.667%'],
             duration: 750
           }
@@ -179,7 +187,7 @@ export const animateProjectReverse = (index: number) => {
         targets: `.project:not(.focused)`,
         keyframes: [
           {
-            opacity: ['50%', '100%'],
+            opacity: ['66%', '100%'],
             duration: 250,
             easing: 'easeOutCirc'
           }
@@ -197,7 +205,6 @@ export const animateProjectReverse = (index: number) => {
             duration: 250,
             delay: 800,
             opacity: (el: Element) => {
-              console.log(el);
               return el.classList.contains('fullDescription') ? '0%' : '100%';
             },
             begin(anim) {

@@ -27,6 +27,10 @@
   flex: 1 1 0%;
 }
 
+body {
+  background-color: var(--vc-colors-bg-base, rgb(0, 0, 0));
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;
@@ -99,10 +103,11 @@
 
   .project img {
     filter: blur(2px);
-    transition: 0.4s filter linear;
+    transition: 0.2s filter linear;
   }
 
-  .centered img {
+  .centered img,
+  .focused img {
     filter: blur(0px);
   }
 
@@ -115,7 +120,7 @@
   }
 
   .project.centered {
-    background-color: rgba(var(--vc-colors-bg-fill), 0.2);
+    background-color: rgba(var(--vc-colors-bg-base), 0.6);
     opacity: 100% !important;
   }
 

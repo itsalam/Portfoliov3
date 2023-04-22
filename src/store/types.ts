@@ -6,6 +6,7 @@ export type Technology = {
     stroke?: boolean;
     name: string;
   };
+  [key: string]: unknown;
 };
 
 export type Work = {
@@ -16,6 +17,7 @@ export type Work = {
     to: string;
     descriptions: string[];
   }[];
+  [key: string]: unknown;
 };
 
 export type Contact = {
@@ -24,13 +26,28 @@ export type Contact = {
     stroke?: boolean;
     name: string;
   };
+  [key: string]: unknown;
+};
+
+export type Project = {
+  name: string;
+  description: string;
+  fullDescription: string;
+  [key: string]: unknown;
+};
+
+export type Resume = {
+  url: string;
 };
 
 export type CMSStore = {
   technologies: Technology[];
-  projects: any;
+  projects: Project[];
   works: Work[];
   contact: Contact[];
-  resume: any;
+  resume: Resume;
   imageBuilder: ImageUrlBuilder;
+  isLoading: boolean;
 };
+
+export type AsyncCMSStore = Partial<CMSStore>;

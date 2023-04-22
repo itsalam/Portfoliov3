@@ -3,23 +3,26 @@ import { useMemo, useRef } from 'react';
 import fragmentShader from './fragment.glsl';
 import { Vector2 } from 'three';
 import { useFrame, useThree } from '@react-three/fiber';
-import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
+import { EffectComposer, Bloom, DepthOfField } from '@react-three/postprocessing';
 import { useControls } from 'leva';
 import { CustomEffect } from '../helper';
+import { Html } from '@react-three/drei/web/Html';
+import useStore from '@src/store';
 
 export default function Background() {
   const effectRef = useRef<CustomEffect>(null);
   const time = useRef<number>(0);
   const { size } = useThree();
 
+  const { darkMode } = useStore();
+
   const configs = useControls("Theme Configs", {
-    color1: '#00aa58',
-    color2: '#e3aa00',
-    color3: '#00cc69',
-    color4: '#664e00',
-    alpha: 3.0,
-    backgroundOpacity: "100%",
-  });
+    color1: '#22c55e',
+    color2: '#d9f99d',
+    color3: '#10b981',
+    color4: '#facc15',
+    alpha: 3.0
+  }, { collapsed: true });
 
   const DomainWarp = forwardRef((_, ref) => {
     const resolution = new Vector2(size.width, size.height);
@@ -40,10 +43,11 @@ export default function Background() {
 
   return (
     <group>
+      {darkMode && <Html center className='bg-base h-screen w-screen opacity-[.95]'></Html>}
       <EffectComposer>
         <DomainWarp ref={effectRef} />
-        <Bloom intensity={0.8} luminanceThreshold={0.1} />
-        <Vignette offset={0.5} darkness={0.7} />
+        <Bloom intensity={0.4} luminanceThreshold={0.1} />
+        {/* <Vignette offset={0.5} darkness={0.7} /> */}
       </EffectComposer>
     </group>
   );

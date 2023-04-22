@@ -20,6 +20,7 @@ import {
 import Smiley from '@src/assets/smile1.svg';
 import { useControls } from 'leva';
 import { CustomEffect } from '../helper';
+import { Html, OrbitControls } from '@react-three/drei';
 
 export default function Background() {
   const NUM_ICONS = 28;
@@ -45,7 +46,7 @@ export default function Background() {
       scale: 7,
       horizontalOffset: 1.0,
       verticalOffset: 0.6
-    });
+    }, { collapsed: true });
 
   const shaderConfigs = useControls('Shader Config', {
     //distort speed
@@ -62,7 +63,7 @@ export default function Background() {
 
     // reflection
     delta: 145
-  });
+  }, { collapsed: true });
 
   useEffect(() => {
     let curMeshes: Mesh[] = [];
@@ -83,7 +84,7 @@ export default function Background() {
       const adjSpeed = speed / 1000;
       child.position.x -= adjSpeed * horizontalOffset;
       child.position.y -= adjSpeed * verticalOffset;
-      if (child.position.y < 0) {
+      if (child.position.y < -1) {
         child.position.x =
           (offSet * NUM_ICONS * horizontalOffset) / ROW_PER_ICON +
           child.position.x;
@@ -117,7 +118,7 @@ export default function Background() {
           scale={scale / 10000}
           position={[offSet + offsetX, offSet + offsetY, 0]}
         >
-          <meshBasicMaterial color={color} side={DoubleSide} />
+          <meshBasicMaterial color={color} opacity={0.8} transparent />
           <shapeGeometry args={[smiley]} />
         </mesh>
       );
@@ -133,20 +134,23 @@ export default function Background() {
     return <primitive ref={ref} object={effect} dispose={null} />;
   });
 
-  return (
+  return (<>
+
     <group>
-      <ambientLight />
       <group position={[-3, -6, 0]} ref={groupRef} castShadow>
         {smileys}
       </group>
-      <meshStandardMaterial color="#353540" />
+      <OrbitControls />
       <EffectComposer>
         <Scanline opacity={0.1} />
         <Distort ref={effectRef} />
-        <Noise opacity={0.1} />
+        <Noise opacity={0.3} />
         <Bloom luminanceThreshold={0.1} />
         <Vignette eskil offset={0.6} darkness={0.8} />
       </EffectComposer>
+
+      <Html center className='bg-base h-screen w-screen opacity-80'></Html>
     </group>
+  </>
   );
 }
