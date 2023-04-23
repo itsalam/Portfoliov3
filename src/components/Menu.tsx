@@ -1,5 +1,4 @@
 import { cx } from "@vechaiui/react";
-import anime from 'animejs';
 import { debounce } from 'lodash';
 import useStore from '@src/store';
 import {
@@ -21,22 +20,17 @@ interface SelectorProps {
 function Selector(props: SelectorProps & SVGProps<SVGSVGElement>) {
     const { radius, strokeWidth, ...otherProps } = props;
     const { progress } = useStore();
+    const progCircleRef = useRef<SVGCircleElement>(null);
 
     const normalizedRadius = radius - strokeWidth * 2;
     const circumference = normalizedRadius * 2 * Math.PI;
-    const svgProperties = {
-        normalizedRadius: radius - strokeWidth * 2,
-        circumference: normalizedRadius * 2 * Math.PI,
-        strokeDashoffset: circumference - progress * circumference,
-    };
 
     useEffect(() => {
-        anime({
-            targets: svgProperties,
-            strokeDashoffset: circumference - progress * circumference,
-            round: 1,
-            easing: 'easeOutQuad',
-        });
+        if (progCircleRef.current) {
+            progCircleRef.current.animate(
+                { strokeDashoffset: circumference - progress * circumference },
+                { duration: 400, fill: "forwards", easing: 'ease-in' });
+        }
     }, [progress])
 
     return (
@@ -46,11 +40,12 @@ function Selector(props: SelectorProps & SVGProps<SVGSVGElement>) {
                 fill="transparent"
                 strokeWidth={strokeWidth / 2}
                 strokeDasharray={circumference + ' ' + circumference}
-                style={{ strokeDashoffset: svgProperties.strokeDashoffset }}
+                strokeDashoffset={0}
                 transform={`rotate(-90, ${radius}, ${radius})`}
                 r={normalizedRadius}
                 cx={radius}
                 cy={radius}
+                ref={progCircleRef}
             />
             <circle
                 stroke={'currentColor'}
@@ -200,7 +195,7 @@ function Menu({ vertical = isWideListener(), isToolBar = false }) {
                 "intro-revealer flex group flex-row  items-center font-display my-auto py-2 z-50",
                 "xl:rounded-xl xl:flex-col xl:-translate-x-full xl:-translate-y-1/2 xl:top-1/2 xl:w-40 xl:bottom-auto xl:left-auto xl:right-auto",
                 {
-                    "fixed bg-fill/10 left-0 bottom-0 m-auto right-0 flex-shrink-1 w-full -translate-y-1/4 shadow-2xl": !isToolBar,
+                    "fixed bg-base left-0 bottom-0 m-auto right-0 flex-shrink-1 w-full -translate-y-1/4 shadow-2xl": !isToolBar,
                     "sticky flex-1": isToolBar
                 }
             )}

@@ -101,7 +101,7 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
         key={`p-${i}`}
         className={cx(
             'relative snap-center transition md:h-[40vh] md:min-h-[20rem]  project rounded-md shadow-md flex hover:bg-base/60 bg-base/30 hover:opacity-100',
-            'md:w-2/3',
+            'w-full md:w-2/3',
             'flex-col md:flex-row',
             { right: i % 2 === 0, left: i % 2 === 1, mobile: isMobile }
         )}
@@ -113,7 +113,7 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
 
                 'cursor-pointer md:w-1/4 object-cover object-center z-10',
                 'md:min-w-[14rem]',
-                'w-full',
+                'w-full h-96 md:h-auto',
                 { "md:rounded-l-md": i % 2 === 0, "md:rounded-r-md": i % 2 === 1 }
             )}
         />

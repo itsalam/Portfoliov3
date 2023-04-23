@@ -112,7 +112,7 @@ body {
   }
 
   .project.right {
-    margin-right: auto;
+    @apply md:mr-auto;
   }
 
   .project.left {
@@ -122,14 +122,6 @@ body {
   .project.centered {
     background-color: rgba(var(--vc-colors-bg-base), 0.6);
     opacity: 100% !important;
-  }
-
-  .focused:not(.centered) .carousel {
-    opacity: 0% !important;
-  }
-
-  .project:not(.focused) .carousel {
-    display: none;
   }
 
   input::placeholder,

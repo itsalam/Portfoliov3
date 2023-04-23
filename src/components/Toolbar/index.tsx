@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import useStore from '@src/store';
-import anime from 'animejs';
 import Menu from '../Menu';
 import { isMobileListener, isWideListener } from '@src/etc/helper';
 import ThemeSwitch from './ThemeSwitch';
@@ -23,26 +22,21 @@ function Toolbar(props: { darkMode: boolean, setDarkMode: (arg: boolean) => void
             setCurrPage(activePage);
             return;
         }
-        anime({
-            targets: `#toolbar .titleContent>div`,
-            keyframes: [
-                {
-                    translateY: (_: Element, i: number) => {
-                        return animationVals(activePage > currPage)[i];
-                    },
-                    duration: 650
-                }
-            ],
-            easing: 'easeOutQuart',
-            complete: () => {
-                setCurrPage(activePage);
-            }
-        });
+        document.querySelectorAll(`#toolbar .titleContent>div`)?.forEach(
+            (element: Element, i: number) => {
+                const animation = element.animate({
+                    transform: animationVals(activePage > currPage)[i].map((val: string) => `translateY(${val})`)
+                }, { duration: 450, fill: "forwards", easing: "ease-out" })
+                animation.onfinish = () => setCurrPage(activePage);
+
+            });
+
+
     }, [activePage]);
 
     return (
         <div
-            className={"intro-revealer fixed z-20 flex w-full items-center justify-between space-x-4 rounded p-4"}
+            className={"intro-revealer bg-base/80 fixed z-20 flex w-full items-center justify-between space-x-4 rounded p-4 md:bg-transparent"}
             id="toolbar"
         >
             <div className="text-foreground flex flex-1 pl-4 text-xl tracking-widest">

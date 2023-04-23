@@ -5,7 +5,6 @@ import { HTMLProps, useState } from 'react';
 import { Tab } from '@headlessui/react';
 import { cx } from '@vechaiui/react';
 import { pageRef } from '../etc/helper';
-import anime, { AnimeParams } from 'animejs';
 
 const convertDate = (date: string) => {
   return new Date(date).toLocaleDateString('default', {
@@ -21,26 +20,21 @@ export default function Works(props: HTMLProps<HTMLDivElement>) {
 
   const { works } = useStore();
 
-  const tabAnimation = (configs: AnimeParams) =>
-    anime({
-      targets: `.tabPanel`,
-      opacity: [1, 0],
-      easing: 'linear',
-      duration: 250,
-      ...configs
-    });
+  const tabAnimation = (opacity: number) =>
+    document.querySelector(`.tabPanel`)?.animate({
+      opacity
+    }, { duration: 250, fill: "forwards" });
+
 
   const handleTabChange = (index: number) => {
-    tabAnimation({
-      complete: () => {
+    const fadeAni = tabAnimation(0)
+    if (fadeAni) {
+      fadeAni.onfinish = () => {
+        console.log(index)
         setActiveWork(index);
-        setTimeout(() => {
-          tabAnimation({
-            opacity: [0, 1]
-          });
-        }, 200);
-      }
-    });
+        tabAnimation(1);
+      };
+    }
   };
 
   const renderWork = (work: Work) => {
