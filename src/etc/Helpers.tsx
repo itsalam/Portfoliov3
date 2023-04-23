@@ -1,15 +1,35 @@
-import useStore from '@src/store';
-import { debounce } from 'lodash';
-import { useCallback, useEffect, useRef, useState } from 'react';
+
+
+
+import { debounce } from "lodash";
+import { SVGProps, useCallback, useEffect, useRef, useState } from "react";
+import useStore from "@src/store";
 
 const { setProgress, pages, setActivePage } = useStore.getState();
 
 export const getScrollProgress = (containerElem?: Element): number => {
   return containerElem
     ? -containerElem.getBoundingClientRect().top /
-        (containerElem.clientHeight - window.innerHeight)
+    (containerElem.clientHeight - window.innerHeight)
     : -1;
 };
+
+const valToHex = (color: string): string => {
+  const hexadecimal = parseInt(color).toString(16);
+  return hexadecimal.length == 1 ? '0' + hexadecimal : hexadecimal;
+};
+
+export const RGBtoHex = (vals: string[]) => {
+  let hex = vals
+    .map((val) => (val.includes('#') ? val : valToHex(val)))
+    .join('');
+  if (!hex.includes('#')) {
+    hex = '#' + hex;
+  }
+  return hex;
+};
+
+
 
 const debounceSetActivePage = debounce(
   (entries: IntersectionObserverEntry[]) => {
@@ -138,17 +158,19 @@ export function useScreenSize() {
   return windowSize;
 }
 
-const valToHex = (color: string): string => {
-  const hexadecimal = parseInt(color).toString(16);
-  return hexadecimal.length == 1 ? '0' + hexadecimal : hexadecimal;
-};
-
-export const RGBtoHex = (vals: string[]) => {
-  let hex = vals
-    .map((val) => (val.includes('#') ? val : valToHex(val)))
-    .join('');
-  if (!hex.includes('#')) {
-    hex = '#' + hex;
-  }
-  return hex;
-};
+export const ArrowSVG = (props: SVGProps<SVGSVGElement>) =>
+  <svg
+    className="text-background h-5 w-5"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2"
+      d="M14 5l7 7m0 0l-7 7m7-7H3"
+    />
+  </svg>

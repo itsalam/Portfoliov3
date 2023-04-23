@@ -10,8 +10,8 @@ const SmileyDark: ColorScheme & BgColorScheme = {
       fill: colors.trueGray['700']
     },
     text: {
-      foreground: colors.fuchsia['200'],
-      muted: colors.blue['200']
+      foreground: colors.fuchsia['300'],
+      muted: colors.indigo['200']
     },
     primary: colors.indigo,
     neutral: colors.indigo,

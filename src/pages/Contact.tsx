@@ -1,4 +1,5 @@
 import {
+  useNotification,
   FormControl,
   FormLabel,
   Input,
@@ -9,12 +10,14 @@ import { HTMLProps, ReactNode, useState } from 'react';
 import useStore from '@src/store';
 import { Document, Page } from 'react-pdf/dist/esm/entry.vite';
 import { debounce } from 'lodash';
-import { isWideListener, pageRef } from '../etc/helper';
+import { SanityImageSource } from '@sanity/image-url/lib/types/types';
+import { pageRef, isWideListener, ArrowSVG } from '@src/etc/Helpers';
 
 export default function Contact(props: HTMLProps<HTMLDivElement>) {
   const { imageBuilder, contact, resume } = useStore();
   const ref = pageRef().containerCallback;
   const [scale, setScale] = useState(1.0);
+  const notification = useNotification()
 
   const isWide = isWideListener();
 
@@ -55,58 +58,84 @@ export default function Contact(props: HTMLProps<HTMLDivElement>) {
         setScale(pageScale);
       }
     }
-  }, 100);
+  }, 1000);
+
+  const svgUrl = (imageRec: SanityImageSource) => imageBuilder?.image(imageRec).url() ?? "";
+
+  const ContactInfo = (props: { info: { value: string }, svgUrl: string }) => <div
+    key={props.info.value}
+    className="mainText flex w-full items-center gap-2 py-1 align-middle"
+  >
+    <svg
+      className="icon h-8 w-8 md:h-10 md:w-10"
+      data-src={props.svgUrl}
+      {...{ fill: 'currentColor' }}
+    />
+    {props.info.value}
+  </div>
 
   return (
-    <div id={'contact'} className="sticky top-[10%] h-screen xl:top-[15%]" {...props} ref={ref}>
-      <div className="bg-base/10 sticky top-[10%] flex h-[70vh] w-full flex-col gap-5 xl:top-[15%] xl:px-4">
+    <div id={'contact'} className="sticky h-screen py-[10vh] " {...props} ref={ref}>
+      <div className="bg-base/10 sticky top-[10%] flex h-auto w-full flex-col gap-2 xl:px-4">
         <h1 className="title relative left-0 flex w-full items-center gap-10">
           Contact
           <div className="bg-foreground h-[2px] w-1/3" />
         </h1>
-        <div className="flex h-full w-full flex-col xl:flex-row xl:gap-8 xl:px-8">
-          <div className="flex flex-col xl:w-3/5">
+
+        <div className="flex h-full w-full flex-col gap-2 xl:flex-row xl:gap-8 xl:px-8">
+          <div className="flex flex-col gap-3 xl:w-3/5">
             <h2 className="mainText">
               Interested in working together? Just drop me a message here.
             </h2>
-            <FormControl id="name" className="my-1 flex flex-col">
+            <FormControl id="name" className="flex flex-col">
               {isWide && <Label>Name</Label>}
               <TextInput placeholder={isWide ? "" : "Name"} />
             </FormControl>
-            <FormControl id="email" className="my-1 flex flex-col">
+            <FormControl id="email" className="flex flex-col">
               {isWide && <Label>Email</Label>}
               <TextInput placeholder={isWide ? "" : "Email"} />
             </FormControl>
-            <FormControl id="message" className="my-1 flex h-40 flex-col">
+            <FormControl id="message" className="flex h-40 flex-col">
               {isWide && <Label>Message</Label>}
               <TextArea placeholder={isWide ? "" : "Message"} />
             </FormControl>
 
-            <Button className="border-foreground hover:bg-fill/30 my-2 rounded-md border-2 p-3 xl:my-4">
-              SEND
+            <Button
+              onClick={() => notification({ title: "Message sent!", status: "success" })}
+              className="bg-primary-400/20 text-foreground group relative inline-flex w-56 overflow-hidden rounded py-3 pl-4 pr-12 font-semibold transition-all duration-150 ease-in-out hover:pl-10 hover:pr-6">
+              <span className="bg-foreground absolute bottom-0 left-0 h-1 w-full transition-all duration-150 ease-in-out group-hover:h-full"></span>
+              <span className="absolute right-0 pr-4 duration-200 ease-out group-hover:translate-x-12">
+                <ArrowSVG className="text-foreground h-5 w-5" />
+              </span>
+              <span className="absolute left-0 -translate-x-12 pl-2.5 duration-200 ease-out group-hover:translate-x-0">
+                <ArrowSVG className="text-background h-5 w-5" />
+              </span>
+              <span className="group-hover:text-background relative w-full text-left transition-colors duration-200 ease-in-out">Send message</span>
             </Button>
-            <h4 className="mainText p-2 text-xs">
-              Actually, its probably more convienient to just email me. ¯\_(ツ)_/¯
-            </h4>
-            {(contact && imageBuilder) && contact.map((info) => {
-              const svgUrl = imageBuilder.image(info.thumbnail).url();
-              return (
-                <div
-                  key={info.value}
-                  className="mainText flex w-full items-center gap-4 py-1 align-middle"
-                >
-                  <svg
-                    className="icon h-10 w-10"
-                    data-src={svgUrl}
-                    {...{ fill: 'currentColor' }}
-                  />
-                  {info.value}
-                </div>
-              );
-            })}
+
+            <div className="flex justify-evenly gap-2 md:pt-10">
+              <div>
+                <h4 className="mainText p-2 text-xs">
+                  Actually, its probably more convienient to just email me. ¯\_(ツ)_/¯
+                </h4>
+                {(contact && imageBuilder) && contact.map((info) => <ContactInfo {...{ info, svgUrl: svgUrl(info.thumbnail) }} />
+                )}
+              </div>
+              {(!isWide && resume) && <Button className="bg-primary-400/10 hover:bg-foreground hover:text-background group relative flex w-1/4 flex-col items-center justify-center overflow-hidden rounded px-4 py-3 font-semibold transition-all">
+                <span className="bg-foreground absolute bottom-0 left-0 h-1 w-full transition-all duration-150 ease-in-out group-hover:h-full" />
+                <svg
+                  className="icon group-hover:text-background absolute top-8 h-10 w-10"
+                  data-src={svgUrl(resume.icon)}
+                  {...{ fill: 'currentColor' }}
+                />
+                <span className="group-hover:text-background absolute bottom-8">Resume</span>
+              </Button>
+              }
+            </div>
+
           </div>
-          <div className="flex h-full flex-col items-center justify-center xl:w-2/5">
-            {(isWideListener() && resume) && <div
+          {(isWide && resume) && <div className="flex h-full flex-col items-center justify-center gap-4 xl:w-2/5">
+            <div
               className="flex max-h-[66%] max-w-full text-clip"
               id="pdfDocument"
             >
@@ -120,13 +149,20 @@ export default function Contact(props: HTMLProps<HTMLDivElement>) {
                   key={`${scale}`}
                 />
               </Document>
-            </div>}
-            <Button className="border-foreground hover:bg-fill/30 rounded-md border-2 p-3 xl:m-8 xl:w-1/2">
-              RESUME
+            </div>
+            <Button className="bg-primary-400/10 hover:bg-foreground group-hover:text-background group relative flex h-20 w-1/2 flex-col items-center justify-center overflow-hidden rounded px-4 py-3 font-semibold transition-all">
+              <span className="bg-foreground absolute bottom-0 left-0 h-1 w-full transition-all duration-150 ease-in-out group-hover:h-full" />
+              <svg
+                className="icon group-hover:text-background absolute top-3 h-10 w-10"
+                data-src={svgUrl(resume.icon)}
+                {...{ fill: 'currentColor' }}
+              />
+              <span className="group-hover:text-background absolute bottom-3">Resume</span>
             </Button>
           </div>
+          }
         </div>
       </div>
-    </div>
+    </div >
   );
 }

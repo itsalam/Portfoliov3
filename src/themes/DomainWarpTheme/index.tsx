@@ -3,7 +3,7 @@ import { useMemo, useRef } from 'react';
 import fragmentShader from './fragment.glsl';
 import { Vector2 } from 'three';
 import { useFrame, useThree } from '@react-three/fiber';
-import { EffectComposer, Bloom, DepthOfField } from '@react-three/postprocessing';
+import { EffectComposer } from '@react-three/postprocessing';
 import { useControls } from 'leva';
 import { CustomEffect } from '../helper';
 import { Html } from '@react-three/drei/web/Html';
@@ -46,8 +46,6 @@ export default function Background() {
       {darkMode && <Html center className='bg-base h-screen w-screen opacity-[.95]'></Html>}
       <EffectComposer>
         <DomainWarp ref={effectRef} />
-        <Bloom intensity={0.4} luminanceThreshold={0.1} />
-        {/* <Vignette offset={0.5} darkness={0.7} /> */}
       </EffectComposer>
     </group>
   );

@@ -4,8 +4,7 @@ import Contact from '../pages/Contact';
 import Projects from '../pages/Projects';
 import Work from '../pages/Work';
 import Menu from './Menu';
-import { updateScrollProgress } from '@src/etc/helper';
-import { isMobileListener, isWideListener } from '@src/etc/helper';
+import { isWideListener, isMobileListener, updateScrollProgress } from "@src/etc/Helpers";
 
 function Content() {
     const isWide = isWideListener();
@@ -23,7 +22,7 @@ function Content() {
                 )}
             >
                 {(isWide || isMobile) && <Menu />}
-                <div className="flex w-full flex-col gap-[20vh] px-4">
+                <div className="flex w-full flex-col gap-[20vh] px-4 pb-20 md:pb-0">
                     <Home />
                     <Projects />
                     <Work />

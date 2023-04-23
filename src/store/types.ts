@@ -37,6 +37,10 @@ export type Project = {
 };
 
 export type Resume = {
+  icon: {
+    stroke?: boolean;
+    name: string;
+  };
   url: string;
 };
 

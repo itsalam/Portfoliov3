@@ -2,7 +2,7 @@ import { HTMLProps, useEffect } from 'react';
 import anime from 'animejs';
 import { cx } from "@vechaiui/react";
 import useStore from '../store';
-import { pageRef } from '../etc/helper';
+import { pageRef } from '@src/etc/Helpers';
 
 const SPIN_DURATION = 2000;
 const LOOP_DELAY = 3500;
@@ -46,6 +46,7 @@ const revealHome = () => anime.timeline({
   begin(anim) {
     addEventListener("mousedown", () => anim.seek(anim.duration), { once: true });
   },
+  complete: () => window.location.hash && window.location.assign(window.location.hash)
 })
   .add({
     targets: `#home .revealer>*:first-child, #home .revealer .introText`,

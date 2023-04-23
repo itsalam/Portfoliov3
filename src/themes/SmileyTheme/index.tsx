@@ -6,8 +6,7 @@ import {
   Vector2,
   Shape,
   Group,
-  Color,
-  DoubleSide
+  Color
 } from 'three';
 import { useFrame, useLoader, useThree } from '@react-three/fiber';
 import {

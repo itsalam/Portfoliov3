@@ -10,15 +10,7 @@ export const animateProject = (index: number): AnimeTimelineInstance => {
   const targets = `.project:nth-of-type(${index + 1})`;
   return anime
     .timeline({
-      autoplay: true,
-      complete: (anim) => {
-        // anime({
-        //   targets: `.project:nth-of-type(${index + 1}) .carousel`,
-        //   translateY: ['0%', '-80%'],
-        //   duration: 1000,
-        //   easing: 'linear'
-        // });
-      }
+      autoplay: true
     })
     .add(
       {
@@ -33,7 +25,7 @@ export const animateProject = (index: number): AnimeTimelineInstance => {
             easing: 'easeInOutCirc',
             width: ['66.667%', '100%'],
             duration: 650,
-            delay: 650
+            delay: 850
           }
         ]
       },
@@ -45,20 +37,10 @@ export const animateProject = (index: number): AnimeTimelineInstance => {
         keyframes: [
           {
             easing: 'easeInOutCirc',
-            height: ['8rem', '28rem'],
+            height: ['8rem', '24rem'],
             duration: 750
           }
         ]
-      },
-      0
-    )
-    .add(
-      {
-        targets: `${targets}:not(.mobile)>.carousel`,
-        opacity: ['0%', '100%'],
-        easing: 'easeInOutCirc',
-        delay: 1650,
-        duration: 450
       },
       0
     )
@@ -75,7 +57,7 @@ export const animateProject = (index: number): AnimeTimelineInstance => {
           {
             easing: 'linear',
             opacity: ['100%'],
-            delay: 150,
+            delay: 350,
             duration: 250
           }
         ]
@@ -93,7 +75,7 @@ export const animateProject = (index: number): AnimeTimelineInstance => {
     .add(
       {
         targets: `div${targets} .revealer>*`,
-        delay: anime.stagger(250, { easing: 'easeInQuad' }),
+        delay: anime.stagger(150),
         keyframes: [
           {
             translateY: ['0%', '100%'],
@@ -101,7 +83,7 @@ export const animateProject = (index: number): AnimeTimelineInstance => {
           },
           {
             translateY: ['-100%', '0%'],
-            delay: 250,
+            delay: 350,
             duration: 450,
             begin(anim) {
               setTimeout(() => {
@@ -111,7 +93,7 @@ export const animateProject = (index: number): AnimeTimelineInstance => {
                   elem.classList.toggle('expanded', true);
                 }
                 if (elem.classList.contains('description')) {
-                  elem.style.height = '0';
+                  elem.style.display = 'none';
                 }
               }, 600);
             }
@@ -149,19 +131,10 @@ export const animateProjectReverse = (index: number) => {
         keyframes: [
           {
             easing: 'easeInOutCirc',
-            height: ['28rem', '8rem'],
+            height: ['24rem', '8rem'],
             duration: 750
           }
         ]
-      },
-      0
-    )
-    .add(
-      {
-        targets: `${targets}:not(.mobile)>.carousel`,
-        opacity: ['100%', '0%'],
-        easing: 'easeInOutCirc',
-        duration: 250
       },
       0
     )
@@ -214,7 +187,7 @@ export const animateProjectReverse = (index: number) => {
                 elem.classList.toggle('expanded', false);
               }
               if (elem.classList.contains('description')) {
-                elem.style.height = '';
+                elem.style.display = 'block';
               }
             }
           }

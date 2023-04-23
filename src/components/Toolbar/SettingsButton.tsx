@@ -1,5 +1,5 @@
+import { RGBtoHex, isWideListener } from '@src/etc/Helpers';
 import useStore from '@src/store';
-import { RGBtoHex, isWideListener } from '@src/etc/helper';
 import { Leva, useControls } from 'leva';
 import { useMemo } from 'react';
 
@@ -13,14 +13,14 @@ export default function SettingsButton(props: { darkMode: boolean, setDarkMode: 
         darkMode: {
             label: 'Dark Mode',
             value: localStorage.theme == 'dark',
-            onChange: (v) => {
+            onChange: (v: boolean) => {
                 props.setDarkMode(v)
             }
         },
         Theme: {
             options: themeIds,
             value: activeTheme,
-            onChange: (v) => {
+            onChange: (v: any) => {
                 setActiveTheme(v)
             },
             transient: true
@@ -29,7 +29,7 @@ export default function SettingsButton(props: { darkMode: boolean, setDarkMode: 
             min: 0,
             max: 1,
             step: .1,
-            onChange: (v) => {
+            onChange: (v: any) => {
                 setBgOpacity(v)
             }
         }
@@ -40,7 +40,7 @@ export default function SettingsButton(props: { darkMode: boolean, setDarkMode: 
         const scheme = vechaiTheme.colorSchemes[colorSchemeId].colors;
         return {
             colors: {
-                elevation1: RGBtoHex([...scheme.bg.base.split(","), "200"]),
+                elevation1: RGBtoHex([...scheme.bg.base.split(","), "125"]),
                 elevation2: RGBtoHex([...scheme.bg.base.split(","), "0"]),
                 elevation3: RGBtoHex([...scheme.bg.fill.split(","), "55"]),
                 accent1: RGBtoHex([...scheme.neutral[900].split(","), "255"]),
@@ -78,6 +78,7 @@ export default function SettingsButton(props: { darkMode: boolean, setDarkMode: 
             position: { x: 0, y: isWide ? 0 : 65 }
         }
         }
+        hidden={!isWide}
         collapsed={true}
         theme={vechaiThemeToLeva}
     />

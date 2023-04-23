@@ -1,6 +1,6 @@
 import { AnimeTimelineInstance } from 'animejs';
 import { cx } from "@vechaiui/react";
-import React, { HTMLProps, useCallback } from 'react';
+import React, { HTMLProps, useCallback, useMemo } from 'react';
 import { useEffect, useState } from 'react';
 import useStore from '@src/store';
 import { debounce } from 'lodash';
@@ -8,9 +8,9 @@ import {
     animateProject,
     animateProjectReverse
 } from './animations';
-import { isMobileListener, isWideListener, pageRef, useScreenSize } from '../../etc/helper';
 import { Project } from '@src/store/types';
 import Carousel from './carousel';
+import { pageRef, useScreenSize, isMobileListener, isWideListener } from '@src/etc/Helpers';
 
 const isElementCentered = (e: Element) => {
     const rect = e.getBoundingClientRect();
@@ -27,7 +27,7 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
 
     const { containerRef, containerCallback } = pageRef();
 
-    const { width } = useScreenSize();
+    const { width, height } = useScreenSize();
     const isMobile = isMobileListener()
     const isWide = isWideListener()
 
@@ -46,6 +46,13 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
         100,
         { trailing: false, leading: true }
     );
+
+    const getScrollHeight = useMemo(() => {
+        if (containerRef.current) {
+            const containerHeight = containerRef.current?.scrollHeight;
+            return height ? { height: `${containerHeight + height * .20}px` } : {}
+        }
+    }, [height])
 
     useEffect(() => {
         addEventListener('scroll', toggleCentered);
@@ -68,8 +75,12 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
     const scrollToMiddle = (e: Element, i: number) => {
         const elementRect = e.getBoundingClientRect();
         let absoluteElementTop = window.pageYOffset;
-        if (focusedProj !== undefined) {
-            absoluteElementTop += window.innerHeight * .15 * focusedProj > i ? 1 : -1;
+        const offset = isMobile ? 125 : window.innerHeight * .075;
+        if (focusedProj !== undefined && focusedProj !== i) {
+            absoluteElementTop += offset * (focusedProj > i ? 1 : -1);
+        } else if (focusedProj === undefined) {
+            console.log(absoluteElementTop)
+            absoluteElementTop += offset;
         }
         absoluteElementTop += (elementRect.bottom + elementRect.top) / 2;
         const middle = absoluteElementTop - window.innerHeight / 2;
@@ -100,8 +111,8 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
     const renderProjects = (project: Project, i: number) => <div
         key={`p-${i}`}
         className={cx(
-            'relative snap-center transition md:h-[40vh] md:min-h-[20rem]  project rounded-md shadow-md flex hover:bg-base/60 bg-base/30 hover:opacity-100',
-            'md:w-2/3',
+            'relative snap-center transition md:h-[40vh] md:min-h-[20rem] project rounded-md shadow-md flex hover:bg-base/60 bg-base/30 hover:opacity-100',
+            'w-full md:w-2/3',
             'flex-col md:flex-row',
             { right: i % 2 === 0, left: i % 2 === 1, mobile: isMobile }
         )}
@@ -113,7 +124,7 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
 
                 'cursor-pointer md:w-1/4 object-cover object-center z-10',
                 'md:min-w-[14rem]',
-                'w-full',
+                'w-full h-96 md:h-auto',
                 { "md:rounded-l-md": i % 2 === 0, "md:rounded-r-md": i % 2 === 1 }
             )}
         />
@@ -122,8 +133,8 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
             className={cx(
                 'cursor-pointer flex flex-col p-4 justify-center items-center md:w-3/4 md:h-auto h-32',
                 {
-                    'md:items-start md:right-0': i % 2 === 0,
-                    'md:items-end md:text-end md:left-0': i % 2 === 1
+                    'md:items-end md:text-end md:left-0': i % 2 === 0,
+                    'md:items-start md:right-0': i % 2 === 1
                 }
             )}
         >
@@ -136,7 +147,7 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
                 </p>
             </div>
             <div className="bg-foreground my-3 h-[1px] w-full" />
-            <div className="revealer fullDescription shrink-1 h-0 opacity-0">
+            <div className="revealer fullDescription shrink-1 h-0 overflow-y-scroll opacity-0">
                 <div className="subText absolute ">
                     <p>{project.fullDescription}</p>
                 </div>
@@ -147,10 +158,10 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
 
     return (
         <div
-            className="projectTrack relative flex h-auto w-full grow flex-col items-center justify-center gap-20 py-32"
+            className="projectTrack relative flex h-auto w-full grow flex-col items-center justify-start gap-20 py-[10vh]"
             ref={containerCallback}
             id="projects"
-            style={{ height: `${55 * subProjects.length + 10}vh` }}
+            style={getScrollHeight}
             {...props}
         >
             <h1 className="title relative left-0 flex w-full items-center gap-10">

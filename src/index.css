@@ -53,13 +53,13 @@ body {
   .mainText {
     font-family: Source Sans Pro;
     white-space: break-spaces;
-    @apply font-light 2xl:text-3xl md:text-2xl text-xl leading-tight;
+    @apply md:font-light 2xl:text-3xl md:text-2xl text-xl leading-tight;
   }
 
   .subText {
     font-family: Source Sans Pro;
     white-space: break-spaces;
-    @apply font-light 2xl:text-2xl md:text-lg text-base leading-tight;
+    @apply md:font-light 2xl:text-2xl md:text-lg text-base leading-tight;
   }
 
   .bg-foreground {
@@ -68,6 +68,21 @@ body {
       var(--vc-colors-text-foreground),
       var(--tw-text-opacity)
     );
+  }
+
+  .bg-muted {
+    --tw-text-opacity: 1;
+    background-color: rgba(var(--vc-colors-text-muted), var(--tw-text-opacity));
+  }
+
+  .text-background {
+    --tw-text-opacity: 1;
+    color: rgba(var(--vc-colors-bg-base), var(--tw-text-opacity));
+  }
+
+  .text-fill {
+    --tw-text-opacity: 1;
+    color: rgba(var(--vc-colors-bg-fill), var(--tw-text-opacity));
   }
 
   .border-foreground {
@@ -112,24 +127,16 @@ body {
   }
 
   .project.right {
-    margin-right: auto;
+    @apply md:ml-auto md:flex-row-reverse;
   }
 
   .project.left {
-    @apply md:ml-auto md:flex-row-reverse;
+    @apply md:mr-auto;
   }
 
   .project.centered {
     background-color: rgba(var(--vc-colors-bg-base), 0.6);
     opacity: 100% !important;
-  }
-
-  .focused:not(.centered) .carousel {
-    opacity: 0% !important;
-  }
-
-  .project:not(.focused) .carousel {
-    display: none;
   }
 
   input::placeholder,

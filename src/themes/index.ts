@@ -4,8 +4,6 @@ import { extendTheme, VechaiTheme } from '@vechaiui/react';
 import { StateCreator } from 'zustand';
 import { GroupProps } from '@react-three/fiber';
 import { ComponentType, lazy, LazyExoticComponent } from 'react';
-import React from 'react';
-import anime from 'animejs';
 
 const theme = extendTheme({
   cursor: 'pointer',
@@ -39,6 +37,19 @@ export type ThemeStore = {
   setBgOpacity: (opacity: number) => void;
 };
 
+const fadeInOutCanvas = (callback: () => void) => {
+  const animation = (transitions?: object) =>
+    document
+      .querySelector('#canvas')
+      ?.animate(
+        { opacity: 0, ...transitions },
+        { duration: 450, easing: 'linear' }
+      );
+  animation()
+    ?.finished.then(callback)
+    .then(() => animation({ opacity: [0, 1] }));
+};
+
 const createThemeSlice: StateCreator<ThemeStore> = (set, get) => ({
   darkMode: localStorage.theme == 'dark',
   setDarkMode: (darkMode: boolean) => set((state) => ({ ...state, darkMode })),
@@ -57,21 +68,11 @@ const createThemeSlice: StateCreator<ThemeStore> = (set, get) => ({
   activeTheme: 'Smiley',
   setActiveTheme: async (id: string) => {
     if (get().activeTheme !== id) {
-      const animation = (configs?: {}) =>
-        anime({
-          targets: '#canvas',
-          opacity: [1, 0],
-          duration: 600,
-          easing: 'linear',
-          ...configs
-        });
-      animation()
-        .finished.then(() =>
-          set({
-            activeTheme: id
-          })
-        )
-        .then(() => animation({ opacity: [0, 1] }));
+      fadeInOutCanvas(() =>
+        set({
+          activeTheme: id
+        })
+      );
     }
   },
   bgOpacity: 100,

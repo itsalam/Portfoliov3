@@ -6,7 +6,7 @@ const DomainWarpLight: ColorScheme & BgColorScheme = {
   type: 'light',
   colors: {
     bg: {
-      base: colors.trueGray['200'],
+      base: colors.trueGray['300'],
       fill: colors.trueGray['500']
     },
     text: {
@@ -32,7 +32,7 @@ const DomainWarpDark: ColorScheme & BgColorScheme = {
       foreground: colors.green['200'],
       muted: colors.lime['200']
     },
-    primary: colors.emerald,
+    primary: colors.green,
     neutral: colors.lime,
     hightlight1: '#00cc69',
     hightlight2: '#e3aa00'

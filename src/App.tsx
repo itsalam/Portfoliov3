@@ -14,13 +14,14 @@ function App() {
 
   function AppLoader() {
     return (
-      <div className="flex h-screen w-full flex-col items-center justify-center">
-        <div className="h-20 w-20 animate-spin rounded-full border-t-4 border-gray-200"></div>
+      <div className="absolute bottom-1/2 right-1/2  translate-x-1/2 translate-y-1/2">
+        <div className="h-32 w-32 animate-spin  rounded-full border-8 border-solid border-gray-500/50 border-t-transparent"></div>
       </div>
     );
   }
 
   const colorSchemeId = `${activeTheme}${darkMode ? 'Dark' : 'Light'}`;
+
   useEffect(() => {
     localStorage.theme = darkMode ? 'dark' : 'light';
   }, [darkMode]);
