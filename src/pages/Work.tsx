@@ -1,4 +1,5 @@
-/* eslint-disable tailwindcss/no-custom-classname */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 import useStore from '@src/store';
 import { Work } from '@src/store/types';
 import { HTMLProps, useState } from 'react';
@@ -21,16 +22,18 @@ export default function Works(props: HTMLProps<HTMLDivElement>) {
   const { works } = useStore();
 
   const tabAnimation = (opacity: number) =>
-    document.querySelector(`.tabPanel`)?.animate({
-      opacity
-    }, { duration: 250, fill: "forwards" });
-
+    document.querySelector(`.tabPanel`)?.animate(
+      {
+        opacity
+      },
+      { duration: 250, fill: 'forwards' }
+    );
 
   const handleTabChange = (index: number) => {
-    const fadeAni = tabAnimation(0)
-    if (fadeAni) {
+    const fadeAni = tabAnimation(0);
+    if (fadeAni && typeof index === 'number') {
       fadeAni.onfinish = () => {
-        console.log(index)
+        console.log(index);
         setActiveWork(index);
         tabAnimation(1);
       };
@@ -46,7 +49,13 @@ export default function Works(props: HTMLProps<HTMLDivElement>) {
         {work.experiences.map((experience, i) => (
           <div className="flex flex-col gap-3 xl:px-4" key={i}>
             <h1 className="subTitle text-muted whitespace-pre-wrap sm:whitespace-nowrap">
-              <span>{experience.title}<span className="text-foreground">{"\n @ "}{work.companyName}</span></span>
+              <span>
+                {experience.title}
+                <span className="text-foreground">
+                  {'\n @ '}
+                  {work.companyName}
+                </span>
+              </span>
             </h1>
             <p className="mainText text-muted">
               {convertDate(experience.from)} - {convertDate(experience.to)}
@@ -60,17 +69,18 @@ export default function Works(props: HTMLProps<HTMLDivElement>) {
               ))}
             </div>
           </div>
-        ))
-        }
-      </Tab.Panel >
+        ))}
+      </Tab.Panel>
     );
   };
 
   return (
     <Tab.Group
-      as="div"
+      // @ts-ignore
+      as={'div'}
       className="flex h-screen flex-col gap-5 py-[10vh] md:h-full md:px-4"
       selectedIndex={activeWork}
+      // @ts-ignore
       onChange={handleTabChange}
       id="work"
       {...props}
@@ -80,25 +90,27 @@ export default function Works(props: HTMLProps<HTMLDivElement>) {
         Work
         <div className="bg-foreground h-[2px] w-1/3" />
       </h1>
-      {works && <>
-        <Tab.List className={cx('flex subText font-works gap-1')}>
-          {works.map((work) => (
-            <Tab
-              key={work.companyName}
-              value={work.companyName}
-              className={cx(
-                'xl:px-12 xl:py-4 p-4 hover:border-foreground hover:brightness-100 border-2 transition-all border-transparent brightness-75',
-                'selected:border-foreground selected:bg-primary-300/30 selected:brightness-110'
-              )}
-            >
-              {work.companyName}
-            </Tab>
-          ))}
-        </Tab.List>
-        <Tab.Panels className="tabPanel flex-1 overflow-y-auto">
-          {works.map((work) => renderWork(work))}
-        </Tab.Panels>
-      </>}
+      {works && (
+        <>
+          <Tab.List className={cx('flex subText font-works gap-1')}>
+            {works.map((work) => (
+              <Tab
+                key={work.companyName}
+                value={work.companyName}
+                className={cx(
+                  'xl:px-12 xl:py-4 p-4 hover:border-foreground hover:brightness-100 border-2 transition-all border-transparent brightness-75',
+                  'selected:border-foreground selected:bg-primary-300/30 selected:brightness-110'
+                )}
+              >
+                {work.companyName}
+              </Tab>
+            ))}
+          </Tab.List>
+          <Tab.Panels className="tabPanel flex-1 overflow-y-auto">
+            {works.map((work) => renderWork(work))}
+          </Tab.Panels>
+        </>
+      )}
     </Tab.Group>
   );
 }

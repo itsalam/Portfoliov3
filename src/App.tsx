@@ -5,12 +5,12 @@ import Toolbar from './components/Toolbar';
 import Content from './components/Content';
 import { VechaiProvider } from '@vechaiui/react';
 import useStore from './store';
-import { cx } from "@vechaiui/react";
+import { cx } from '@vechaiui/react';
 
 function App() {
   const { vechaiTheme, themes } = useStore.getState();
-  const { isLoading, activeTheme, bgOpacity, darkMode, setDarkMode } = useStore();
-
+  const { isLoading, activeTheme, bgOpacity, darkMode, setDarkMode } =
+    useStore();
 
   function AppLoader() {
     return (
@@ -28,7 +28,11 @@ function App() {
 
   const Theme = useCallback(() => {
     function ThreeJsLoader() {
-      return <Html center><AppLoader /></Html>;
+      return (
+        <Html center>
+          <AppLoader />
+        </Html>
+      );
     }
 
     const Background = themes[activeTheme].background;
@@ -36,7 +40,6 @@ function App() {
       <Suspense fallback={<ThreeJsLoader />}>
         <Background />
       </Suspense>
-
     );
   }, [activeTheme]);
 
@@ -47,26 +50,30 @@ function App() {
         darkMode ? 'dark' : 'light'
       )}
     >
-      {
-        isLoading ? <AppLoader /> :
-          <Suspense fallback={<AppLoader />}>
-            <VechaiProvider
-              theme={vechaiTheme}
-              colorScheme={colorSchemeId}
+      {isLoading ? (
+        <AppLoader />
+      ) : (
+        <Suspense fallback={<AppLoader />}>
+          <VechaiProvider theme={vechaiTheme} colorScheme={colorSchemeId}>
+            <div
+              className="canvas-holder bg-base fixed z-[-1] h-screen w-screen"
+              style={{ opacity: bgOpacity }}
             >
-              <div className="canvas-holder bg-base fixed z-[-1] h-screen w-screen" style={{ opacity: bgOpacity }}>
-
-                <Canvas id="canvas" shadows="percentage" className="intro-revealer z-[-2]" style={{ opacity: 0 }}>
-                  <OrbitControls />
-                  <Theme />
-                </Canvas>
-              </div>
-              <Toolbar {...{ darkMode, setDarkMode }} />
-              <Content />
-            </VechaiProvider>
-          </Suspense>
-      }
-
+              <Canvas
+                id="canvas"
+                shadows="percentage"
+                className="intro-revealer z-[-2]"
+                style={{ opacity: 0 }}
+              >
+                <OrbitControls />
+                <Theme />
+              </Canvas>
+            </div>
+            <Toolbar {...{ darkMode, setDarkMode }} />
+            <Content />
+          </VechaiProvider>
+        </Suspense>
+      )}
     </div>
   );
 }

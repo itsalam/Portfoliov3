@@ -1,16 +1,13 @@
-
-
-
-import { debounce } from "lodash";
-import { SVGProps, useCallback, useEffect, useRef, useState } from "react";
-import useStore from "@src/store";
+import { debounce } from 'lodash';
+import { SVGProps, useCallback, useEffect, useRef, useState } from 'react';
+import useStore from '@src/store';
 
 const { setProgress, pages, setActivePage } = useStore.getState();
 
 export const getScrollProgress = (containerElem?: Element): number => {
   return containerElem
     ? -containerElem.getBoundingClientRect().top /
-    (containerElem.clientHeight - window.innerHeight)
+        (containerElem.clientHeight - window.innerHeight)
     : -1;
 };
 
@@ -28,8 +25,6 @@ export const RGBtoHex = (vals: string[]) => {
   }
   return hex;
 };
-
-
 
 const debounceSetActivePage = debounce(
   (entries: IntersectionObserverEntry[]) => {
@@ -158,7 +153,7 @@ export function useScreenSize() {
   return windowSize;
 }
 
-export const ArrowSVG = (props: SVGProps<SVGSVGElement>) =>
+export const ArrowSVG = (props: SVGProps<SVGSVGElement>) => (
   <svg
     className="text-background h-5 w-5"
     fill="none"
@@ -174,3 +169,4 @@ export const ArrowSVG = (props: SVGProps<SVGSVGElement>) =>
       d="M14 5l7 7m0 0l-7 7m7-7H3"
     />
   </svg>
+);

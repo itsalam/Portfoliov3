@@ -16,19 +16,22 @@ export default function Background() {
 
   const { darkMode } = useStore();
 
-  const configs = useControls("Theme Configs", {
-    color1: '#22c55e',
-    color2: '#d9f99d',
-    color3: '#10b981',
-    color4: '#facc15',
-    alpha: 3.0
-  }, { collapsed: true });
+  const configs = useControls(
+    'Theme Configs',
+    {
+      color1: '#22c55e',
+      color2: '#d9f99d',
+      color3: '#10b981',
+      color4: '#facc15',
+      alpha: 3.0
+    },
+    { collapsed: true }
+  );
 
   const DomainWarp = forwardRef((_, ref) => {
     const resolution = new Vector2(size.width, size.height);
     const effect = useMemo(
-      () =>
-        new CustomEffect(fragmentShader, resolution, time.current, configs),
+      () => new CustomEffect(fragmentShader, resolution, time.current, configs),
       []
     );
     return <primitive ref={ref} object={effect} dispose={null} />;
@@ -43,7 +46,9 @@ export default function Background() {
 
   return (
     <group>
-      {darkMode && <Html center className='bg-base h-screen w-screen opacity-[.95]'></Html>}
+      {darkMode && (
+        <Html center className="bg-base h-screen w-screen opacity-[.95]"></Html>
+      )}
       <EffectComposer>
         <DomainWarp ref={effectRef} />
       </EffectComposer>

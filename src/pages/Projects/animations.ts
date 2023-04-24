@@ -37,7 +37,7 @@ export const animateProject = (index: number): AnimeTimelineInstance => {
         keyframes: [
           {
             easing: 'easeInOutCirc',
-            height: ['8rem', '24rem'],
+            height: ['8rem', '22rem'],
             duration: 750
           }
         ]
@@ -131,7 +131,7 @@ export const animateProjectReverse = (index: number) => {
         keyframes: [
           {
             easing: 'easeInOutCirc',
-            height: ['24rem', '8rem'],
+            height: ['22rem', '8rem'],
             duration: 750
           }
         ]

@@ -1,13 +1,7 @@
 import React, { useRef, useMemo, forwardRef, useEffect, useState } from 'react';
 import fragmentShader from './fragment.glsl';
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader';
-import {
-  Mesh,
-  Vector2,
-  Shape,
-  Group,
-  Color
-} from 'three';
+import { Mesh, Vector2, Shape, Group, Color } from 'three';
 import { useFrame, useLoader, useThree } from '@react-three/fiber';
 import {
   EffectComposer,
@@ -36,33 +30,48 @@ export default function Background() {
 
   const [meshs, setMeshes] = useState<Mesh[]>([]);
 
-  const { speed, offSet, scale, horizontalOffset, verticalOffset, colorA, colorB } =
-    useControls("Theme Configs", {
-      colorA: "#ffef1f",
-      colorB: "#ff10f0",
+  const {
+    speed,
+    offSet,
+    scale,
+    horizontalOffset,
+    verticalOffset,
+    colorA,
+    colorB
+  } = useControls(
+    'Theme Configs',
+    {
+      colorA: '#ffef1f',
+      colorB: '#ff10f0',
       offSet: 1.75,
       speed: 1,
       scale: 7,
       horizontalOffset: 1.0,
       verticalOffset: 0.6
-    }, { collapsed: true });
+    },
+    { collapsed: true }
+  );
 
-  const shaderConfigs = useControls('Shader Config', {
-    //distort speed
-    speed: 1,
-    speed_x: 3,
-    speed_y: 3,
+  const shaderConfigs = useControls(
+    'Shader Config',
+    {
+      //distort speed
+      speed: 1,
+      speed_x: 3,
+      speed_y: 3,
 
-    // refraction
-    emboss: 10.9,
-    intensity: 5.4,
-    steps: 2,
-    frequency: 13.0,
-    angle: 13,
+      // refraction
+      emboss: 10.9,
+      intensity: 5.4,
+      steps: 2,
+      frequency: 13.0,
+      angle: 13,
 
-    // reflection
-    delta: 145
-  }, { collapsed: true });
+      // reflection
+      delta: 145
+    },
+    { collapsed: true }
+  );
 
   useEffect(() => {
     let curMeshes: Mesh[] = [];
@@ -127,29 +136,34 @@ export default function Background() {
     const resolution = new Vector2(size.width, size.height);
     const effect = useMemo(
       () =>
-        new CustomEffect(fragmentShader, resolution, time.current, shaderConfigs),
+        new CustomEffect(
+          fragmentShader,
+          resolution,
+          time.current,
+          shaderConfigs
+        ),
       []
     );
     return <primitive ref={ref} object={effect} dispose={null} />;
   });
 
-  return (<>
+  return (
+    <>
+      <group>
+        <group position={[-3, -6, 0]} ref={groupRef} castShadow>
+          {smileys}
+        </group>
+        <OrbitControls />
+        <EffectComposer>
+          <Scanline opacity={0.1} />
+          <Distort ref={effectRef} />
+          <Noise opacity={0.3} />
+          <Bloom luminanceThreshold={0.1} />
+          <Vignette eskil offset={0.6} darkness={0.8} />
+        </EffectComposer>
 
-    <group>
-      <group position={[-3, -6, 0]} ref={groupRef} castShadow>
-        {smileys}
+        <Html center className="bg-base h-screen w-screen opacity-80"></Html>
       </group>
-      <OrbitControls />
-      <EffectComposer>
-        <Scanline opacity={0.1} />
-        <Distort ref={effectRef} />
-        <Noise opacity={0.3} />
-        <Bloom luminanceThreshold={0.1} />
-        <Vignette eskil offset={0.6} darkness={0.8} />
-      </EffectComposer>
-
-      <Html center className='bg-base h-screen w-screen opacity-80'></Html>
-    </group>
-  </>
+    </>
   );
 }

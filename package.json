@@ -7,8 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "prestart": "postcss src/css/index.css -o src/index.css",
-    "format": "prettier --config .prettierrc src/**/*.tsx --write"
+    "format": "prettier --config .prettierrc.json --write ."
   },
   "dependencies": {
     "@headlessui/react": "^1.7.13",
@@ -27,6 +26,7 @@
     "postprocessing": "^6.30.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-hook-form": "^7.43.9",
     "react-pdf": "^6.2.2",
     "swiper": "^9.2.3",
     "three": "^0.148.0",
