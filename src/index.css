@@ -43,17 +43,17 @@ body {
 
   .subTitle {
     font-family: Source Sans Pro;
-    @apply font-normal 2xl:text-4xl md:text-3xl text-2xl leading-tight;
+    @apply font-normal 2xl:text-4xl md:text-2xl text-2xl leading-tight;
   }
 
   .subTitle.expanded {
-    @apply 2xl:text-5xl md:text-4xl text-3xl;
+    @apply 2xl:text-5xl md:text-4xl text-2xl;
   }
 
   .mainText {
     font-family: Source Sans Pro;
     white-space: break-spaces;
-    @apply md:font-light 2xl:text-3xl md:text-2xl text-xl leading-tight;
+    @apply md:font-light 2xl:text-2xl md:text-2xl text-xl leading-tight;
   }
 
   .subText {

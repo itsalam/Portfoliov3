@@ -2,7 +2,7 @@ import dwThemes from './DomainWarpTheme/colorScheme';
 import smileyThemes from './SmileyTheme/colorScheme';
 import { extendTheme, VechaiTheme } from '@vechaiui/react';
 import { StateCreator } from 'zustand';
-import { GroupProps } from '@react-three/fiber';
+import { GroupProps, RootState } from '@react-three/fiber';
 import { ComponentType, lazy, LazyExoticComponent } from 'react';
 
 const theme = extendTheme({
@@ -15,7 +15,9 @@ const theme = extendTheme({
 
 export type Theme = {
   id: string;
-  background: LazyExoticComponent<ComponentType<GroupProps>>;
+  background: LazyExoticComponent<
+    ComponentType<GroupProps> & Partial<RootState>
+  >;
 };
 
 export type BgColorScheme = {

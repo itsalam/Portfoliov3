@@ -7,7 +7,7 @@ export const scrollAnimation = anime({
 });
 
 export const animateProject = (index: number): AnimeTimelineInstance => {
-  const targets = `.project:nth-of-type(${index + 1})`;
+  const targets = `#projects .swiper-slide:nth-of-type(${index + 1}) .project`;
   return anime
     .timeline({
       autoplay: true
@@ -37,7 +37,7 @@ export const animateProject = (index: number): AnimeTimelineInstance => {
         keyframes: [
           {
             easing: 'easeInOutCirc',
-            height: ['8rem', '22rem'],
+            height: ['8rem', '20rem'],
             duration: 750
           }
         ]
@@ -106,7 +106,8 @@ export const animateProject = (index: number): AnimeTimelineInstance => {
 };
 
 export const animateProjectReverse = (index: number) => {
-  const targets = `.project:nth-of-type(${index + 1})`;
+  console.log(index);
+  const targets = `#projects .swiper-slide:nth-of-type(${index + 1}) .project`;
   anime
     .timeline({
       autoplay: true

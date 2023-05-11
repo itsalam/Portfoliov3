@@ -14,7 +14,7 @@ const convertDate = (date: string) => {
   });
 };
 
-export default function Works(props: HTMLProps<HTMLDivElement>) {
+export default function Work(props: HTMLProps<HTMLDivElement>) {
   const [activeWork, setActiveWork] = useState<number>(0);
 
   const { containerCallback } = pageRef();
@@ -78,7 +78,7 @@ export default function Works(props: HTMLProps<HTMLDivElement>) {
     <Tab.Group
       // @ts-ignore
       as={'div'}
-      className="flex h-screen flex-col gap-5 py-[10vh] md:h-full md:px-4"
+      className="flex h-screen flex-col gap-5 py-16 md:h-full md:px-4 md:py-[10vh]"
       selectedIndex={activeWork}
       // @ts-ignore
       onChange={handleTabChange}
@@ -86,9 +86,9 @@ export default function Works(props: HTMLProps<HTMLDivElement>) {
       {...props}
       ref={containerCallback}
     >
-      <h1 className="title relative left-0 flex w-full items-center gap-10">
+      <h1 className="title relative left-0 flex w-full items-center gap-4">
         Work
-        <div className="bg-foreground h-[2px] w-1/3" />
+        <div className="bg-foreground relative top-1/4 h-[2px] w-1/3" />
       </h1>
       {works && (
         <>

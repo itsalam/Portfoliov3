@@ -13,6 +13,7 @@ import { debounce } from 'lodash';
 import { SanityImageSource } from '@sanity/image-url/lib/types/types';
 import { pageRef, isWideListener, ArrowSVG } from '@src/etc/Helpers';
 import { useForm } from 'react-hook-form';
+import { Resume } from '@src/store/types';
 
 type FormInputProps = {
   id: string;
@@ -90,19 +91,6 @@ export default function Contact(props: HTMLProps<HTMLDivElement>) {
     </FormControl>
   ));
 
-  const onPageLoad = debounce((page) => {
-    const parentDiv = document.querySelector('#pdfDocument');
-    if (parentDiv) {
-      const pageScale = Math.min(
-        parentDiv.clientWidth / page.originalWidth,
-        parentDiv.clientHeight / page.originalHeight
-      );
-      if (scale !== pageScale) {
-        setScale(pageScale);
-      }
-    }
-  }, 1000);
-
   const svgUrl = (imageRec: SanityImageSource) =>
     imageBuilder?.image(imageRec).url() ?? '';
 
@@ -140,20 +128,26 @@ export default function Contact(props: HTMLProps<HTMLDivElement>) {
     </div>
   );
 
+  const ResumePreview = (props: { resume: Resume }) => {
+    return <div className="h-full w-full">
+      <embed src={props.resume.url} className="h-[50vh] min-h-[300px] w-full" />
+    </div>
+  }
+
   return (
     <div
       id={'contact'}
-      className="flex h-screen items-center justify-center py-[10vh]"
+      className="flex h-screen items-start justify-center py-16 md:items-center md:py-[10vh]"
       {...props}
       ref={ref}
     >
       <div className="bg-base/10 flex h-auto w-full flex-col  gap-2 xl:px-4">
-        <h1 className="title relative left-0 flex w-full items-center gap-10">
+        <h1 className="title relative left-0 flex w-full items-center gap-4">
           Contact
-          <div className="bg-foreground h-[2px] w-1/3" />
+          <div className="bg-foreground relative top-1/4 h-[2px] w-1/3" />
         </h1>
 
-        <div className="flex h-full w-full flex-col gap-2 xl:flex-row xl:gap-8 xl:px-8">
+        <div className="flex h-full w-full flex-1 flex-col gap-2 xl:flex-row xl:gap-8 xl:px-8">
           <form
             className="flex flex-col gap-3 xl:w-3/5"
             onSubmit={handleSubmit(submitContact)}
@@ -186,8 +180,8 @@ export default function Contact(props: HTMLProps<HTMLDivElement>) {
               </span>
             </Button>
 
-            <div className="flex justify-evenly gap-2 pt-4 md:pt-0">
-              <div>
+            <div className="flex justify-start gap-2 pt-4 md:pt-0">
+              <div className="w-full flex-1">
                 <h4 className="mainText p-2 text-xs">
                   Actually, its probably more convienient to just email me.
                   ¯\_(ツ)_/¯
@@ -214,22 +208,8 @@ export default function Contact(props: HTMLProps<HTMLDivElement>) {
             </div>
           </form>
           {isWide && resume && (
-            <div className="flex h-full flex-col items-center justify-center gap-4 xl:w-2/5">
-              <div
-                className="flex max-h-[66%] max-w-full text-clip"
-                id="pdfDocument"
-              >
-                <Document className="" file={resume.url}>
-                  <Page
-                    pageNumber={1}
-                    renderTextLayer={false}
-                    onLoadSuccess={onPageLoad}
-                    scale={scale}
-                    renderAnnotationLayer={false}
-                    key={`${scale}`}
-                  />
-                </Document>
-              </div>
+            <div className="flex h-full flex-col items-center justify-center gap-4 self-center xl:w-2/5">
+              <ResumePreview resume={resume} />
               <Button className="bg-primary-400/10 hover:bg-foreground group-hover:text-background group relative flex h-20 w-1/2 flex-col items-center justify-center overflow-hidden rounded px-4 py-3 font-semibold transition-all">
                 <span className="bg-foreground absolute bottom-0 left-0 h-1 w-full transition-all duration-150 ease-in-out group-hover:h-full" />
                 <svg

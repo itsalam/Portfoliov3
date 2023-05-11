@@ -1,47 +1,26 @@
-import { Suspense, useCallback, useEffect } from 'react';
-import { Canvas } from '@react-three/fiber';
-import { Html, OrbitControls } from '@react-three/drei';
+import { Suspense, useEffect } from 'react';
 import Toolbar from './components/Toolbar';
 import Content from './components/Content';
 import { VechaiProvider } from '@vechaiui/react';
 import useStore from './store';
 import { cx } from '@vechaiui/react';
+import Home from './pages/Home';
+import Projects from './pages/Projects';
+import Contact from './pages/Contact';
+import Work from './pages/Work';
+import { DefaultLoader } from './etc/Helpers';
+import Background from './components/Background';
 
 function App() {
-  const { vechaiTheme, themes } = useStore.getState();
-  const { isLoading, activeTheme, bgOpacity, darkMode, setDarkMode } =
+  const { vechaiTheme } = useStore.getState();
+  const { isLoading, activeTheme, darkMode, setDarkMode } =
     useStore();
-
-  function AppLoader() {
-    return (
-      <div className="absolute bottom-1/2 right-1/2  translate-x-1/2 translate-y-1/2">
-        <div className="h-32 w-32 animate-spin  rounded-full border-8 border-solid border-gray-500/50 border-t-transparent"></div>
-      </div>
-    );
-  }
 
   const colorSchemeId = `${activeTheme}${darkMode ? 'Dark' : 'Light'}`;
 
   useEffect(() => {
     localStorage.theme = darkMode ? 'dark' : 'light';
   }, [darkMode]);
-
-  const Theme = useCallback(() => {
-    function ThreeJsLoader() {
-      return (
-        <Html center>
-          <AppLoader />
-        </Html>
-      );
-    }
-
-    const Background = themes[activeTheme].background;
-    return (
-      <Suspense fallback={<ThreeJsLoader />}>
-        <Background />
-      </Suspense>
-    );
-  }, [activeTheme]);
 
   return (
     <div
@@ -51,26 +30,18 @@ function App() {
       )}
     >
       {isLoading ? (
-        <AppLoader />
+        <DefaultLoader />
       ) : (
-        <Suspense fallback={<AppLoader />}>
+        <Suspense fallback={<DefaultLoader />}>
           <VechaiProvider theme={vechaiTheme} colorScheme={colorSchemeId}>
-            <div
-              className="canvas-holder bg-base fixed z-[-1] h-screen w-screen"
-              style={{ opacity: bgOpacity }}
-            >
-              <Canvas
-                id="canvas"
-                shadows="percentage"
-                className="intro-revealer z-[-2]"
-                style={{ opacity: 0 }}
-              >
-                <OrbitControls />
-                <Theme />
-              </Canvas>
-            </div>
+            <Background />
             <Toolbar {...{ darkMode, setDarkMode }} />
-            <Content />
+            <Content>
+              <Home />
+              <Projects />
+              <Work />
+              <Contact />
+            </Content>
           </VechaiProvider>
         </Suspense>
       )}

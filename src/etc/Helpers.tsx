@@ -7,7 +7,7 @@ const { setProgress, pages, setActivePage } = useStore.getState();
 export const getScrollProgress = (containerElem?: Element): number => {
   return containerElem
     ? -containerElem.getBoundingClientRect().top /
-        (containerElem.clientHeight - window.innerHeight)
+    (containerElem.clientHeight - window.innerHeight)
     : -1;
 };
 
@@ -55,16 +55,18 @@ const observer = new IntersectionObserver(
   { threshold: 0.25 }
 );
 
+const debounceSetProgress = (containerElem?: Element) => debounce(() => {
+  const scrollProgress: number = getScrollProgress(containerElem);
+  if (scrollProgress < 1 && scrollProgress > 0) {
+    setProgress(scrollProgress);
+  }
+})
+
 export const updateScrollProgress = () => {
   const containerRef = useRef<Element>();
   const containerCallback = useCallback<React.RefCallback<Element>>(
     (node: Element) => {
-      const onScroll = debounce(() => {
-        const scrollProgress: number = getScrollProgress(containerRef.current);
-        if (scrollProgress < 1 && scrollProgress > 0) {
-          setProgress(scrollProgress);
-        }
-      });
+      const onScroll = debounceSetProgress(containerRef.current);
 
       containerRef.current = node;
       if (containerRef.current) {
@@ -170,3 +172,11 @@ export const ArrowSVG = (props: SVGProps<SVGSVGElement>) => (
     />
   </svg>
 );
+
+export function DefaultLoader() {
+  return (
+    <div className="absolute bottom-1/2 right-1/2  translate-x-1/2 translate-y-1/2">
+      <div className="h-32 w-32 animate-spin  rounded-full border-8 border-solid border-gray-500/50 border-t-transparent"></div>
+    </div>
+  );
+}

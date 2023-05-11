@@ -112,11 +112,11 @@ function Menu({ vertical = isWideListener(), isToolBar = false }) {
       document.querySelector('#selector')?.animate(
         vertical
           ? {
-              top: `${moveVal}px`
-            }
+            top: `${moveVal}px`
+          }
           : {
-              left: `${moveVal}px`
-            },
+            left: `${moveVal}px`
+          },
         { duration: 250, fill: 'forwards', easing: 'ease-out' }
       );
     },

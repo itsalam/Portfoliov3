@@ -1,8 +1,8 @@
 import React, { useRef, useMemo, forwardRef, useEffect, useState } from 'react';
 import fragmentShader from './fragment.glsl';
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader';
-import { Mesh, Vector2, Shape, Group, Color } from 'three';
-import { useFrame, useLoader, useThree } from '@react-three/fiber';
+import { Mesh, Vector2, Shape, Group, Color, Camera } from 'three';
+import { RootState, Size, useFrame, useLoader, useThree } from '@react-three/fiber';
 import {
   EffectComposer,
   Bloom,
@@ -133,7 +133,7 @@ export default function Background() {
     });
 
   const Distort = forwardRef((_, ref) => {
-    const resolution = new Vector2(size.width, size.height);
+    const resolution = new Vector2(size?.width ?? window.innerWidth, size?.height ?? window.innerHeight);
     const effect = useMemo(
       () =>
         new CustomEffect(
