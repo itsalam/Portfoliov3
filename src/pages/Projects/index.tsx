@@ -1,29 +1,28 @@
 import { AnimeTimelineInstance } from 'animejs';
 import { cx } from '@vechaiui/react';
-import React, { HTMLProps, useCallback, useMemo } from 'react';
+import React, { HTMLProps, useCallback, useMemo, useRef } from 'react';
 import { useEffect, useState } from 'react';
 import useStore from '@src/store';
 import { debounce } from 'lodash';
 import { animateProject, animateProjectReverse } from './animations';
 import { Project } from '@src/store/types';
 import Carousel from './carousel';
-import { Swiper, SwiperSlide } from "swiper/react";
-import { FreeMode, Mousewheel, Pagination, Scrollbar } from "swiper";
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { FreeMode, Mousewheel, Pagination, Scrollbar } from 'swiper';
 
 import {
-  pageRef,
   useScreenSize,
   isMobileListener,
   isWideListener
 } from '@src/etc/Helpers';
-
 
 export default function Projects(props: HTMLProps<HTMLDivElement>) {
   const [focusedProj, setFocusedProj] = useState<number>();
   const [focusedAni, setFocusedAni] = useState<AnimeTimelineInstance>();
   const [centeredElem, setCenteredElem] = useState<Element>();
 
-  const { containerRef, containerCallback } = pageRef();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const progressBarRef = useRef<HTMLDivElement>(null);
 
   const { width } = useScreenSize();
   const isMobile = isMobileListener();
@@ -31,6 +30,11 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
 
   const { projects } = useStore();
   const subProjects = new Array(5).fill(projects ? projects[0] : undefined);
+
+  useEffect(() => {
+    console.log(projects);
+    projects && animateProgress(1 / subProjects.length);
+  }, []);
 
   useEffect(() => {
     setFocusedProj(undefined);
@@ -47,6 +51,15 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
   useEffect(() => {
     if (focusedProj !== undefined) setFocusedAni(animateProject(focusedProj));
   }, [focusedProj]);
+
+  const animateProgress = useCallback(
+    (progress: number) =>
+      progressBarRef.current?.animate(
+        { width: `${progress * 100}%` },
+        { duration: 150, fill: 'forwards', easing: 'ease-in-out' }
+      ),
+    []
+  );
 
   const positionCarousel = useCallback(() => {
     const rect = containerRef.current?.getBoundingClientRect();
@@ -69,16 +82,15 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
   };
 
   const renderProjects = (project: Project, i: number) => (
-    <SwiperSlide
-      key={`p-${i}`}
-      className='flex items-center justify-center'
-    >
-      <div className={cx(
-        'snap-center transition md:h-[40vh] md:min-h-[20rem] project rounded-md shadow-md flex hover:bg-base/60 bg-base/30 hover:opacity-100 ',
-        'w-full md:w-2/3',
-        'flex-col md:flex-row',
-        { right: i % 2 === 0, left: i % 2 === 1, mobile: isMobile }
-      )}>
+    <SwiperSlide key={`p-${i}`} className="flex items-center justify-center">
+      <div
+        className={cx(
+          'snap-center transition md:h-[40vh] md:min-h-[20rem] project rounded-md shadow-md flex hover:bg-base/60 bg-base/30 hover:opacity-100 ',
+          'w-full md:w-2/3',
+          'flex-col md:flex-row',
+          { right: i % 2 === 0, left: i % 2 === 1, mobile: isMobile }
+        )}
+      >
         <img
           onClick={(e) => onProjectClick(e, i)}
           src={`https://source.unsplash.com/featured/800x1600sig=${i}`}
@@ -86,7 +98,7 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
             'cursor-pointer md:w-1/4 object-cover object-center z-10',
             'md:min-w-[14rem]',
             'w-full h-80 md:h-auto',
-            { 'md:rounded-l-md': i % 2 === 0, 'md:rounded-r-md': i % 2 === 1 }
+            { 'md:rounded-r-md': i % 2 === 0, 'md:rounded-l-md': i % 2 === 1 }
           )}
         />
         <div
@@ -122,31 +134,44 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
 
   return (
     <div
-      className="projectTrack relative flex h-screen w-full grow flex-col items-center justify-start overflow-y-scroll py-16 md:gap-20 md:py-[10vh]"
-      ref={containerCallback}
+      className="projectTrack relative flex h-screen w-full grow flex-col items-center justify-start overflow-y-scroll py-16 md:py-[10vh]"
+      ref={containerRef}
       id="projects"
       {...props}
     >
       <h1 className="title relative left-0 flex w-full items-center gap-4">
         Projects
-        <div className="bg-foreground relative top-1/4 h-[2px] w-1/3" />
+        <div className="bg-foreground/20 relative top-1/4 h-[2px] w-1/3">
+          <div className="bg-foreground h-full w-full" ref={progressBarRef} />
+        </div>
       </h1>
       <Swiper
-        direction={"vertical"}
+        direction={'vertical'}
         mousewheel={true}
-        scrollbar={true}
         centeredSlides
         slidesPerView={1}
         nested={true}
         spaceBetween={30}
-        pagination={{
-          clickable: true,
+        scrollbar={{
+          hide: false
         }}
-
-        onSlideChangeTransitionEnd={(swiper) => { setCenteredElem(swiper.slides[swiper.activeIndex].firstChild as HTMLElement) }}
-        modules={[Pagination, FreeMode, Scrollbar, Mousewheel]} className='h-auto w-full'>
+        onAfterInit={(swiper) => {
+          setCenteredElem(swiper.slides[0].firstChild as HTMLElement);
+        }}
+        onSlideChange={(swiper) => {
+          const progress = (swiper.activeIndex + 1) / swiper.slides.length;
+          animateProgress(progress);
+        }}
+        onSlideChangeTransitionEnd={(swiper) => {
+          setCenteredElem(
+            swiper.slides[swiper.activeIndex].firstChild as HTMLElement
+          );
+        }}
+        modules={[Scrollbar, Pagination, FreeMode, Scrollbar, Mousewheel]}
+        className="h-auto w-full"
+      >
         {subProjects.map(renderProjects)}
       </Swiper>
-    </div >
+    </div>
   );
 }

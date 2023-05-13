@@ -8,10 +8,8 @@ import {
 } from '@vechaiui/react';
 import { HTMLProps, ReactNode, forwardRef, useState } from 'react';
 import useStore from '@src/store';
-import { Document, Page } from 'react-pdf/dist/esm/entry.vite';
-import { debounce } from 'lodash';
 import { SanityImageSource } from '@sanity/image-url/lib/types/types';
-import { pageRef, isWideListener, ArrowSVG } from '@src/etc/Helpers';
+import { isWideListener, ArrowSVG } from '@src/etc/Helpers';
 import { useForm } from 'react-hook-form';
 import { Resume } from '@src/store/types';
 
@@ -24,8 +22,6 @@ type FormInputProps = {
 
 export default function Contact(props: HTMLProps<HTMLDivElement>) {
   const { imageBuilder, contact, resume } = useStore();
-  const ref = pageRef().containerCallback;
-  const [scale, setScale] = useState(1.0);
   const notification = useNotification();
 
   const {
@@ -95,15 +91,17 @@ export default function Contact(props: HTMLProps<HTMLDivElement>) {
     imageBuilder?.image(imageRec).url() ?? '';
 
   const submitContact = async (data: RequestInit | undefined) => {
-    fetch(
-      'https://us-central1-portfolio-282821.cloudfunctions.net/sendContactMail',
-      data
-    )
+    console.log(data);
+    fetch('/sendContactMail', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    })
       .then((res: Response) => {
         console.log(res);
         notification({ title: 'Message sent!', status: 'success' });
       })
       .catch((e) => {
+        console.log(e);
         notification({
           title: 'Oh no, somethings wrong and you should tell me around it. o:',
           status: 'warning'
@@ -129,17 +127,21 @@ export default function Contact(props: HTMLProps<HTMLDivElement>) {
   );
 
   const ResumePreview = (props: { resume: Resume }) => {
-    return <div className="h-full w-full">
-      <embed src={props.resume.url} className="h-[50vh] min-h-[300px] w-full" />
-    </div>
-  }
+    return (
+      <div className="h-full w-full">
+        <embed
+          src={props.resume.url}
+          className="h-[50vh] min-h-[300px] w-full"
+        />
+      </div>
+    );
+  };
 
   return (
     <div
       id={'contact'}
       className="flex h-screen items-start justify-center py-16 md:items-center md:py-[10vh]"
       {...props}
-      ref={ref}
     >
       <div className="bg-base/10 flex h-auto w-full flex-col  gap-2 xl:px-4">
         <h1 className="title relative left-0 flex w-full items-center gap-4">

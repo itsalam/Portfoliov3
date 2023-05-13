@@ -106,7 +106,6 @@ export const animateProject = (index: number): AnimeTimelineInstance => {
 };
 
 export const animateProjectReverse = (index: number) => {
-  console.log(index);
   const targets = `#projects .swiper-slide:nth-of-type(${index + 1}) .project`;
   anime
     .timeline({

@@ -13,8 +13,7 @@ import Background from './components/Background';
 
 function App() {
   const { vechaiTheme } = useStore.getState();
-  const { isLoading, activeTheme, darkMode, setDarkMode } =
-    useStore();
+  const { isLoading, activeTheme, darkMode, setDarkMode } = useStore();
 
   const colorSchemeId = `${activeTheme}${darkMode ? 'Dark' : 'Light'}`;
 

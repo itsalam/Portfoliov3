@@ -1,4 +1,11 @@
-import { HTMLProps, ReactElement, ReactNode, isValidElement } from 'react';
+import {
+  HTMLProps,
+  ReactElement,
+  ReactNode,
+  isValidElement,
+  useEffect,
+  useRef
+} from 'react';
 import { cx } from '@vechaiui/react';
 import Menu from './Menu';
 import {
@@ -6,17 +13,34 @@ import {
   isMobileListener,
   updateScrollProgress
 } from '@src/etc/Helpers';
-import "swiper/css";
-import "swiper/css/pagination";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { FreeMode, HashNavigation, Mousewheel, Pagination, Scrollbar } from "swiper";
+import 'swiper/css';
+import 'swiper/css/pagination';
+import { Swiper, SwiperRef, SwiperSlide } from 'swiper/react';
+import {
+  FreeMode,
+  HashNavigation,
+  Keyboard,
+  Mousewheel,
+  Pagination,
+  Scrollbar
+} from 'swiper';
 import React from 'react';
-
+import useStore from '@src/store';
 
 function Content(props: HTMLProps<HTMLDivElement> & { children?: ReactNode }) {
   const isWide = isWideListener();
   const isMobile = isMobileListener();
   const { containerCallback } = updateScrollProgress();
+
+  const { activePage, pages, setProgress } = useStore.getState();
+
+  const swiperRef = useRef<SwiperRef | null>(null);
+
+  useEffect(() => {
+    console.log(activePage);
+    swiperRef.current?.swiper.slideTo(activePage, 750);
+    setProgress(activePage / (pages.length - 1));
+  }, [activePage]);
 
   return (
     <div
@@ -32,18 +56,31 @@ function Content(props: HTMLProps<HTMLDivElement> & { children?: ReactNode }) {
       >
         {(isWide || isMobile) && <Menu />}
         <Swiper
-          direction={"vertical"}
+          onSwiper={(swiper) => (swiperRef.current = { swiper })}
+          direction={'vertical'}
           slidesPerView={1}
           scrollbar={true}
           centeredSlides={true}
-          touchStartPreventDefault={false}
-          pagination={{
-            clickable: true,
+          keyboard={{
+            enabled: true
           }}
-          modules={[Pagination, FreeMode, Scrollbar, Mousewheel, HashNavigation]} className="flex w-full flex-col gap-[20vh] px-4 ">
-          {props.children && React.Children.map(props.children,
-            (child: ReactElement) => isValidElement(child) ? <SwiperSlide>{child}</SwiperSlide> : null
-          )}
+          touchStartPreventDefault={false}
+          onSlideChangeTransitionEnd={(swiper) => {
+            useStore.setState({ activePage: swiper.activeIndex });
+          }}
+          modules={[
+            Pagination,
+            Keyboard,
+            Scrollbar,
+            Mousewheel,
+            HashNavigation
+          ]}
+          className="flex w-full flex-col gap-[20vh] px-4 "
+        >
+          {props.children &&
+            React.Children.map(props.children, (child) =>
+              isValidElement(child) ? <SwiperSlide>{child}</SwiperSlide> : null
+            )}
         </Swiper>
       </div>
     </div>

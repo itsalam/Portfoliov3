@@ -13,10 +13,11 @@ module.exports = {
       },
 
       colors: {
-        'theme-green': '#739E89',
-        'theme-highlight': '#82E1B3',
-        'theme-mute': '#CCE1C7',
-        'theme-tan': '#E2DCC8'
+        foreground:
+          'rgba(var(--vc-colors-text-foreground), var(--tw-text-opacity))',
+        muted: 'rgba(var(--vc-colors-text-muted), var(--tw-text-opacity))',
+        background: 'rgba(var(--vc-colors-bg-base), var(--tw-bg-opacity))',
+        fill: 'rgba(var(--vc-colors-bg-fill), var(--tw-bg-opacity))'
       }
     }
   },

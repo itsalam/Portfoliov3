@@ -7,7 +7,7 @@ const { setProgress, pages, setActivePage } = useStore.getState();
 export const getScrollProgress = (containerElem?: Element): number => {
   return containerElem
     ? -containerElem.getBoundingClientRect().top /
-    (containerElem.clientHeight - window.innerHeight)
+        (containerElem.clientHeight - window.innerHeight)
     : -1;
 };
 
@@ -26,41 +26,13 @@ export const RGBtoHex = (vals: string[]) => {
   return hex;
 };
 
-const debounceSetActivePage = debounce(
-  (entries: IntersectionObserverEntry[]) => {
-    const { activePage } = useStore.getState();
-    entries = entries.filter((e) => e.isIntersecting);
-    if (entries.length) {
-      const focusedEntry = entries.reduce((prev, curr) =>
-        prev.intersectionRatio > curr.intersectionRatio ? prev : curr
-      );
-      if (focusedEntry) {
-        const index = pages.findIndex(
-          (page) => page.toLocaleLowerCase() === focusedEntry.target.id
-        );
-        if (index !== activePage) {
-          setActivePage(index);
-        }
-      }
+const debounceSetProgress = (containerElem?: Element) =>
+  debounce(() => {
+    const scrollProgress: number = getScrollProgress(containerElem);
+    if (scrollProgress < 1 && scrollProgress > 0) {
+      setProgress(scrollProgress);
     }
-  },
-  200,
-  { maxWait: 500 }
-);
-
-const observer = new IntersectionObserver(
-  (entries) => {
-    debounceSetActivePage(entries);
-  },
-  { threshold: 0.25 }
-);
-
-const debounceSetProgress = (containerElem?: Element) => debounce(() => {
-  const scrollProgress: number = getScrollProgress(containerElem);
-  if (scrollProgress < 1 && scrollProgress > 0) {
-    setProgress(scrollProgress);
-  }
-})
+  });
 
 export const updateScrollProgress = () => {
   const containerRef = useRef<Element>();
@@ -71,22 +43,6 @@ export const updateScrollProgress = () => {
       containerRef.current = node;
       if (containerRef.current) {
         window.addEventListener('scroll', onScroll);
-      }
-    },
-    []
-  );
-
-  return { containerRef, containerCallback };
-};
-
-export const pageRef = () => {
-  const containerRef = useRef<Element>();
-
-  const containerCallback = useCallback<React.RefCallback<Element>>(
-    (node: Element) => {
-      containerRef.current = node;
-      if (containerRef.current) {
-        observer.observe(containerRef.current);
       }
     },
     []
@@ -146,7 +102,6 @@ export function useScreenSize() {
     function handleResize() {
       setWindowSize(getSize());
     }
-    console.log(getSize());
     setWindowSize(getSize());
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);

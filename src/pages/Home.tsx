@@ -2,7 +2,6 @@ import { HTMLProps, useEffect } from 'react';
 import anime from 'animejs';
 import { cx } from '@vechaiui/react';
 import useStore from '../store';
-import { pageRef } from '@src/etc/Helpers';
 
 const SPIN_DURATION = 2000;
 const LOOP_DELAY = 3500;
@@ -20,67 +19,6 @@ const translateY = (offset: number) => ({
   duration: SPIN_DURATION
 });
 
-const titleLoop = () =>
-  anime
-    .timeline({
-      loop: true,
-      delay: SPIN_DURATION
-    })
-    .add({
-      targets: `#home .titleContent>.homeTitle`,
-      keyframes: [translateY(0), translateY(1), translateY(2)],
-      delay: LOOP_DELAY,
-      easing: 'easeOutExpo'
-    })
-    .add(
-      {
-        targets: `#home .aTitle`,
-        keyframes: [translateY(2), { ...translateY(0), delay: SPIN_DURATION }],
-        delay: LOOP_DELAY,
-        easing: 'easeOutExpo'
-      },
-      0
-    );
-
-const revealHome = () =>
-  anime
-    .timeline({
-      begin(anim) {
-        addEventListener('mousedown', () => anim.seek(anim.duration), {
-          once: true
-        });
-      },
-      complete: () =>
-        window.location.hash && window.location.assign(window.location.hash)
-    })
-    .add(
-      {
-        targets: `#home .revealer>*:first-child, #home .revealer .introText`,
-        translateY: ['-25%', '0%'],
-        opacity: [0, 1],
-        easing: 'easeOutExpo',
-        delay: anime.stagger(600, { easing: 'easeInQuad' })
-      },
-      0
-    )
-    .add({
-      targets: `#home .techs`,
-      opacity: [0, 1],
-      delay: anime.stagger(75, { easing: 'easeInQuad' }),
-      complete: () => {
-        titleLoop();
-      }
-    })
-    .add(
-      {
-        targets: '.intro-revealer',
-        opacity: [0, 1],
-        duration: 500,
-        easing: 'linear'
-      },
-      2500
-    );
-
 const GREETING = 'Hey there, I’m';
 const TITLES = [
   'Vincent\nLam',
@@ -91,8 +29,80 @@ const BODY =
   'I’m a developer based in Vancouver with a knack for developing web applications for internal company use. I like building things that are both elegant and robust with the most modern tools available.';
 
 export default function Home(props: HTMLProps<HTMLDivElement>) {
+  const { pages, setActivePage } = useStore.getState();
   const { imageBuilder, technologies } = useStore.getState();
-  const { containerCallback } = pageRef();
+
+  const titleLoop = () =>
+    anime
+      .timeline({
+        loop: true,
+        delay: SPIN_DURATION
+      })
+      .add({
+        targets: `#home .titleContent>.homeTitle`,
+        keyframes: [translateY(0), translateY(1), translateY(2)],
+        delay: LOOP_DELAY,
+        easing: 'easeOutExpo'
+      })
+      .add(
+        {
+          targets: `#home .aTitle`,
+          keyframes: [
+            translateY(2),
+            { ...translateY(0), delay: SPIN_DURATION }
+          ],
+          delay: LOOP_DELAY,
+          easing: 'easeOutExpo'
+        },
+        0
+      );
+
+  const revealHome = () =>
+    anime
+      .timeline({
+        begin(anim) {
+          addEventListener('mousedown', () => anim.seek(anim.duration), {
+            once: true
+          });
+        },
+        complete: () => {
+          const activePage = pages.findIndex(
+            (page) =>
+              page.localeCompare(window.location.hash.substring(1), undefined, {
+                sensitivity: 'base'
+              }) === 0
+          );
+
+          setActivePage(Math.max(activePage, 0));
+        }
+      })
+      .add(
+        {
+          targets: `#home .revealer>*:first-child, #home .revealer .introText`,
+          translateY: ['-25%', '0%'],
+          opacity: [0, 1],
+          easing: 'easeOutExpo',
+          delay: anime.stagger(850, { easing: 'easeInQuad' })
+        },
+        0
+      )
+      .add({
+        targets: `#home .techs`,
+        opacity: [0, 1],
+        delay: anime.stagger(75, { easing: 'easeInQuad' }),
+        complete: () => {
+          titleLoop();
+        }
+      })
+      .add(
+        {
+          targets: '.intro-revealer',
+          opacity: [0, 1],
+          duration: 500,
+          easing: 'linear'
+        },
+        3500
+      );
 
   useEffect(() => {
     revealHome();
@@ -103,7 +113,6 @@ export default function Home(props: HTMLProps<HTMLDivElement>) {
       className={
         'm-auto flex h-screen w-full snap-center flex-col justify-center'
       }
-      ref={containerCallback}
       id="home"
       {...props}
     >

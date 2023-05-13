@@ -11,10 +11,10 @@ const SmileyDark: ColorScheme & BgColorScheme = {
     },
     text: {
       foreground: colors.fuchsia['300'],
-      muted: colors.indigo['200']
+      muted: colors.yellow['100']
     },
     primary: colors.indigo,
-    neutral: colors.indigo,
+    neutral: colors.yellow,
     hightlight1: '#ffef1f',
     hightlight2: '#ff10f0'
   }
@@ -29,8 +29,8 @@ const SmileyLight: ColorScheme & BgColorScheme = {
       fill: colors.warmGray['400']
     },
     text: {
-      foreground: colors.pink['800'],
-      muted: colors.fuchsia['800']
+      foreground: colors.fuchsia['800'],
+      muted: colors.yellow['800']
     },
     primary: colors.fuchsia,
     neutral: colors.fuchsia,

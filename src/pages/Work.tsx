@@ -2,10 +2,9 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 import useStore from '@src/store';
 import { Work } from '@src/store/types';
-import { HTMLProps, useState } from 'react';
+import { HTMLProps, useRef, useState } from 'react';
 import { Tab } from '@headlessui/react';
 import { cx } from '@vechaiui/react';
-import { pageRef } from '@src/etc/Helpers';
 
 const convertDate = (date: string) => {
   return new Date(date).toLocaleDateString('default', {
@@ -16,8 +15,6 @@ const convertDate = (date: string) => {
 
 export default function Work(props: HTMLProps<HTMLDivElement>) {
   const [activeWork, setActiveWork] = useState<number>(0);
-
-  const { containerCallback } = pageRef();
 
   const { works } = useStore();
 
@@ -84,7 +81,6 @@ export default function Work(props: HTMLProps<HTMLDivElement>) {
       onChange={handleTabChange}
       id="work"
       {...props}
-      ref={containerCallback}
     >
       <h1 className="title relative left-0 flex w-full items-center gap-4">
         Work

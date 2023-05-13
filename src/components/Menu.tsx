@@ -11,6 +11,7 @@ import {
 } from 'react';
 import React from 'react';
 import { isWideListener } from '@src/etc/Helpers';
+import { useSwiper } from 'swiper/react';
 
 interface SelectorProps {
   radius: number;
@@ -68,6 +69,14 @@ function Selector(props: SelectorProps & SVGProps<SVGSVGElement>) {
   );
 }
 
+const Divider = () => (
+  <div
+    className={
+      'bg-foreground invisible m-auto h-4 w-[2px] brightness-75 xl:visible'
+    }
+  />
+);
+
 const RADIUS = 12;
 const STROKE = 3;
 
@@ -81,19 +90,7 @@ function Menu({ vertical = isWideListener(), isToolBar = false }) {
   const menuItemRef = pages.map(() => useRef<HTMLAnchorElement>(null));
 
   const [currCoords, setCurrCoords] = useState<number>();
-
-  const MenuSelector = useCallback(
-    () => (
-      <Selector
-        id="selector"
-        strokeWidth={STROKE}
-        radius={RADIUS}
-        className={cx(`absolute brightness-125 translate-y-4 xl:translate-y-3`)}
-        style={currCoords !== undefined ? { [START]: `${currCoords}px` } : {}}
-      />
-    ),
-    []
-  );
+  const [firstLoad, setFirstLoad] = useState(true);
 
   const getMenuCoord = (index: number) => {
     const currMenuItem = menuItemRef[index].current;
@@ -112,11 +109,11 @@ function Menu({ vertical = isWideListener(), isToolBar = false }) {
       document.querySelector('#selector')?.animate(
         vertical
           ? {
-            top: `${moveVal}px`
-          }
+              top: `${moveVal}px`
+            }
           : {
-            left: `${moveVal}px`
-          },
+              left: `${moveVal}px`
+            },
         { duration: 250, fill: 'forwards', easing: 'ease-out' }
       );
     },
@@ -127,10 +124,12 @@ function Menu({ vertical = isWideListener(), isToolBar = false }) {
   useEffect(() => {
     moveSelector(activePage);
     const pageRef = menuItemRef[activePage];
-    if (activePage && pageRef.current) {
+    if (pageRef.current && !firstLoad) {
       if (window.location.hash !== pageRef.current.href.split('#')[1]) {
         history.pushState(null, '', pageRef.current.href);
       }
+    } else {
+      setFirstLoad(false);
     }
   }, [activePage]);
 
@@ -139,23 +138,27 @@ function Menu({ vertical = isWideListener(), isToolBar = false }) {
     setCurrCoords(getMenuCoord(activePage));
   }, [vertical]);
 
-  const Divider = () => (
-    <div
-      className={
-        'bg-foreground invisible m-auto h-4 w-[2px] brightness-75 xl:visible'
-      }
-    />
-  );
-
-  const onMouseClick = (
+  const onItemClick = (
     index: number,
     event: React.MouseEvent<HTMLAnchorElement, MouseEvent>
   ) => {
     event.preventDefault();
     setActivePage(index);
     setCurrCoords(getMenuCoord(index));
-    window.location.assign(event.currentTarget.href);
   };
+
+  const MenuSelector = useCallback(
+    () => (
+      <Selector
+        id="selector"
+        strokeWidth={STROKE}
+        radius={RADIUS}
+        className={cx(`absolute brightness-125 translate-y-4 xl:translate-y-3`)}
+        style={currCoords !== undefined ? { [START]: `${currCoords}px` } : {}}
+      />
+    ),
+    []
+  );
 
   const MenuButton = (props: { index: number; text: string }) => {
     const { index, text } = props;
@@ -164,7 +167,7 @@ function Menu({ vertical = isWideListener(), isToolBar = false }) {
       <a
         type="button"
         ref={menuItemRef[index]}
-        onMouseDown={(event) => onMouseClick(index, event)}
+        onMouseDown={(event) => onItemClick(index, event)}
         onMouseEnter={() => moveSelector(index)}
         href={`#${text.toLocaleLowerCase()}`}
         className={cx(

@@ -16,13 +16,11 @@ export const sendContactMail = functions.https.onRequest(
     res.set('Access-Control-Allow-Methods', 'GET, POST');
     res.set('Access-Control-Allow-Headers', 'Content-Type');
     res.set('Access-Control-Max-Age', '3600');
-    console.log('req body' + req);
+    console.log('req body' + req.body);
 
-    const data = {
-      name: req.body.name,
-      email: req.body.email,
-      message: req.body.message
-    };
+    const reqBody = JSON.parse(req.body);
+
+    console.log(reqBody);
 
     admin
       .firestore()
@@ -30,13 +28,9 @@ export const sendContactMail = functions.https.onRequest(
       .add({
         to: 'vincentthanhlam@gmail.com',
         message: {
-          subject: 'New message from ' + data.name + ' on portfolio site.',
-          html: `From our portfolio site, ${data.name} says: ${data.message} <br> You can contact them at: ${data.email}`
+          subject: 'New message from ' + reqBody.name + ' on portfolio site.',
+          html: `From our portfolio site, ${reqBody.name} says: ${reqBody.message} <br> You can contact them at: ${reqBody.email}`
         }
-      })
-      .catch((error) => {
-        console.log(error);
-        res.status(400).send(`An Error occured: ${error.message}`);
       })
       .then(() => {
         res.status(200).send(`Messaged recieved`);

@@ -62,29 +62,6 @@ body {
     @apply md:font-light 2xl:text-2xl md:text-lg text-base leading-tight;
   }
 
-  .bg-foreground {
-    --tw-text-opacity: 1;
-    background-color: rgba(
-      var(--vc-colors-text-foreground),
-      var(--tw-text-opacity)
-    );
-  }
-
-  .bg-muted {
-    --tw-text-opacity: 1;
-    background-color: rgba(var(--vc-colors-text-muted), var(--tw-text-opacity));
-  }
-
-  .text-background {
-    --tw-text-opacity: 1;
-    color: rgba(var(--vc-colors-bg-base), var(--tw-text-opacity));
-  }
-
-  .text-fill {
-    --tw-text-opacity: 1;
-    color: rgba(var(--vc-colors-bg-fill), var(--tw-text-opacity));
-  }
-
   .border-foreground {
     border-color: rgba(
       var(--vc-colors-text-foreground),

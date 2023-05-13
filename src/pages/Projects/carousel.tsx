@@ -81,7 +81,6 @@ export default function Carousel(
 
   useEffect(() => {
     if (visProp) {
-      console.log('visible');
       setVisible(true);
       (carouselRef.current as HTMLDivElement).animate(
         { opacity: [0, 1] },
