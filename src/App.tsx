@@ -1,4 +1,4 @@
-import { Suspense, useEffect } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 import Toolbar from './components/Toolbar';
 import Content from './components/Content';
 import { VechaiProvider } from '@vechaiui/react';

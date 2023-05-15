@@ -26,26 +26,53 @@ import {
 } from 'swiper';
 import React from 'react';
 import useStore from '@src/store';
+import { useControls } from 'leva';
 
 function Content(props: HTMLProps<HTMLDivElement> & { children?: ReactNode }) {
   const isWide = isWideListener();
   const isMobile = isMobileListener();
-  const { containerCallback } = updateScrollProgress();
+
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const { activePage, pages, setProgress } = useStore.getState();
+  const { hideForeground } = useStore();
 
   const swiperRef = useRef<SwiperRef | null>(null);
 
   useEffect(() => {
-    console.log(activePage);
     swiperRef.current?.swiper.slideTo(activePage, 750);
     setProgress(activePage / (pages.length - 1));
   }, [activePage]);
 
+  useEffect(() => {
+    if (contentRef.current) {
+      if (!hideForeground) contentRef.current.style.setProperty('display', 'flex');
+      const animate = contentRef.current.animate({ opacity: hideForeground ? 0 : 1 }, { duration: 350, fill: "forwards" });
+      if (hideForeground) {
+        animate.onfinish = () => {
+          contentRef.current?.style.setProperty('display', hideForeground ? 'none' : 'flex');
+        }
+      }
+
+    }
+  }, [hideForeground]);
+
+  useControls({
+    hideForeground: {
+      value: false,
+      label: 'Hide Content',
+      // onChange: (value: boolean) => {
+      //   useStore.setState({ hideForeground: value })
+      // }
+    }
+  })
+
   return (
     <div
       className="z-10 flex items-start justify-center"
-      ref={containerCallback}
+      ref={contentRef}
+
+      style={{ display: "none" }}
     >
       <div
         className={cx(

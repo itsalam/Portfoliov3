@@ -6,7 +6,7 @@ const DomainWarpLight: ColorScheme & BgColorScheme = {
   type: 'light',
   colors: {
     bg: {
-      base: colors.trueGray['300'],
+      base: colors.trueGray['400'],
       fill: colors.trueGray['500']
     },
     text: {

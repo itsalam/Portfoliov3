@@ -129,6 +129,5 @@ vec4 noise_func(vec3 p){
 }
 
 void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor) {
-    // color = noise_func(vec3(uv, 1.0));
     outputColor = noise_func(vec3(uv, 1.0));;
 }

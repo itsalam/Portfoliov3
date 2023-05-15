@@ -33,6 +33,9 @@ export type Project = {
   name: string;
   description: string;
   fullDescription: string;
+  githublink: string;
+  link: string;
+  thumbnails: any;
   [key: string]: unknown;
 };
 
@@ -42,6 +45,7 @@ export type Resume = {
     name: string;
   };
   url: string;
+  title: string;
 };
 
 export type CMSStore = {

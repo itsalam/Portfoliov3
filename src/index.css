@@ -59,7 +59,7 @@ body {
   .subText {
     font-family: Source Sans Pro;
     white-space: break-spaces;
-    @apply md:font-light 2xl:text-2xl md:text-lg text-base leading-tight;
+    @apply md:font-light 2xl:text-lg md:text-lg text-base leading-tight;
   }
 
   .border-foreground {
@@ -73,7 +73,12 @@ body {
     fill: var(--vc-colors-text-foreground);
   }
 
-  .revealer {
+  .revealer,
+  .link-revealer {
+    @apply relative w-full overflow-x-clip overflow-y-hidden;
+  }
+
+  .greeting-revealer {
     @apply relative w-full overflow-x-clip overflow-y-hidden;
   }
 

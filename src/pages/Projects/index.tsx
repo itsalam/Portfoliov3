@@ -1,9 +1,10 @@
 import { AnimeTimelineInstance } from 'animejs';
 import { cx } from '@vechaiui/react';
-import React, { HTMLProps, useCallback, useMemo, useRef } from 'react';
+import React, { HTMLProps, MouseEventHandler, useCallback, useMemo, useRef } from 'react';
 import { useEffect, useState } from 'react';
 import useStore from '@src/store';
-import { debounce } from 'lodash';
+import Link from "@src/assets/link.svg"
+import Github from "@src/assets/github.svg"
 import { animateProject, animateProjectReverse } from './animations';
 import { Project } from '@src/store/types';
 import Carousel from './carousel';
@@ -28,13 +29,16 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
   const isMobile = isMobileListener();
   const isWide = isWideListener();
 
-  const { projects } = useStore();
-  const subProjects = new Array(5).fill(projects ? projects[0] : undefined);
+  const { projects, imageBuilder } = useStore.getState();
 
   useEffect(() => {
-    console.log(projects);
-    projects && animateProgress(1 / subProjects.length);
+    projects && animateProgress(1 / projects.length);
   }, []);
+
+  useEffect(() => {
+    const firstProj = document.querySelector('.project');
+    firstProj && setCenteredElem(firstProj);
+  }, [projects]);
 
   useEffect(() => {
     setFocusedProj(undefined);
@@ -61,11 +65,6 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
     []
   );
 
-  const positionCarousel = useCallback(() => {
-    const rect = containerRef.current?.getBoundingClientRect();
-    return rect ? { left: `${(rect.right + window.innerWidth) / 2}px` } : {};
-  }, [containerRef, width]);
-
   const onProjectClick = (
     e: React.MouseEvent<HTMLDivElement, MouseEvent>,
     i: number
@@ -81,11 +80,27 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
     setFocusedProj(i === focusedProj ? undefined : i);
   };
 
+  const onDescriptionClick: MouseEventHandler<HTMLDivElement> = (e) => {
+    e.stopPropagation()
+  }
+
+  const LinkHref = (props: { dataSrc: string, href: string }) => {
+    const onAnchorClick = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+      e.stopPropagation(); //
+    }
+
+    return <a className="hover:bg-foreground/10 h-7 w-7 rounded-sm" href={props.href} onClick={onAnchorClick}>
+      <svg fill="currentColor"
+        data-src={props.dataSrc}>
+      </svg>
+    </a>
+  }
+
   const renderProjects = (project: Project, i: number) => (
     <SwiperSlide key={`p-${i}`} className="flex items-center justify-center">
       <div
         className={cx(
-          'snap-center transition md:h-[40vh] md:min-h-[20rem] project rounded-md shadow-md flex hover:bg-base/60 bg-base/30 hover:opacity-100 ',
+          'snap-center transition md:h-[40vh] md:min-h-[20rem] project rounded-md shadow-md flex hover:bg-base/80 bg-base/30 hover:opacity-100 ',
           'w-full md:w-2/3',
           'flex-col md:flex-row',
           { right: i % 2 === 0, left: i % 2 === 1, mobile: isMobile }
@@ -93,7 +108,7 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
       >
         <img
           onClick={(e) => onProjectClick(e, i)}
-          src={`https://source.unsplash.com/featured/800x1600sig=${i}`}
+          src={imageBuilder?.image(project.thumbnails[0]).url()}
           className={cx(
             'cursor-pointer md:w-1/4 object-cover object-center z-10',
             'md:min-w-[14rem]',
@@ -111,25 +126,27 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
             }
           )}
         >
-          <div className="revealer shrink-0 ">
-            <h1 className="subTitle">{project.name}</h1>
+          <div className="revealer shrink-0">
+            <h1 className="subTitle whitespace-no-wrap">{project.name}</h1>
+            <div className='revealer'>
+              <div className={cx('links flex', { "flex-row-reverse": i % 2 === 0 })}>
+                <LinkHref dataSrc={Link} href={project.link} />
+                <LinkHref dataSrc={Github} href={project.githublink} />
+              </div>
+            </div>
           </div>
           <div className="revealer shrink-0">
             <p className="subText description">{project.description}</p>
           </div>
           <div className="bg-foreground my-3 h-[1px] w-full" />
           <div className="revealer fullDescription shrink-1 h-0 overflow-y-scroll opacity-0">
-            <div className="subText absolute ">
+            <div className="subText absolute" onClick={onDescriptionClick}>
               <p>{project.fullDescription}</p>
             </div>
           </div>
         </div>
       </div>
-      <Carousel
-        style={positionCarousel()}
-        visible={isWide && i === focusedProj}
-      />
-    </SwiperSlide>
+    </SwiperSlide >
   );
 
   return (
@@ -155,9 +172,7 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
         scrollbar={{
           hide: false
         }}
-        onAfterInit={(swiper) => {
-          setCenteredElem(swiper.slides[0].firstChild as HTMLElement);
-        }}
+
         onSlideChange={(swiper) => {
           const progress = (swiper.activeIndex + 1) / swiper.slides.length;
           animateProgress(progress);
@@ -170,7 +185,7 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
         modules={[Scrollbar, Pagination, FreeMode, Scrollbar, Mousewheel]}
         className="h-auto w-full"
       >
-        {subProjects.map(renderProjects)}
+        {projects?.map(renderProjects)}
       </Swiper>
     </div>
   );

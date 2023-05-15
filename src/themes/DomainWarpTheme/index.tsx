@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, useEffect } from 'react';
 import { useMemo, useRef } from 'react';
 import fragmentShader from './fragment.glsl';
 import { Vector2 } from 'three';
@@ -10,11 +10,20 @@ import { Html } from '@react-three/drei/web/Html';
 import useStore from '@src/store';
 
 export default function Background() {
+  const { darkMode, hideForeground } = useStore();
+
   const effectRef = useRef<CustomEffect>(null);
+  const filterRef = useRef<HTMLDivElement>(null);
   const time = useRef<number>(0);
   const { size } = useThree();
 
-  const { darkMode } = useStore();
+  useEffect(() => {
+    if (filterRef.current) {
+      const opacity = darkMode ? hideForeground ? .3 : 0.95 : 0;
+      filterRef.current.animate({ opacity }, { duration: 350, fill: "forwards" });
+    }
+
+  }, [hideForeground, darkMode]);
 
   const configs = useControls(
     'Theme Configs',
@@ -46,9 +55,7 @@ export default function Background() {
 
   return (
     <group>
-      {darkMode && (
-        <Html center className="bg-base h-screen w-screen opacity-[.95]"></Html>
-      )}
+      <Html center className="bg-base h-screen w-screen opacity-[.95]" ref={filterRef} ></Html>
       <EffectComposer>
         <DomainWarp ref={effectRef} />
       </EffectComposer>

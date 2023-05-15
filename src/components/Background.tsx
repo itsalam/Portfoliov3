@@ -2,6 +2,7 @@ import { Html, OrbitControls } from '@react-three/drei';
 import { Canvas, useThree } from '@react-three/fiber';
 import { DefaultLoader } from '@src/etc/Helpers';
 import useStore from '@src/store';
+import { useControls } from 'leva';
 import { Suspense, useCallback } from 'react';
 
 export default function Background() {
@@ -25,15 +26,25 @@ export default function Background() {
     );
   }, [activeTheme]);
 
+  useControls({
+    hideForeground: {
+      value: false,
+      label: 'Hide Content',
+      onChange: (value: boolean) => {
+        useStore.setState({ hideForeground: value })
+      }
+    }
+  })
+
   return (
     <div
-      className="canvas-holder bg-base fixed z-[-1] h-screen w-screen"
+      className="canvas-holder bg-base fixed h-screen w-screen"
       style={{ opacity: bgOpacity }}
     >
       <Canvas
         id="canvas"
         shadows="percentage"
-        className="intro-revealer z-[-2]"
+        className="intro-revealer"
         style={{ opacity: 0 }}
       >
         <OrbitControls />

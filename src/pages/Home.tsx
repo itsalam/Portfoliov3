@@ -78,18 +78,28 @@ export default function Home(props: HTMLProps<HTMLDivElement>) {
       })
       .add(
         {
-          targets: `#home .revealer>*:first-child, #home .revealer .introText`,
+          targets: `#home .introText`,
           translateY: ['-25%', '0%'],
           opacity: [0, 1],
           easing: 'easeOutExpo',
-          delay: anime.stagger(850, { easing: 'easeInQuad' })
+          delay: (_, i, l) => [500, 800, 1500, 2050][i % l]
         },
         0
+      )
+      .add(
+        {
+          targets: `#home .revealer>*:first-child`,
+          translateY: ['-25%', '0%'],
+          opacity: [0, 1],
+          easing: 'easeOutExpo',
+          delay: anime.stagger(1250)
+        },
+        2500
       )
       .add({
         targets: `#home .techs`,
         opacity: [0, 1],
-        delay: anime.stagger(75, { easing: 'easeInQuad' }),
+        delay: () => anime.random(150, 350),
         complete: () => {
           titleLoop();
         }
@@ -108,6 +118,8 @@ export default function Home(props: HTMLProps<HTMLDivElement>) {
     revealHome();
   }, []);
 
+
+
   return (
     <div
       className={
@@ -116,7 +128,7 @@ export default function Home(props: HTMLProps<HTMLDivElement>) {
       id="home"
       {...props}
     >
-      <div className={cx('revealer mainText mix-blend-difference')}>
+      <div className={cx('greeting-revealer mainText mix-blend-difference')}>
         <span className={'revealerSpan'}>
           {GREETING.split(' ').map((text) => (
             <span className={'introText'}>{text} </span>
@@ -176,6 +188,6 @@ export default function Home(props: HTMLProps<HTMLDivElement>) {
             })}
         </div>
       </div>
-    </div>
+    </div >
   );
 }

@@ -4,7 +4,8 @@ import {
   FormLabel,
   Input,
   Textarea,
-  Button
+  Button,
+  cx
 } from '@vechaiui/react';
 import { HTMLProps, ReactNode, forwardRef, useState } from 'react';
 import useStore from '@src/store';
@@ -12,6 +13,7 @@ import { SanityImageSource } from '@sanity/image-url/lib/types/types';
 import { isWideListener, ArrowSVG } from '@src/etc/Helpers';
 import { useForm } from 'react-hook-form';
 import { Resume } from '@src/store/types';
+import { Title } from '@src/components/Commons';
 
 type FormInputProps = {
   id: string;
@@ -34,7 +36,7 @@ export default function Contact(props: HTMLProps<HTMLDivElement>) {
 
   const Label = (props: { children: ReactNode }) => {
     return (
-      <FormLabel className="mainText py-1.5 capitalize">
+      <FormLabel className="mainText capitalize">
         {props.children}
       </FormLabel>
     );
@@ -109,6 +111,25 @@ export default function Contact(props: HTMLProps<HTMLDivElement>) {
       });
   };
 
+
+
+  const DownloadButton = (props: HTMLProps<HTMLButtonElement> & { resume: Resume }) => <a
+    href={props.resume.url}
+    download={props.resume.title}
+    className={cx(
+      "bg-primary-400/10 hover:bg-foreground group-hover:text-background group relative flex flex-col items-center justify-center overflow-hidden rounded px-4 py-3 font-semibold transition-all",
+      props.className)}>
+    <span className="bg-foreground absolute bottom-0 left-0 h-1 w-full transition-all duration-150 ease-in-out group-hover:h-full" />
+    <svg
+      className="icon group-hover:text-background absolute top-3 h-10 w-10"
+      data-src={svgUrl(props.resume.icon)}
+      {...{ fill: 'currentColor' }}
+    />
+    <span className="group-hover:text-background absolute bottom-3">
+      Resume
+    </span>
+  </a>
+
   const ContactInfo = (props: {
     info: { value: string };
     svgSrc: SanityImageSource;
@@ -131,102 +152,82 @@ export default function Contact(props: HTMLProps<HTMLDivElement>) {
       <div className="h-full w-full">
         <embed
           src={props.resume.url}
-          className="h-[50vh] min-h-[300px] w-full"
+          className="h-[65vh] min-h-[300px]  w-full xl:h-[50vh]"
         />
       </div>
     );
   };
 
-  return (
-    <div
-      id={'contact'}
-      className="flex h-screen items-start justify-center py-16 md:items-center md:py-[10vh]"
-      {...props}
-    >
-      <div className="bg-base/10 flex h-auto w-full flex-col  gap-2 xl:px-4">
-        <h1 className="title relative left-0 flex w-full items-center gap-4">
-          Contact
-          <div className="bg-foreground relative top-1/4 h-[2px] w-1/3" />
-        </h1>
+  const FormSubmitButton = () => <Button
+    type="submit"
+    className="bg-primary-400/20 text-foreground group relative mt-2 inline-flex w-56 overflow-hidden rounded py-3 pl-4 pr-12 font-semibold transition-all duration-150 ease-in-out hover:pl-10 hover:pr-6"
+  >
+    <span className="bg-foreground absolute bottom-0 left-0 h-1 w-full transition-all duration-150 ease-in-out group-hover:h-full"></span>
+    <span className="absolute right-0 pr-4 duration-200 ease-out group-hover:translate-x-12">
+      <ArrowSVG className="text-foreground h-5 w-5" />
+    </span>
+    <span className="absolute left-0 -translate-x-12 pl-2.5 duration-200 ease-out group-hover:translate-x-0">
+      <ArrowSVG className="text-background h-5 w-5" />
+    </span>
+    <span className="group-hover:text-background relative w-full text-left transition-colors duration-200 ease-in-out">
+      Send message
+    </span>
+  </Button>
 
-        <div className="flex h-full w-full flex-1 flex-col gap-2 xl:flex-row xl:gap-8 xl:px-8">
-          <form
-            className="flex flex-col gap-3 xl:w-3/5"
-            onSubmit={handleSubmit(submitContact)}
-          >
-            <h2 className="mainText">
-              Interested in working together? Just drop me a message here.
-            </h2>
-            <FormInput id="name" required invalid={Boolean(errors.name)} />
-            <FormInput id="email" required invalid={Boolean(errors.email)} />
-            <FormInput
-              id="message"
-              required
-              text
-              className="h-40"
-              invalid={Boolean(errors.message)}
-            />
-            <Button
-              type="submit"
-              className="bg-primary-400/20 text-foreground group relative inline-flex w-56 overflow-hidden rounded py-3 pl-4 pr-12 font-semibold transition-all duration-150 ease-in-out hover:pl-10 hover:pr-6"
-            >
-              <span className="bg-foreground absolute bottom-0 left-0 h-1 w-full transition-all duration-150 ease-in-out group-hover:h-full"></span>
-              <span className="absolute right-0 pr-4 duration-200 ease-out group-hover:translate-x-12">
-                <ArrowSVG className="text-foreground h-5 w-5" />
-              </span>
-              <span className="absolute left-0 -translate-x-12 pl-2.5 duration-200 ease-out group-hover:translate-x-0">
-                <ArrowSVG className="text-background h-5 w-5" />
-              </span>
-              <span className="group-hover:text-background relative w-full text-left transition-colors duration-200 ease-in-out">
-                Send message
-              </span>
-            </Button>
+  const ContactForm = () => <form
+    className="flex flex-col gap-1"
+    onSubmit={handleSubmit(submitContact)}
+  >
+    <h2 className="mainText">
+      Interested in working together? Just drop me a message here.
+    </h2>
+    <FormInput id="name" required invalid={Boolean(errors.name)} />
+    <FormInput id="email" required invalid={Boolean(errors.email)} />
+    <FormInput
+      id="message"
+      required
+      text
+      className="h-40"
+      invalid={Boolean(errors.message)}
+    />
+    <FormSubmitButton />
+  </form>
 
-            <div className="flex justify-start gap-2 pt-4 md:pt-0">
-              <div className="w-full flex-1">
-                <h4 className="mainText p-2 text-xs">
-                  Actually, its probably more convienient to just email me.
-                  ¯\_(ツ)_/¯
-                </h4>
-                {contact &&
-                  imageBuilder &&
-                  contact.map((info) => (
-                    <ContactInfo {...{ info, svgSrc: info.thumbnail }} />
-                  ))}
-              </div>
-              {!isWide && resume && (
-                <button className="bg-primary-400/10 hover:bg-foreground hover:text-background group relative flex w-1/4 flex-col items-center justify-center overflow-hidden rounded px-4 py-3 font-semibold transition-all">
-                  <span className="bg-foreground absolute bottom-0 left-0 h-1 w-full transition-all duration-150 ease-in-out group-hover:h-full" />
-                  <svg
-                    className="icon group-hover:text-background absolute top-8 h-10 w-10"
-                    data-src={svgUrl(resume.icon)}
-                    {...{ fill: 'currentColor' }}
-                  />
-                  <span className="group-hover:text-background absolute bottom-8">
-                    Resume
-                  </span>
-                </button>
-              )}
-            </div>
-          </form>
-          {isWide && resume && (
-            <div className="flex h-full flex-col items-center justify-center gap-4 self-center xl:w-2/5">
-              <ResumePreview resume={resume} />
-              <Button className="bg-primary-400/10 hover:bg-foreground group-hover:text-background group relative flex h-20 w-1/2 flex-col items-center justify-center overflow-hidden rounded px-4 py-3 font-semibold transition-all">
-                <span className="bg-foreground absolute bottom-0 left-0 h-1 w-full transition-all duration-150 ease-in-out group-hover:h-full" />
-                <svg
-                  className="icon group-hover:text-background absolute top-3 h-10 w-10"
-                  data-src={svgUrl(resume.icon)}
-                  {...{ fill: 'currentColor' }}
-                />
-                <span className="group-hover:text-background absolute bottom-3">
-                  Resume
-                </span>
-              </Button>
-            </div>
-          )}
-        </div>
-      </div>
+  const Socials = () => <div className="flex justify-start gap-1 sm:pt-4 md:pt-0">
+    <div className="pr-12">
+      <h4 className="mainText px-1 text-xs">
+        Actually, its probably more convienient to just email me.
+        ¯\_(ツ)_/¯
+      </h4>
+      {contact &&
+        imageBuilder &&
+        contact.map((info) => (
+          <ContactInfo {...{ info, svgSrc: info.thumbnail }} key={info.value} />
+        ))}
     </div>
-  );
+    {!isWide && resume && (
+      <DownloadButton resume={resume} className='h-24 w-1/4 self-center' />
+    )}
+  </div>
+
+  const ResumeSideColumn = (props: { resume: Resume }) => <div className="flex h-full flex-col items-center justify-center gap-4 self-center xl:w-2/5">
+    <ResumePreview resume={props.resume} />
+    <DownloadButton resume={props.resume} className='h-20 w-1/2' />
+  </div>
+
+  return <div
+    id={'contact'}
+    className="flex h-screen items-start justify-center py-16 md:items-center md:py-[10vh]"
+    {...props}
+  >
+    <div className="flex h-auto w-full gap-10 xl:px-4">
+
+      <div className="flex h-full w-full flex-1 flex-col gap-2">
+        <Title>Contact</Title>
+        <ContactForm />
+        <Socials />
+      </div>
+      {isWide && resume && <ResumeSideColumn resume={resume} />}
+    </div>
+  </div>
 }

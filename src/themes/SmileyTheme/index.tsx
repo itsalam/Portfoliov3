@@ -1,10 +1,8 @@
 import React, { useRef, useMemo, forwardRef, useEffect, useState } from 'react';
 import fragmentShader from './fragment.glsl';
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader';
-import { Mesh, Vector2, Shape, Group, Color, Camera } from 'three';
+import { Mesh, Vector2, Shape, Group, Color } from 'three';
 import {
-  RootState,
-  Size,
   useFrame,
   useLoader,
   useThree
@@ -16,25 +14,35 @@ import {
   Scanline,
   Vignette
 } from '@react-three/postprocessing';
+import useStore from '@src/store';
 import Smiley from '@src/assets/smile1.svg';
 import { useControls } from 'leva';
 import { CustomEffect } from '../helper';
 import { Html, OrbitControls } from '@react-three/drei';
 
-export default function Background() {
-  const NUM_ICONS = 28;
-  const ROW_PER_ICON = 4;
 
+
+export default function Background() {
+  const NUM_ICONS = 32;
+  const ROW_PER_ICON = 4;
+  const OFFSET_FACTOR = 1.065;
+
+  const { hideForeground } = useStore();
+
+
+  const filterRef = useRef<HTMLDivElement>(null);
   const groupRef = useRef<Group>(null);
   const effectRef = useRef<CustomEffect>(null);
   const time = useRef<number>(0);
 
-  const { size } = useThree(({ size, camera }) => {
-    camera.position.set(7, -4, 5);
-    return { size };
-  });
-
   const [meshs, setMeshes] = useState<Mesh[]>([]);
+
+  useEffect(() => {
+    if (filterRef.current) {
+      filterRef.current.animate({ opacity: hideForeground ? 0 : 0.8 }, { duration: 350, fill: "forwards" });
+    }
+
+  }, [hideForeground]);
 
   const {
     speed,
@@ -43,7 +51,8 @@ export default function Background() {
     horizontalOffset,
     verticalOffset,
     colorA,
-    colorB
+    colorB,
+    cameraPosition
   } = useControls(
     'Theme Configs',
     {
@@ -53,7 +62,8 @@ export default function Background() {
       speed: 1,
       scale: 7,
       horizontalOffset: 1.0,
-      verticalOffset: 0.6
+      verticalOffset: 0.6,
+      cameraPosition: [7, -4, 5]
     },
     { collapsed: true }
   );
@@ -79,6 +89,11 @@ export default function Background() {
     { collapsed: true }
   );
 
+  const { size } = useThree(({ size, camera }) => {
+    camera.position.set(cameraPosition[0], cameraPosition[1], cameraPosition[2]);
+    return { size };
+  });
+
   useEffect(() => {
     let curMeshes: Mesh[] = [];
     groupRef.current?.traverse((child) => {
@@ -89,7 +104,7 @@ export default function Background() {
     setMeshes(curMeshes);
   }, [groupRef.current]);
 
-  useFrame((state, delta) => {
+  useFrame((_, delta) => {
     if (effectRef.current) {
       time.current += delta;
       effectRef.current.u_time = time.current;
@@ -98,11 +113,12 @@ export default function Background() {
       const adjSpeed = speed / 1000;
       child.position.x -= adjSpeed * horizontalOffset;
       child.position.y -= adjSpeed * verticalOffset;
-      if (child.position.y < -1) {
+      if (child.position.y < 0) {
+        const maxLevel = NUM_ICONS / ROW_PER_ICON
         child.position.x =
-          (offSet * NUM_ICONS * horizontalOffset) / ROW_PER_ICON +
+          (offSet * maxLevel * OFFSET_FACTOR * horizontalOffset) +
           child.position.x;
-        child.position.y = (offSet * NUM_ICONS * verticalOffset) / ROW_PER_ICON;
+        child.position.y = (offSet * maxLevel * verticalOffset);
       }
     });
   });
@@ -171,7 +187,7 @@ export default function Background() {
           <Vignette eskil offset={0.6} darkness={0.8} />
         </EffectComposer>
 
-        <Html center className="bg-base h-screen w-screen opacity-80"></Html>
+        <Html center className="bg-base h-screen w-screen" ref={filterRef} />
       </group>
     </>
   );

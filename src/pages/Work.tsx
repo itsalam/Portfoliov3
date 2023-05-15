@@ -5,6 +5,7 @@ import { Work } from '@src/store/types';
 import { HTMLProps, useRef, useState } from 'react';
 import { Tab } from '@headlessui/react';
 import { cx } from '@vechaiui/react';
+import { Title } from '@src/components/Commons';
 
 const convertDate = (date: string) => {
   return new Date(date).toLocaleDateString('default', {
@@ -82,10 +83,7 @@ export default function Work(props: HTMLProps<HTMLDivElement>) {
       id="work"
       {...props}
     >
-      <h1 className="title relative left-0 flex w-full items-center gap-4">
-        Work
-        <div className="bg-foreground relative top-1/4 h-[2px] w-1/3" />
-      </h1>
+      <Title>Work</Title>
       {works && (
         <>
           <Tab.List className={cx('flex subText font-works gap-1')}>
@@ -94,8 +92,8 @@ export default function Work(props: HTMLProps<HTMLDivElement>) {
                 key={work.companyName}
                 value={work.companyName}
                 className={cx(
-                  'xl:px-12 xl:py-4 p-4 hover:border-foreground hover:brightness-100 border-2 transition-all border-transparent brightness-75',
-                  'selected:border-foreground selected:bg-primary-300/30 selected:brightness-110'
+                  'xl:px-12 xl:py-4 p-4 hover:border-foreground hover:brightness-100 hover:bg-foreground/15 border-2 transition-all border-transparent brightness-75',
+                  'selected:border-foreground selected:bg-foreground/25 selected:brightness-110'
                 )}
               >
                 {work.companyName}

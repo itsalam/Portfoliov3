@@ -89,11 +89,15 @@ export const animateProject = (index: number): AnimeTimelineInstance => {
               setTimeout(() => {
                 const elem = anim as unknown as HTMLElement;
                 elem.style.textAlign = 'start';
+                elem.style.flexDirection = 'row';
                 if (elem.classList.contains('subTitle')) {
                   elem.classList.toggle('expanded', true);
                 }
                 if (elem.classList.contains('description')) {
                   elem.style.display = 'none';
+                }
+                if (elem.classList.contains('links')) {
+                  elem.style.flexDirection = 'row';
                 }
               }, 600);
             }
@@ -182,12 +186,21 @@ export const animateProjectReverse = (index: number) => {
             },
             begin(anim) {
               const elem = anim as unknown as HTMLElement;
+              console.log(elem);
               elem.style.textAlign = '';
               if (elem.classList.contains('subTitle')) {
                 elem.classList.toggle('expanded', false);
               }
               if (elem.classList.contains('description')) {
                 elem.style.display = 'block';
+              }
+              if (elem.classList.contains('links')) {
+                console.log(elem);
+                elem.style.flexDirection = elem.classList.contains(
+                  'flex-row-reverse'
+                )
+                  ? 'row-reverse'
+                  : 'row';
               }
             }
           }
