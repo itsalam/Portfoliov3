@@ -20,12 +20,13 @@ export type Work = {
   [key: string]: unknown;
 };
 
-export type Contact = {
+export type Social = {
   value: string;
   thumbnail: {
     stroke?: boolean;
     name: string;
   };
+  link?: string;
   [key: string]: unknown;
 };
 
@@ -52,7 +53,7 @@ export type CMSStore = {
   technologies: Technology[];
   projects: Project[];
   works: Work[];
-  contact: Contact[];
+  contact: Social[];
   resume: Resume;
   imageBuilder: ImageUrlBuilder;
   isLoading: boolean;

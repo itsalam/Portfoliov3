@@ -19,10 +19,12 @@ export default function Background() {
 
   useEffect(() => {
     if (filterRef.current) {
-      const opacity = darkMode ? hideForeground ? .3 : 0.95 : 0;
-      filterRef.current.animate({ opacity }, { duration: 350, fill: "forwards" });
+      const opacity = darkMode ? (hideForeground ? 0.3 : 0.95) : 0;
+      filterRef.current.animate(
+        { opacity },
+        { duration: 350, fill: 'forwards' }
+      );
     }
-
   }, [hideForeground, darkMode]);
 
   const configs = useControls(
@@ -55,7 +57,11 @@ export default function Background() {
 
   return (
     <group>
-      <Html center className="bg-base h-screen w-screen opacity-[.95]" ref={filterRef} ></Html>
+      <Html
+        center
+        className="bg-base h-screen w-screen opacity-[.95]"
+        ref={filterRef}
+      ></Html>
       <EffectComposer>
         <DomainWarp ref={effectRef} />
       </EffectComposer>

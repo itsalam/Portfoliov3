@@ -75,7 +75,7 @@ export const animateProject = (index: number): AnimeTimelineInstance => {
     .add(
       {
         targets: `div${targets} .revealer>*`,
-        delay: anime.stagger(150),
+        delay: anime.stagger(100, { easing: 'easeInOutCirc' }),
         keyframes: [
           {
             translateY: ['0%', '100%'],
@@ -195,9 +195,8 @@ export const animateProjectReverse = (index: number) => {
                 elem.style.display = 'block';
               }
               if (elem.classList.contains('links')) {
-                console.log(elem);
                 elem.style.flexDirection = elem.classList.contains(
-                  'flex-row-reverse'
+                  'md:flex-row-reverse'
                 )
                   ? 'row-reverse'
                   : 'row';

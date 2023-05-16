@@ -1,15 +1,4 @@
-import { debounce } from 'lodash';
-import { SVGProps, useCallback, useEffect, useRef, useState } from 'react';
-import useStore from '@src/store';
-
-const { setProgress, pages, setActivePage } = useStore.getState();
-
-export const getScrollProgress = (containerElem?: Element): number => {
-  return containerElem
-    ? -containerElem.getBoundingClientRect().top /
-        (containerElem.clientHeight - window.innerHeight)
-    : -1;
-};
+import { SVGProps, useEffect, useState } from 'react';
 
 const valToHex = (color: string): string => {
   const hexadecimal = parseInt(color).toString(16);
@@ -24,31 +13,6 @@ export const RGBtoHex = (vals: string[]) => {
     hex = '#' + hex;
   }
   return hex;
-};
-
-const debounceSetProgress = (containerElem?: Element) =>
-  debounce(() => {
-    const scrollProgress: number = getScrollProgress(containerElem);
-    if (scrollProgress < 1 && scrollProgress > 0) {
-      setProgress(scrollProgress);
-    }
-  });
-
-export const updateScrollProgress = () => {
-  const containerRef = useRef<Element>();
-  const containerCallback = useCallback<React.RefCallback<Element>>(
-    (node: Element) => {
-      const onScroll = debounceSetProgress(containerRef.current);
-
-      containerRef.current = node;
-      if (containerRef.current) {
-        window.addEventListener('scroll', onScroll);
-      }
-    },
-    []
-  );
-
-  return { containerRef, containerCallback };
 };
 
 export const isMobileListener = () => {
@@ -81,34 +45,6 @@ export const isWideListener = () => {
 
   return isWide;
 };
-
-export function useScreenSize() {
-  const isClient = typeof window === 'object';
-
-  function getSize() {
-    return {
-      width: isClient ? window.innerWidth : undefined,
-      height: isClient ? window.innerHeight : undefined
-    };
-  }
-
-  const [windowSize, setWindowSize] = useState(getSize);
-
-  useEffect(() => {
-    if (!isClient) {
-      return;
-    }
-
-    function handleResize() {
-      setWindowSize(getSize());
-    }
-    setWindowSize(getSize());
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  return windowSize;
-}
 
 export const ArrowSVG = (props: SVGProps<SVGSVGElement>) => (
   <svg

@@ -43,14 +43,14 @@ function Toolbar(props: {
   return (
     <div
       className={
-        'intro-revealer bg-base/75 fixed z-20 flex w-full items-center justify-between space-x-4 rounded p-4 md:bg-transparent'
+        'intro-revealer bg-foreground/10 fixed z-20 flex w-full items-center justify-between space-x-4 rounded p-4 md:bg-transparent'
       }
       id="toolbar"
     >
-      <div className="text-foreground flex flex-1 pl-4 text-xl tracking-widest">
+      <div className="text-foreground flex flex-1 text-xl tracking-widest md:pl-4">
         Vincent Lam /
         <div className="revealer w-24">
-          <div className="titleContent w-24 whitespace-pre">
+          <div className="titleContent whitespace-pre md:w-24">
             <div className="absolute"> {pages[currPage ?? 0]}</div>
             <div className="absolute"> {pages[activePage]}</div>
           </div>

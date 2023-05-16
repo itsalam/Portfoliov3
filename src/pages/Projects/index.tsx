@@ -1,21 +1,21 @@
 import { AnimeTimelineInstance } from 'animejs';
 import { cx } from '@vechaiui/react';
-import React, { HTMLProps, MouseEventHandler, useCallback, useMemo, useRef } from 'react';
+import React, {
+  HTMLProps,
+  MouseEventHandler,
+  useCallback,
+  useRef
+} from 'react';
 import { useEffect, useState } from 'react';
 import useStore from '@src/store';
-import Link from "@src/assets/link.svg"
-import Github from "@src/assets/github.svg"
+import Link from '@src/assets/link.svg';
+import Github from '@src/assets/github.svg';
 import { animateProject, animateProjectReverse } from './animations';
 import { Project } from '@src/store/types';
-import Carousel from './carousel';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { FreeMode, Mousewheel, Pagination, Scrollbar } from 'swiper';
 
-import {
-  useScreenSize,
-  isMobileListener,
-  isWideListener
-} from '@src/etc/Helpers';
+import { isMobileListener, isWideListener } from '@src/etc/Helpers';
 
 export default function Projects(props: HTMLProps<HTMLDivElement>) {
   const [focusedProj, setFocusedProj] = useState<number>();
@@ -25,15 +25,19 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
   const containerRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
 
-  const { width } = useScreenSize();
   const isMobile = isMobileListener();
   const isWide = isWideListener();
 
   const { projects, imageBuilder } = useStore.getState();
+  const { activePage } = useStore();
 
   useEffect(() => {
     projects && animateProgress(1 / projects.length);
   }, []);
+
+  // useEffect(() => {
+  //   projects && animateProgress(1 / projects.length);
+  // }, [activePage]);
 
   useEffect(() => {
     const firstProj = document.querySelector('.project');
@@ -50,7 +54,7 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
   useEffect(() => {
     document.querySelector('.centered')?.classList.toggle('centered', false);
     centeredElem?.classList.toggle('centered', true);
-  }, [centeredElem]);
+  }, [centeredElem, activePage]);
 
   useEffect(() => {
     if (focusedProj !== undefined) setFocusedAni(animateProject(focusedProj));
@@ -81,26 +85,32 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
   };
 
   const onDescriptionClick: MouseEventHandler<HTMLDivElement> = (e) => {
-    e.stopPropagation()
-  }
+    e.stopPropagation();
+  };
 
-  const LinkHref = (props: { dataSrc: string, href: string }) => {
-    const onAnchorClick = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+  const LinkHref = (props: { dataSrc: string; href: string }) => {
+    const onAnchorClick = (
+      e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
+    ) => {
       e.stopPropagation(); //
-    }
+    };
 
-    return <a className="hover:bg-foreground/10 h-7 w-7 rounded-sm" href={props.href} onClick={onAnchorClick}>
-      <svg fill="currentColor"
-        data-src={props.dataSrc}>
-      </svg>
-    </a>
-  }
+    return (
+      <a
+        className="hover:bg-foreground/10 h-7 w-7 rounded-sm"
+        href={props.href}
+        onClick={onAnchorClick}
+      >
+        <svg fill="currentColor" data-src={props.dataSrc}></svg>
+      </a>
+    );
+  };
 
   const renderProjects = (project: Project, i: number) => (
     <SwiperSlide key={`p-${i}`} className="flex items-center justify-center">
       <div
         className={cx(
-          'snap-center transition md:h-[40vh] md:min-h-[20rem] project rounded-md shadow-md flex hover:bg-base/80 bg-base/30 hover:opacity-100 ',
+          'snap-center transition project rounded-md shadow-md flex hover:bg-base/80 bg-base/30 hover:opacity-100 md:h-4/6',
           'w-full md:w-2/3',
           'flex-col md:flex-row',
           { right: i % 2 === 0, left: i % 2 === 1, mobile: isMobile }
@@ -111,8 +121,7 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
           src={imageBuilder?.image(project.thumbnails[0]).url()}
           className={cx(
             'cursor-pointer md:w-1/4 object-cover object-center z-10',
-            'md:min-w-[14rem]',
-            'w-full h-80 md:h-auto',
+            'w-full h-60 md:h-auto rounded-t-md',
             { 'md:rounded-r-md': i % 2 === 0, 'md:rounded-l-md': i % 2 === 1 }
           )}
         />
@@ -126,10 +135,14 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
             }
           )}
         >
-          <div className="revealer shrink-0">
-            <h1 className="subTitle whitespace-no-wrap">{project.name}</h1>
-            <div className='revealer'>
-              <div className={cx('links flex', { "flex-row-reverse": i % 2 === 0 })}>
+          <div className="revealer flex shrink-0 justify-between md:flex-col">
+            <h1 className="subTitle whitespace-no-wrap shrink-0">{project.name}</h1>
+            <div className="revealer w-auto">
+              <div
+                className={cx('links flex', {
+                  'md:flex-row-reverse': i % 2 === 0
+                })}
+              >
                 <LinkHref dataSrc={Link} href={project.link} />
                 <LinkHref dataSrc={Github} href={project.githublink} />
               </div>
@@ -146,7 +159,7 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
           </div>
         </div>
       </div>
-    </SwiperSlide >
+    </SwiperSlide>
   );
 
   return (
@@ -164,7 +177,6 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
       </h1>
       <Swiper
         direction={'vertical'}
-        mousewheel={true}
         centeredSlides
         slidesPerView={1}
         nested={true}
@@ -172,7 +184,6 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
         scrollbar={{
           hide: false
         }}
-
         onSlideChange={(swiper) => {
           const progress = (swiper.activeIndex + 1) / swiper.slides.length;
           animateProgress(progress);

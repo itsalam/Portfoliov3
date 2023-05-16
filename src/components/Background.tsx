@@ -31,10 +31,10 @@ export default function Background() {
       value: false,
       label: 'Hide Content',
       onChange: (value: boolean) => {
-        useStore.setState({ hideForeground: value })
+        useStore.setState({ hideForeground: value });
       }
     }
-  })
+  });
 
   return (
     <div

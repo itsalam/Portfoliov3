@@ -2,7 +2,7 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 import useStore from '@src/store';
 import { Work } from '@src/store/types';
-import { HTMLProps, useRef, useState } from 'react';
+import { HTMLProps, useState } from 'react';
 import { Tab } from '@headlessui/react';
 import { cx } from '@vechaiui/react';
 import { Title } from '@src/components/Commons';
@@ -31,7 +31,6 @@ export default function Work(props: HTMLProps<HTMLDivElement>) {
     const fadeAni = tabAnimation(0);
     if (fadeAni && typeof index === 'number') {
       fadeAni.onfinish = () => {
-        console.log(index);
         setActiveWork(index);
         tabAnimation(1);
       };
@@ -60,7 +59,7 @@ export default function Work(props: HTMLProps<HTMLDivElement>) {
             </p>
             <div className="subText w-full xl:px-4">
               {experience.descriptions.map((desc, j) => (
-                <p className="w-full" key={`exp${i}-${j}`}>
+                <p className="w-full p-1" key={`exp${i}-${j}`}>
                   {' '}
                   · {desc}
                 </p>
@@ -76,7 +75,7 @@ export default function Work(props: HTMLProps<HTMLDivElement>) {
     <Tab.Group
       // @ts-ignore
       as={'div'}
-      className="flex h-screen flex-col gap-5 py-16 md:h-full md:px-4 md:py-[10vh]"
+      className="flex h-screen flex-col gap-5 py-16 pb-24 md:h-full md:px-4 md:py-[10vh]"
       selectedIndex={activeWork}
       // @ts-ignore
       onChange={handleTabChange}

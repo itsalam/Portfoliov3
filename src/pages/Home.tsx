@@ -118,8 +118,6 @@ export default function Home(props: HTMLProps<HTMLDivElement>) {
     revealHome();
   }, []);
 
-
-
   return (
     <div
       className={
@@ -164,7 +162,7 @@ export default function Home(props: HTMLProps<HTMLDivElement>) {
       </div>
       <div className={cx(['revealer subTitle text-muted p-5 md:pt-10'])}>
         <span className={'revealerSpan'}>Things I like Using:</span>
-        <div className="flex w-full flex-wrap justify-evenly p-4 xl:flex-nowrap">
+        <div className="flex w-full flex-wrap justify-evenly p-1 md:p-4 xl:flex-nowrap">
           {technologies &&
             imageBuilder &&
             technologies.map((tech) => {
@@ -172,7 +170,7 @@ export default function Home(props: HTMLProps<HTMLDivElement>) {
               return (
                 <div
                   key={svgUrl}
-                  className="techs text-foreground m-2 flex h-16 w-16 flex-col items-center"
+                  className="techs text-foreground m-2 flex h-12 w-12 flex-col items-center md:h-16 md:w-16"
                 >
                   <svg
                     className="icon h-12 w-12"
@@ -188,6 +186,6 @@ export default function Home(props: HTMLProps<HTMLDivElement>) {
             })}
         </div>
       </div>
-    </div >
+    </div>
   );
 }

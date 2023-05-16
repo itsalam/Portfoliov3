@@ -11,7 +11,6 @@ import {
 } from 'react';
 import React from 'react';
 import { isWideListener } from '@src/etc/Helpers';
-import { useSwiper } from 'swiper/react';
 
 interface SelectorProps {
   radius: number;
@@ -29,10 +28,10 @@ function Selector(props: SelectorProps & SVGProps<SVGSVGElement>) {
   useEffect(() => {
     if (progCircleRef.current) {
       setTimeout(() => {
-        progCircleRef.current.animate(
+        progCircleRef.current?.animate(
           { strokeDashoffset: circumference - progress * circumference },
           { duration: 400, fill: 'forwards', easing: 'ease-in' }
-        )
+        );
       }, 250);
     }
   }, [progress]);
@@ -205,10 +204,10 @@ function Menu({ vertical = isWideListener(), isToolBar = false }) {
       ref={menuRef}
       onMouseLeave={() => moveSelector(activePage)}
       className={cx(
-        'intro-revealer flex group flex-row  items-center font-display my-auto py-2 z-50',
+        'intro-revealer flex group flex-row items-center font-display my-auto py-2 z-50',
         'xl:rounded-xl xl:flex-col xl:-translate-x-full xl:-translate-y-1/2 xl:top-1/2 xl:w-40 xl:bottom-auto xl:left-auto xl:right-auto',
         {
-          'fixed bg-base/50 left-0 bottom-0 m-auto right-0 flex-shrink-1 w-full -translate-y-1/4 shadow-2xl':
+          'fixed bg-foreground/10 left-0 bottom-0 m-auto right-0 flex-shrink-1 w-full shadow-2xl':
             !isToolBar,
           'sticky flex-1': isToolBar
         }

@@ -2,11 +2,7 @@ import React, { useRef, useMemo, forwardRef, useEffect, useState } from 'react';
 import fragmentShader from './fragment.glsl';
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader';
 import { Mesh, Vector2, Shape, Group, Color } from 'three';
-import {
-  useFrame,
-  useLoader,
-  useThree
-} from '@react-three/fiber';
+import { useFrame, useLoader, useThree } from '@react-three/fiber';
 import {
   EffectComposer,
   Bloom,
@@ -20,15 +16,12 @@ import { useControls } from 'leva';
 import { CustomEffect } from '../helper';
 import { Html, OrbitControls } from '@react-three/drei';
 
-
-
 export default function Background() {
   const NUM_ICONS = 32;
   const ROW_PER_ICON = 4;
   const OFFSET_FACTOR = 1.065;
 
   const { hideForeground } = useStore();
-
 
   const filterRef = useRef<HTMLDivElement>(null);
   const groupRef = useRef<Group>(null);
@@ -39,9 +32,11 @@ export default function Background() {
 
   useEffect(() => {
     if (filterRef.current) {
-      filterRef.current.animate({ opacity: hideForeground ? 0 : 0.8 }, { duration: 350, fill: "forwards" });
+      filterRef.current.animate(
+        { opacity: hideForeground ? 0 : 0.8 },
+        { duration: 350, fill: 'forwards' }
+      );
     }
-
   }, [hideForeground]);
 
   const {
@@ -90,7 +85,11 @@ export default function Background() {
   );
 
   const { size } = useThree(({ size, camera }) => {
-    camera.position.set(cameraPosition[0], cameraPosition[1], cameraPosition[2]);
+    camera.position.set(
+      cameraPosition[0],
+      cameraPosition[1],
+      cameraPosition[2]
+    );
     return { size };
   });
 
@@ -114,11 +113,11 @@ export default function Background() {
       child.position.x -= adjSpeed * horizontalOffset;
       child.position.y -= adjSpeed * verticalOffset;
       if (child.position.y < 0) {
-        const maxLevel = NUM_ICONS / ROW_PER_ICON
+        const maxLevel = NUM_ICONS / ROW_PER_ICON;
         child.position.x =
-          (offSet * maxLevel * OFFSET_FACTOR * horizontalOffset) +
+          offSet * maxLevel * OFFSET_FACTOR * horizontalOffset +
           child.position.x;
-        child.position.y = (offSet * maxLevel * verticalOffset);
+        child.position.y = offSet * maxLevel * verticalOffset;
       }
     });
   });

@@ -1,23 +1,11 @@
-import {
-  HTMLProps,
-  ReactElement,
-  ReactNode,
-  isValidElement,
-  useEffect,
-  useRef
-} from 'react';
+import { HTMLProps, ReactNode, isValidElement, useEffect, useRef } from 'react';
 import { cx } from '@vechaiui/react';
 import Menu from './Menu';
-import {
-  isWideListener,
-  isMobileListener,
-  updateScrollProgress
-} from '@src/etc/Helpers';
+import { isWideListener, isMobileListener } from '@src/etc/Helpers';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import { Swiper, SwiperRef, SwiperSlide } from 'swiper/react';
 import {
-  FreeMode,
   HashNavigation,
   Keyboard,
   Mousewheel,
@@ -46,33 +34,38 @@ function Content(props: HTMLProps<HTMLDivElement> & { children?: ReactNode }) {
 
   useEffect(() => {
     if (contentRef.current) {
-      if (!hideForeground) contentRef.current.style.setProperty('display', 'flex');
-      const animate = contentRef.current.animate({ opacity: hideForeground ? 0 : 1 }, { duration: 350, fill: "forwards" });
+      if (!hideForeground)
+        contentRef.current.style.setProperty('display', 'flex');
+      const animate = contentRef.current.animate(
+        { opacity: hideForeground ? 0 : 1 },
+        { duration: 350, fill: 'forwards' }
+      );
       if (hideForeground) {
         animate.onfinish = () => {
-          contentRef.current?.style.setProperty('display', hideForeground ? 'none' : 'flex');
-        }
+          contentRef.current?.style.setProperty(
+            'display',
+            hideForeground ? 'none' : 'flex'
+          );
+        };
       }
-
     }
   }, [hideForeground]);
 
   useControls({
     hideForeground: {
       value: false,
-      label: 'Hide Content',
+      label: 'Hide Content'
       // onChange: (value: boolean) => {
       //   useStore.setState({ hideForeground: value })
       // }
     }
-  })
+  });
 
   return (
     <div
       className="z-10 flex items-start justify-center"
       ref={contentRef}
-
-      style={{ display: "none" }}
+      style={{ display: 'none' }}
     >
       <div
         className={cx(

@@ -10,18 +10,14 @@ import * as functions from 'firebase-functions';
 admin.initializeApp();
 
 export const sendContactMail = functions.https.onRequest(
-  async (req: any, res: any) => {
+  async (req: functions.https.Request, res: functions.Response) => {
     res.set('Access-Control-Allow-Origin', 'https://www.vincentlam.dev');
     res.set('Access-Control-Allow-Credentials', 'true');
     res.set('Access-Control-Allow-Methods', 'GET, POST');
     res.set('Access-Control-Allow-Headers', 'Content-Type');
     res.set('Access-Control-Max-Age', '3600');
-    console.log('req body' + req.body);
 
     const reqBody = JSON.parse(req.body);
-
-    console.log(reqBody);
-
     admin
       .firestore()
       .collection('mail')
