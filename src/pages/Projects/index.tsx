@@ -3,6 +3,7 @@ import { cx } from '@vechaiui/react';
 import React, {
   HTMLProps,
   MouseEventHandler,
+  WheelEventHandler,
   useCallback,
   useRef
 } from 'react';
@@ -12,10 +13,15 @@ import Link from '@src/assets/link.svg';
 import Github from '@src/assets/github.svg';
 import { animateProject, animateProjectReverse } from './animations';
 import { Project } from '@src/store/types';
-import { Swiper, SwiperSlide } from 'swiper/react';
+import { Swiper, SwiperRef, SwiperSlide } from 'swiper/react';
 import { FreeMode, Mousewheel, Pagination, Scrollbar } from 'swiper';
 
-import { isMobileListener, isWideListener } from '@src/etc/Helpers';
+import {
+  handleScroll,
+  isMobileListener,
+  isWideListener
+} from '@src/etc/Helpers';
+import { debounce } from 'lodash';
 
 export default function Projects(props: HTMLProps<HTMLDivElement>) {
   const [focusedProj, setFocusedProj] = useState<number>();
@@ -31,13 +37,26 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
   const { projects, imageBuilder } = useStore.getState();
   const { activePage } = useStore();
 
+  const swiperRef = useRef<SwiperRef | null>(null);
+
+  const scrollContent: WheelEventHandler<HTMLDivElement> = debounce(
+    (event) => {
+      if (swiperRef.current) {
+        const swiper = swiperRef.current.swiper;
+        const nextPage = swiper.activeIndex + (event.deltaY > 0 ? 1 : -1);
+        if (nextPage < swiper.slides.length && nextPage >= 0) {
+          swiper.slideTo(nextPage, 750);
+          event.stopPropagation();
+        }
+      }
+    },
+    250,
+    { leading: true, trailing: false }
+  );
+
   useEffect(() => {
     projects && animateProgress(1 / projects.length);
   }, []);
-
-  // useEffect(() => {
-  //   projects && animateProgress(1 / projects.length);
-  // }, [activePage]);
 
   useEffect(() => {
     const firstProj = document.querySelector('.project');
@@ -69,26 +88,20 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
     []
   );
 
-  const onProjectClick = (
-    e: React.MouseEvent<HTMLDivElement, MouseEvent>,
-    i: number
-  ) => {
-    const lastFocusedElem = document.querySelector('.focused');
-    const elem = e.currentTarget.parentNode as Element;
-    lastFocusedElem?.classList.toggle('focused', false);
-    elem.classList.toggle('focused', i !== focusedProj);
-    if (focusedProj !== undefined) {
-      focusedAni?.pause();
-      animateProjectReverse(focusedProj);
-    }
-    setFocusedProj(i === focusedProj ? undefined : i);
-  };
+  const onProjectClick =
+    (i: number) => (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+      const lastFocusedElem = document.querySelector('.focused');
+      const elem = e.currentTarget as Element;
+      lastFocusedElem?.classList.toggle('focused', false);
+      elem.classList.toggle('focused', i !== focusedProj);
+      if (focusedProj !== undefined) {
+        focusedAni?.pause();
+        animateProjectReverse(focusedProj);
+      }
+      setFocusedProj(i === focusedProj ? undefined : i);
+    };
 
-  const onDescriptionClick: MouseEventHandler<HTMLDivElement> = (e) => {
-    e.stopPropagation();
-  };
-
-  const LinkHref = (props: { dataSrc: string; href: string }) => {
+  const LinkHref = useCallback((props: { dataSrc: string; href: string }) => {
     const onAnchorClick = (
       e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
     ) => {
@@ -104,20 +117,20 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
         <svg fill="currentColor" data-src={props.dataSrc}></svg>
       </a>
     );
-  };
+  }, []);
 
   const renderProjects = (project: Project, i: number) => (
     <SwiperSlide key={`p-${i}`} className="flex items-center justify-center">
       <div
+        onClick={onProjectClick(i)}
         className={cx(
-          'snap-center transition project rounded-md shadow-md flex hover:bg-base/80 bg-base/30 hover:opacity-100 md:h-4/6',
+          'transition project rounded-md shadow-md flex hover:bg-base/80 bg-base/30 md:h-4/6',
           'w-full md:w-2/3',
           'flex-col md:flex-row',
           { right: i % 2 === 0, left: i % 2 === 1, mobile: isMobile }
         )}
       >
         <img
-          onClick={(e) => onProjectClick(e, i)}
           src={imageBuilder?.image(project.thumbnails[0]).url()}
           className={cx(
             'cursor-pointer md:w-1/4 object-cover object-center z-10',
@@ -126,9 +139,8 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
           )}
         />
         <div
-          onClick={(e) => onProjectClick(e, i)}
           className={cx(
-            'cursor-pointer flex flex-col p-4 justify-center items-center md:w-3/4 md:h-auto h-32',
+            'cursor-pointer flex flex-col p-4 justify-center md:w-3/4 md:h-auto h-32',
             {
               'md:items-end md:text-end md:left-0': i % 2 === 0,
               'md:items-start md:right-0': i % 2 === 1
@@ -136,7 +148,9 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
           )}
         >
           <div className="revealer flex shrink-0 justify-between md:flex-col">
-            <h1 className="subTitle whitespace-no-wrap shrink-0">{project.name}</h1>
+            <h1 className="subTitle whitespace-no-wrap shrink-0">
+              {project.name}
+            </h1>
             <div className="revealer w-auto">
               <div
                 className={cx('links flex', {
@@ -152,8 +166,11 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
             <p className="subText description">{project.description}</p>
           </div>
           <div className="bg-foreground my-3 h-[1px] w-full" />
-          <div className="revealer fullDescription shrink-1 h-0 overflow-y-scroll opacity-0">
-            <div className="subText absolute" onClick={onDescriptionClick}>
+          <div
+            className="revealer fullDescription shrink-1 h-0 overflow-y-scroll opacity-0"
+            onWheel={handleScroll}
+          >
+            <div className="subText absolute">
               <p>{project.fullDescription}</p>
             </div>
           </div>
@@ -164,9 +181,10 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
 
   return (
     <div
-      className="projectTrack relative flex h-screen w-full grow flex-col items-center justify-start overflow-y-scroll py-16 md:py-[10vh]"
+      className="projectTrack flex h-full w-full flex-col py-16 md:py-[10vh]"
       ref={containerRef}
       id="projects"
+      onWheel={scrollContent}
       {...props}
     >
       <h1 className="title relative left-0 flex w-full items-center gap-4">
@@ -176,14 +194,10 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
         </div>
       </h1>
       <Swiper
-        direction={'vertical'}
         centeredSlides
+        nested
+        direction={'vertical'}
         slidesPerView={1}
-        nested={true}
-        spaceBetween={30}
-        scrollbar={{
-          hide: false
-        }}
         onSlideChange={(swiper) => {
           const progress = (swiper.activeIndex + 1) / swiper.slides.length;
           animateProgress(progress);
@@ -195,6 +209,7 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
         }}
         modules={[Scrollbar, Pagination, FreeMode, Scrollbar, Mousewheel]}
         className="h-auto w-full"
+        ref={swiperRef}
       >
         {projects?.map(renderProjects)}
       </Swiper>

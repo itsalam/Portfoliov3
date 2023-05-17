@@ -31,7 +31,7 @@ const createCMSSlice: StateCreator<AsyncCMSStore> = (setState) => {
     technologies: [],
     projects: [],
     works: [],
-    contact: [],
+    contacts: [],
     imageBuilder: imageUrlBuilder(client),
     isLoading: true
   };
@@ -40,7 +40,7 @@ const createCMSSlice: StateCreator<AsyncCMSStore> = (setState) => {
       technologies: await getSchema('technology'),
       projects: await getSchema('project'),
       works: await getSchema('works'),
-      contact: await getSchema('contact'),
+      contacts: await getSchema('contact'),
       resume: await getResume(),
       imageBuilder: imageUrlBuilder(client),
       isLoading: false

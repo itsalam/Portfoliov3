@@ -15,11 +15,11 @@ import { isWideListener } from '@src/etc/Helpers';
 interface SelectorProps {
   radius: number;
   strokeWidth: number;
+  progress: number;
 }
 
 function Selector(props: SelectorProps & SVGProps<SVGSVGElement>) {
-  const { radius, strokeWidth, ...otherProps } = props;
-  const { progress } = useStore();
+  const { radius, strokeWidth, progress, ...otherProps } = props;
   const progCircleRef = useRef<SVGCircleElement>(null);
 
   const normalizedRadius = radius - strokeWidth * 2;
@@ -85,12 +85,16 @@ function Menu({ vertical = isWideListener(), isToolBar = false }) {
   const START = vertical ? 'top' : 'left';
   const END = vertical ? 'bottom' : 'right';
 
-  const { activePage, pages, setActivePage } = useStore.getState();
+  const { pages, setActivePage } = useStore.getState();
+  const { activePage } = useStore();
 
   const menuRef = useRef<HTMLDivElement>(null);
   const menuItemRef = pages.map(() => useRef<HTMLAnchorElement>(null));
 
   const [currCoords, setCurrCoords] = useState<number>();
+  const [progress, setProgress] = useState<number>(
+    activePage / (pages.length - 1)
+  );
   const [firstLoad, setFirstLoad] = useState(true);
 
   const getMenuCoord = (index: number) => {
@@ -110,20 +114,19 @@ function Menu({ vertical = isWideListener(), isToolBar = false }) {
       document.querySelector('#selector')?.animate(
         vertical
           ? {
-            top: `${moveVal}px`
-          }
+              top: `${moveVal}px`
+            }
           : {
-            left: `${moveVal}px`
-          },
+              left: `${moveVal}px`
+            },
         { duration: 250, fill: 'forwards', easing: 'ease-out' }
       );
     },
     150,
-    { leading: true }
+    { trailing: true }
   );
 
   useEffect(() => {
-    moveSelector(activePage);
     const pageRef = menuItemRef[activePage];
     if (pageRef.current && !firstLoad) {
       if (window.location.hash !== pageRef.current.href.split('#')[1]) {
@@ -132,6 +135,9 @@ function Menu({ vertical = isWideListener(), isToolBar = false }) {
     } else {
       setFirstLoad(false);
     }
+    moveSelector(activePage);
+
+    setProgress(activePage / (pages.length - 1));
   }, [activePage]);
 
   useEffect(() => {
@@ -147,19 +153,6 @@ function Menu({ vertical = isWideListener(), isToolBar = false }) {
     setActivePage(index);
     setCurrCoords(getMenuCoord(index));
   };
-
-  const MenuSelector = useCallback(
-    () => (
-      <Selector
-        id="selector"
-        strokeWidth={STROKE}
-        radius={RADIUS}
-        className={cx(`absolute brightness-125 translate-y-4 xl:translate-y-3`)}
-        style={currCoords !== undefined ? { [START]: `${currCoords}px` } : {}}
-      />
-    ),
-    []
-  );
 
   const MenuButton = (props: { index: number; text: string }) => {
     const { index, text } = props;
@@ -214,7 +207,14 @@ function Menu({ vertical = isWideListener(), isToolBar = false }) {
       )}
     >
       <MenuContent />
-      <MenuSelector />
+      <Selector
+        id="selector"
+        progress={progress}
+        strokeWidth={STROKE}
+        radius={RADIUS}
+        className={cx(`absolute brightness-125 translate-y-4 xl:translate-y-3`)}
+        style={currCoords !== undefined ? { [START]: `${currCoords}px` } : {}}
+      />
     </div>
   );
 }

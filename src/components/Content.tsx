@@ -1,4 +1,11 @@
-import { HTMLProps, ReactNode, isValidElement, useEffect, useRef } from 'react';
+import {
+  HTMLProps,
+  ReactNode,
+  WheelEventHandler,
+  isValidElement,
+  useEffect,
+  useRef
+} from 'react';
 import { cx } from '@vechaiui/react';
 import Menu from './Menu';
 import { isWideListener, isMobileListener } from '@src/etc/Helpers';
@@ -15,6 +22,7 @@ import {
 import React from 'react';
 import useStore from '@src/store';
 import { useControls } from 'leva';
+import { debounce } from 'lodash';
 
 function Content(props: HTMLProps<HTMLDivElement> & { children?: ReactNode }) {
   const isWide = isWideListener();
@@ -22,14 +30,26 @@ function Content(props: HTMLProps<HTMLDivElement> & { children?: ReactNode }) {
 
   const contentRef = useRef<HTMLDivElement>(null);
 
-  const { activePage, pages, setProgress } = useStore.getState();
+  const { activePage, pages } = useStore.getState();
   const { hideForeground } = useStore();
 
   const swiperRef = useRef<SwiperRef | null>(null);
 
+  const scrollContent: WheelEventHandler<HTMLDivElement> = debounce(
+    (event) => {
+      if (swiperRef.current) {
+        const nextPage = activePage + (event.deltaY > 0 ? 1 : -1);
+        if (nextPage < pages.length && nextPage >= 0) {
+          useStore.setState({ activePage: nextPage });
+        }
+      }
+    },
+    250,
+    { leading: true, trailing: false }
+  );
+
   useEffect(() => {
     swiperRef.current?.swiper.slideTo(activePage, 750);
-    setProgress(activePage / (pages.length - 1));
   }, [activePage]);
 
   useEffect(() => {
@@ -55,9 +75,6 @@ function Content(props: HTMLProps<HTMLDivElement> & { children?: ReactNode }) {
     hideForeground: {
       value: false,
       label: 'Hide Content'
-      // onChange: (value: boolean) => {
-      //   useStore.setState({ hideForeground: value })
-      // }
     }
   });
 
@@ -66,6 +83,7 @@ function Content(props: HTMLProps<HTMLDivElement> & { children?: ReactNode }) {
       className="z-10 flex items-start justify-center"
       ref={contentRef}
       style={{ display: 'none' }}
+      onWheel={scrollContent}
     >
       <div
         className={cx(
@@ -85,7 +103,7 @@ function Content(props: HTMLProps<HTMLDivElement> & { children?: ReactNode }) {
             enabled: true
           }}
           touchStartPreventDefault={false}
-          onSlideChangeTransitionEnd={(swiper) => {
+          onSlideChangeTransitionStart={(swiper) => {
             useStore.setState({ activePage: swiper.activeIndex });
           }}
           modules={[

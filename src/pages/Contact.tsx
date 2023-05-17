@@ -5,9 +5,10 @@ import {
   Input,
   Textarea,
   Button,
-  cx
+  cx,
+  FormControlProps
 } from '@vechaiui/react';
-import { HTMLProps, ReactNode, forwardRef } from 'react';
+import { HTMLProps, ReactNode, forwardRef, useCallback } from 'react';
 import useStore from '@src/store';
 import { SanityImageSource } from '@sanity/image-url/lib/types/types';
 import { isWideListener, ArrowSVG } from '@src/etc/Helpers';
@@ -23,7 +24,7 @@ type FormInputProps = {
 };
 
 export default function Contact(props: HTMLProps<HTMLDivElement>) {
-  const { imageBuilder, contact: contacts, resume } = useStore();
+  const { imageBuilder, contacts, resume } = useStore.getState();
   const notification = useNotification();
 
   const {
@@ -64,23 +65,23 @@ export default function Contact(props: HTMLProps<HTMLDivElement>) {
 
   const FormInput = forwardRef<
     HTMLDivElement,
-    HTMLProps<HTMLFormElement> & FormInputProps
+    HTMLProps<HTMLFormElement> & FormInputProps & FormControlProps
   >((props, ref) => (
     <FormControl
       id={props.id}
-      className={'flex flex-col ' + props.className}
+      className={'flex flex-col gap-1 ' + props.className}
       invalid={props.invalid}
       ref={ref}
     >
       {isWide && <Label>{props.id}</Label>}
       {props.text ? (
         <TextArea
-          placeholder={isWide ? '' : props.id}
+          placeholder={isWide ? '' : props.placeholder ?? props.id}
           {...register(props.id, { required: props.required })}
         />
       ) : (
         <TextInput
-          placeholder={isWide ? '' : props.id}
+          placeholder={isWide ? '' : props.placeholder ?? props.id}
           {...register(props.id, { required: props.required })}
         />
       )}
@@ -96,7 +97,6 @@ export default function Contact(props: HTMLProps<HTMLDivElement>) {
       body: JSON.stringify(data)
     })
       .then((res: Response) => {
-        console.log(res);
         notification({ title: 'Message sent!', status: 'success' });
       })
       .catch((e) => {
@@ -120,34 +120,35 @@ export default function Contact(props: HTMLProps<HTMLDivElement>) {
       )}
     >
       <span className="bg-foreground absolute bottom-0 left-0 h-1 w-full transition-all duration-150 ease-in-out group-hover:h-full" />
-      <svg
-        className="icon group-hover:text-background absolute inset-y-12 h-10 w-10 md:inset-y-3"
-        data-src={svgUrl(props.resume.icon)}
-        {...{ fill: 'currentColor' }}
-      />
-      <span className="group-hover:text-background absolute inset-y-20 md:inset-y-10">
+
+      <span className=" group-hover:text-background absolute flex h-full flex-col items-center justify-center">
+        <svg
+          className="icon group-hover:text-background h-10 w-10"
+          data-src={svgUrl(props.resume.icon)}
+          {...{ fill: 'currentColor' }}
+        />
         Resume
       </span>
     </a>
   );
 
-  const SocialInfo = (props: {
-    info: Social;
-    svgSrc: SanityImageSource;
-  }) => (
+  const SocialInfo = (props: { info: Social; svgSrc: SanityImageSource }) => (
     <div
       key={props.info.value}
-      className="subText flex w-full items-center gap-1 py-1 align-middle md:py-0"
+      className="subText flex w-full items-center gap-1 py-0 align-middle"
     >
       <svg
         className="icon h-8 w-8 p-1 md:h-8 md:w-8"
         data-src={svgUrl(props.svgSrc)}
         {...{ fill: 'currentColor' }}
       />
-      {
-        props.info.link ?
-          <a className='underline' href={props.info.link}>{props.info.value}</a> :
-          props.info.value}
+      {props.info.link ? (
+        <a className="underline" href={props.info.link}>
+          {props.info.value}
+        </a>
+      ) : (
+        props.info.value
+      )}
     </div>
   );
 
@@ -182,51 +183,75 @@ export default function Contact(props: HTMLProps<HTMLDivElement>) {
 
   const ContactForm = () => (
     <form
-      className="flex h-full flex-1 flex-col gap-3 md:gap-4"
+      className="flex h-full flex-1 flex-col gap-2 "
       onSubmit={handleSubmit(submitContact)}
     >
       <h2 className="mainText">
         Interested in working together? Just drop me a message here.
       </h2>
-      <FormInput id="name" required invalid={Boolean(errors.name)} />
-      <FormInput id="email" required invalid={Boolean(errors.email)} />
+      <div className="tall:flex-col tall:gap-2 flex gap-2">
+        <FormInput
+          id="name"
+          placeholder="Name"
+          required
+          invalid={Boolean(errors.name)}
+        />
+        <FormInput
+          id="email"
+          placeholder="Email"
+          required
+          invalid={Boolean(errors.email)}
+        />
+      </div>
+
       <FormInput
         id="message"
+        placeholder="Write a message here..."
         required
         text
-        className="h-40"
+        className="tall:h-40 h-28"
         invalid={Boolean(errors.message)}
       />
       <FormSubmitButton />
     </form>
   );
 
-  const Socials = () => (
-    <div className="flex h-full justify-between gap-1 sm:pt-4 md:pt-8">
-      <div className="md:pr-12">
-        <h4 className="mainText px-1 text-xs">
-          Actually, its probably more convienient to just use my socials. ¯\_(ツ)_/¯
-        </h4>
-        {contacts &&
-          imageBuilder &&
-          contacts.map((contact) => (
-            <SocialInfo
-              {...{ info: contact, svgSrc: contact.thumbnail }}
-              key={contact.value}
-            />
-          ))}
+  const Socials = useCallback(
+    () => (
+      <div className="flex h-full justify-between gap-1 sm:pt-4 md:pt-2">
+        <div className="tall:pt-4 md:pr-12 md:pt-0">
+          <h4 className="mainText px-1 text-xs">
+            Actually, its probably more convienient to just use my socials.
+            ¯\_(ツ)_/¯
+          </h4>
+          {contacts &&
+            imageBuilder &&
+            contacts.map((contact) => (
+              <SocialInfo
+                {...{ info: contact, svgSrc: contact.thumbnail }}
+                key={contact.value}
+              />
+            ))}
+        </div>
+        {!isWide && resume && (
+          <DownloadButton
+            resume={resume}
+            className="mx-4 h-40 w-2/5 self-center"
+          />
+        )}
       </div>
-      {!isWide && resume && (
-        <DownloadButton resume={resume} className="mx-4 h-40 w-2/5 self-center" />
-      )}
-    </div>
+    ),
+    [isWide]
   );
 
-  const ResumeSideColumn = (props: { resume: Resume }) => (
-    <div className="flex h-full flex-col items-center justify-center gap-4 self-center xl:w-2/5">
-      <ResumePreview resume={props.resume} />
-      <DownloadButton resume={props.resume} className="h-20 w-1/3" />
-    </div>
+  const ResumeSideColumn = useCallback(
+    (props: { resume: Resume }) => (
+      <div className="flex h-full flex-col items-center justify-center gap-4 self-center xl:w-2/5">
+        <ResumePreview resume={props.resume} />
+        <DownloadButton resume={props.resume} className="h-20 w-1/3" />
+      </div>
+    ),
+    []
   );
 
   return (

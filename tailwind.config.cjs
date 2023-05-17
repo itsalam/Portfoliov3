@@ -11,7 +11,9 @@ module.exports = {
         body: ['Source Sans Pro'],
         display: ['Work Sans']
       },
-
+      screens: {
+        tall: { raw: '(min-height: 800px)' }
+      },
       colors: {
         foreground:
           'rgba(var(--vc-colors-text-foreground), var(--tw-text-opacity))',

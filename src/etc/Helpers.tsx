@@ -71,3 +71,18 @@ export function DefaultLoader() {
     </div>
   );
 }
+
+export const handleScroll: React.WheelEventHandler<HTMLDivElement> = (e) => {
+  const element = e.currentTarget;
+  if (
+    (e.deltaY < 0 &&
+      element.scrollTop === 0 &&
+      element.scrollHeight > element.clientHeight) ||
+    (e.deltaY > 0 &&
+      element.scrollHeight - element.clientHeight - element.scrollTop < 10 &&
+      element.scrollHeight > element.clientHeight)
+  ) {
+    return;
+  }
+  e.stopPropagation();
+};

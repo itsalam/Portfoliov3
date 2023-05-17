@@ -14,13 +14,21 @@ export const animateProject = (index: number): AnimeTimelineInstance => {
     })
     .add(
       {
-        targets: `${targets}:not(.mobile)`,
+        targets: `${targets}`,
         keyframes: [
           {
             easing: 'easeInOutCirc',
-            height: ['40vh', '55vh'],
+            height: ['66.667%', '90%'],
             duration: 750
-          },
+          }
+        ]
+      },
+      0
+    )
+    .add(
+      {
+        targets: `${targets}:not(.mobile)`,
+        keyframes: [
           {
             easing: 'easeInOutCirc',
             width: ['66.667%', '100%'],
@@ -103,7 +111,7 @@ export const animateProject = (index: number): AnimeTimelineInstance => {
             }
           }
         ],
-        easing: 'easeInOutCirc'
+        easing: 'easeOutQuint'
       },
       0
     );
@@ -121,7 +129,7 @@ export const animateProjectReverse = (index: number) => {
         keyframes: [
           {
             easing: 'easeInOutCirc',
-            height: ['55vh', '40vh'],
+            height: ['90%', '66.667%'],
             width: ['100%', '66.667%'],
             duration: 750
           }
@@ -153,7 +161,7 @@ export const animateProjectReverse = (index: number) => {
           {
             height: ['100%', '0%'],
             duration: 750,
-            easing: 'easeOutCirc'
+            easing: 'easeOutQuint'
           }
         ]
       },
@@ -165,8 +173,7 @@ export const animateProjectReverse = (index: number) => {
         keyframes: [
           {
             opacity: ['66%', '100%'],
-            duration: 250,
-            easing: 'easeOutCirc'
+            duration: 250
           }
         ]
       },
@@ -186,7 +193,6 @@ export const animateProjectReverse = (index: number) => {
             },
             begin(anim) {
               const elem = anim as unknown as HTMLElement;
-              console.log(elem);
               elem.style.textAlign = '';
               if (elem.classList.contains('subTitle')) {
                 elem.classList.toggle('expanded', false);
@@ -204,7 +210,7 @@ export const animateProjectReverse = (index: number) => {
             }
           }
         ],
-        easing: 'easeInOutCirc'
+        easing: 'easeOutQuint'
       },
       0
     );

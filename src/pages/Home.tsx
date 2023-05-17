@@ -42,7 +42,7 @@ export default function Home(props: HTMLProps<HTMLDivElement>) {
         targets: `#home .titleContent>.homeTitle`,
         keyframes: [translateY(0), translateY(1), translateY(2)],
         delay: LOOP_DELAY,
-        easing: 'easeOutExpo'
+        easing: 'easeOutQuint'
       })
       .add(
         {
@@ -52,7 +52,7 @@ export default function Home(props: HTMLProps<HTMLDivElement>) {
             { ...translateY(0), delay: SPIN_DURATION }
           ],
           delay: LOOP_DELAY,
-          easing: 'easeOutExpo'
+          easing: 'easeOutQuint'
         },
         0
       );
@@ -81,7 +81,7 @@ export default function Home(props: HTMLProps<HTMLDivElement>) {
           targets: `#home .introText`,
           translateY: ['-25%', '0%'],
           opacity: [0, 1],
-          easing: 'easeOutExpo',
+          easing: 'easeOutQuint',
           delay: (_, i, l) => [500, 800, 1500, 2050][i % l]
         },
         0
@@ -91,7 +91,7 @@ export default function Home(props: HTMLProps<HTMLDivElement>) {
           targets: `#home .revealer>*:first-child`,
           translateY: ['-25%', '0%'],
           opacity: [0, 1],
-          easing: 'easeOutExpo',
+          easing: 'easeOutQuint',
           delay: anime.stagger(1250)
         },
         2500
@@ -165,25 +165,27 @@ export default function Home(props: HTMLProps<HTMLDivElement>) {
         <div className="flex w-full flex-wrap justify-evenly p-1 md:p-4 xl:flex-nowrap">
           {technologies &&
             imageBuilder &&
-            technologies.map((tech) => {
-              const svgUrl = imageBuilder.image(tech.thumbnail).url();
-              return (
-                <div
-                  key={svgUrl}
-                  className="techs text-foreground m-2 flex h-12 w-12 flex-col items-center md:h-16 md:w-16"
-                >
-                  <svg
-                    className="icon h-12 w-12"
-                    data-src={svgUrl}
-                    {...{
-                      [tech.thumbnail.stroke ? 'stroke' : 'fill']:
-                        'currentColor'
-                    }}
-                  />
-                  <p className="text-sm xl:text-base">{tech.name}</p>
-                </div>
-              );
-            })}
+            technologies
+              .filter((t) => t.mainTech)
+              .map((tech) => {
+                const svgUrl = imageBuilder.image(tech.thumbnail).url();
+                return (
+                  <div
+                    key={svgUrl}
+                    className="techs text-foreground m-2 flex h-12 w-12 flex-col items-center md:h-16 md:w-16"
+                  >
+                    <svg
+                      className="icon h-12 w-12"
+                      data-src={svgUrl}
+                      {...{
+                        [tech.thumbnail.stroke ? 'stroke' : 'fill']:
+                          'currentColor'
+                      }}
+                    />
+                    <p className="text-sm xl:text-base">{tech.name}</p>
+                  </div>
+                );
+              })}
         </div>
       </div>
     </div>

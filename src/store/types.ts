@@ -6,6 +6,7 @@ export type Technology = {
     stroke?: boolean;
     name: string;
   };
+  mainTech: boolean;
   [key: string]: unknown;
 };
 
@@ -53,7 +54,7 @@ export type CMSStore = {
   technologies: Technology[];
   projects: Project[];
   works: Work[];
-  contact: Social[];
+  contacts: Social[];
   resume: Resume;
   imageBuilder: ImageUrlBuilder;
   isLoading: boolean;

@@ -47,7 +47,7 @@ function Toolbar(props: {
       }
       id="toolbar"
     >
-      <div className="text-foreground flex flex-1 text-xl tracking-widest md:pl-4">
+      <div className="text-foreground flex flex-1 whitespace-pre text-xl tracking-widest md:pl-4">
         Vincent Lam /
         <div className="revealer w-24">
           <div className="titleContent whitespace-pre md:w-24">

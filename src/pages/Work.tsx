@@ -6,6 +6,7 @@ import { HTMLProps, useState } from 'react';
 import { Tab } from '@headlessui/react';
 import { cx } from '@vechaiui/react';
 import { Title } from '@src/components/Commons';
+import { handleScroll } from '@src/etc/Helpers';
 
 const convertDate = (date: string) => {
   return new Date(date).toLocaleDateString('default', {
@@ -99,7 +100,10 @@ export default function Work(props: HTMLProps<HTMLDivElement>) {
               </Tab>
             ))}
           </Tab.List>
-          <Tab.Panels className="tabPanel flex-1 overflow-y-auto">
+          <Tab.Panels
+            className="tabPanel flex-1 overflow-y-auto"
+            onWheel={handleScroll}
+          >
             {works.map((work) => renderWork(work))}
           </Tab.Panels>
         </>
