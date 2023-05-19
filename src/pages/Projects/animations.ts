@@ -18,7 +18,7 @@ export const animateProject = (index: number): AnimeTimelineInstance => {
         keyframes: [
           {
             easing: 'easeInOutCirc',
-            height: ['66.667%', '90%'],
+            height: ['50%', '66.67%'],
             duration: 750
           }
         ]
@@ -41,7 +41,7 @@ export const animateProject = (index: number): AnimeTimelineInstance => {
     )
     .add(
       {
-        targets: `${targets}.mobile>div`,
+        // targets: `${targets}.mobile>div`,
         keyframes: [
           {
             easing: 'easeInOutCirc',
@@ -125,11 +125,23 @@ export const animateProjectReverse = (index: number) => {
     })
     .add(
       {
+        targets: `${targets}`,
+        keyframes: [
+          {
+            easing: 'easeInOutCirc',
+            height: ['66.67%', '50%'],
+            duration: 750
+          }
+        ]
+      },
+      0
+    )
+    .add(
+      {
         targets: `${targets}:not(.mobile)`,
         keyframes: [
           {
             easing: 'easeInOutCirc',
-            height: ['90%', '66.667%'],
             width: ['100%', '66.667%'],
             duration: 750
           }
@@ -139,7 +151,7 @@ export const animateProjectReverse = (index: number) => {
     )
     .add(
       {
-        targets: `${targets}.mobile>div`,
+        // targets: `${targets}.mobile>div`,
         keyframes: [
           {
             easing: 'easeInOutCirc',

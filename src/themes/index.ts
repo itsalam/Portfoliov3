@@ -40,16 +40,17 @@ export type ThemeStore = {
 };
 
 const fadeInOutCanvas = (callback: () => void) => {
-  const animation = (transitions?: object) =>
-    document
-      .querySelector('#canvas')
-      ?.animate(
+  const canvas = document.querySelector('#canvas');
+  if (canvas) {
+    const animation = (transitions?: object, delay?: number) =>
+      canvas.animate(
         { opacity: 0, ...transitions },
-        { duration: 450, easing: 'linear' }
+        { duration: 550, easing: 'linear', fill: 'forwards', delay: delay ?? 0 }
       );
-  animation()
-    ?.finished.then(callback)
-    .then(() => animation({ opacity: [0, 1] }));
+    animation()
+      .finished.then(callback)
+      .then(() => animation({ opacity: [0, 1] }, 350));
+  }
 };
 
 const createThemeSlice: StateCreator<ThemeStore> = (set, get) => ({

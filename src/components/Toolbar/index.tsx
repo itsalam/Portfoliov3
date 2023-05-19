@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import useStore from '@src/store';
 import Menu from '../Menu';
 import ThemeSwitch from './ThemeSwitch';
-import SettingsButton from './SettingsButton';
+import Settings from './Settings';
 import { isWideListener, isMobileListener } from '@src/etc/Helpers';
 
 function Toolbar(props: {
@@ -17,7 +17,7 @@ function Toolbar(props: {
     [`${isDownwards ? '-' : ''}100%`, '0%']
   ];
 
-  const isWide = isWideListener();
+  const isWide = isWideListener(1280);
   const isMobile = isMobileListener();
 
   useEffect(() => {
@@ -57,16 +57,17 @@ function Toolbar(props: {
         </div>
       </div>
       <div className="flex gap-4">
-        {!isWide && !isMobile && <Menu isToolBar />}
+        {!isMobile && !isWide && <Menu isToolBar vertical={false} />}
         {!isWide && (
           <ThemeSwitch
             darkMode={props.darkMode}
             setDarkMode={props.setDarkMode}
           />
         )}
-        <SettingsButton
+        <Settings
           darkMode={props.darkMode}
           setDarkMode={props.setDarkMode}
+          hideThemeSwitch={!isWide}
         />
       </div>
     </div>

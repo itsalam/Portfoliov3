@@ -43,7 +43,7 @@ body {
 
   .subTitle {
     font-family: Source Sans Pro;
-    @apply font-normal 2xl:text-4xl md:text-2xl text-2xl leading-tight;
+    @apply 2xl:text-4xl md:text-2xl text-2xl leading-tight;
   }
 
   .subTitle.expanded {

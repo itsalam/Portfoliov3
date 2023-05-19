@@ -25,7 +25,7 @@ import { useControls } from 'leva';
 import { debounce } from 'lodash';
 
 function Content(props: HTMLProps<HTMLDivElement> & { children?: ReactNode }) {
-  const isWide = isWideListener();
+  const isWide = isWideListener(1280);
   const isMobile = isMobileListener();
 
   const contentRef = useRef<HTMLDivElement>(null);

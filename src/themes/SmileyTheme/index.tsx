@@ -23,6 +23,7 @@ export default function Background() {
 
   const { hideForeground } = useStore();
 
+  const [firstRender, setFirstRender] = useState(true);
   const filterRef = useRef<HTMLDivElement>(null);
   const groupRef = useRef<Group>(null);
   const effectRef = useRef<CustomEffect>(null);
@@ -31,11 +32,17 @@ export default function Background() {
   const [meshs, setMeshes] = useState<Mesh[]>([]);
 
   useEffect(() => {
+    console.log("boo")
     if (filterRef.current) {
-      filterRef.current.animate(
-        { opacity: hideForeground ? 0 : 0.8 },
-        { duration: 350, fill: 'forwards' }
-      );
+      if (firstRender) {
+        filterRef.current.style.opacity = hideForeground ? '0' : '0.8';
+        setFirstRender(false);
+      } else {
+        filterRef.current.animate(
+          { opacity: hideForeground ? 0 : 0.8 },
+          { duration: 350, fill: 'forwards' }
+        );
+      }
     }
   }, [hideForeground]);
 

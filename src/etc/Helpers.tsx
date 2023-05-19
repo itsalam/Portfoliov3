@@ -30,12 +30,14 @@ export const isMobileListener = () => {
   return isMobile;
 };
 
-export const isWideListener = () => {
-  const [isWide, setIsWide] = useState<boolean>(window.innerWidth >= 1028);
+export const isWideListener = (breakpoint?: number) => {
+  const [isWide, setIsWide] = useState<boolean>(
+    window.innerWidth >= (breakpoint || 1024)
+  );
 
   useEffect(() => {
     const updateIsWide = () => {
-      setIsWide(window.innerWidth >= 1280);
+      setIsWide(window.innerWidth >= (breakpoint || 1024));
     };
 
     updateIsWide();
@@ -74,7 +76,9 @@ export function DefaultLoader() {
 
 export const handleScroll: React.WheelEventHandler<HTMLDivElement> = (e) => {
   const element = e.currentTarget;
+  console.log(element.scrollHeight, element.clientHeight, element.scrollTop);
   if (
+    element.scrollHeight === element.clientHeight ||
     (e.deltaY < 0 &&
       element.scrollTop === 0 &&
       element.scrollHeight > element.clientHeight) ||

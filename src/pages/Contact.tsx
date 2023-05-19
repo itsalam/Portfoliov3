@@ -157,7 +157,7 @@ export default function Contact(props: HTMLProps<HTMLDivElement>) {
       <div className="h-full w-full">
         <embed
           src={props.resume.url}
-          className="h-[65vh] min-h-[300px]  w-full xl:h-[50vh]"
+          className="h-[65vh] min-h-[300px]  w-full xl:h-[70vh]"
         />
       </div>
     );
@@ -246,7 +246,7 @@ export default function Contact(props: HTMLProps<HTMLDivElement>) {
 
   const ResumeSideColumn = useCallback(
     (props: { resume: Resume }) => (
-      <div className="flex h-full flex-col items-center justify-center gap-4 self-center xl:w-2/5">
+      <div className="flex h-full w-1/2 flex-col items-center justify-center gap-4 self-center ">
         <ResumePreview resume={props.resume} />
         <DownloadButton resume={props.resume} className="h-20 w-1/3" />
       </div>

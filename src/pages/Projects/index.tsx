@@ -2,7 +2,6 @@ import { AnimeTimelineInstance } from 'animejs';
 import { cx } from '@vechaiui/react';
 import React, {
   HTMLProps,
-  MouseEventHandler,
   WheelEventHandler,
   useCallback,
   useRef
@@ -124,7 +123,7 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
       <div
         onClick={onProjectClick(i)}
         className={cx(
-          'transition project rounded-md shadow-md flex hover:bg-base/80 bg-base/30 md:h-4/6',
+          'transition project rounded-md shadow-md flex hover:bg-base/80 bg-base/30 md:h-3/6',
           'w-full md:w-2/3',
           'flex-col md:flex-row',
           { right: i % 2 === 0, left: i % 2 === 1, mobile: isMobile }
@@ -140,7 +139,7 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
         />
         <div
           className={cx(
-            'cursor-pointer flex flex-col p-4 justify-center md:w-3/4 md:h-auto h-32',
+            'cursor-pointer flex flex-col p-4 justify-center md:w-3/4 h-full',
             {
               'md:items-end md:text-end md:left-0': i % 2 === 0,
               'md:items-start md:right-0': i % 2 === 1

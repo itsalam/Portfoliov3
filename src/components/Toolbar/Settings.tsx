@@ -3,9 +3,10 @@ import useStore from '@src/store';
 import { Leva, useControls } from 'leva';
 import { useMemo } from 'react';
 
-export default function SettingsButton(props: {
+export default function Settings(props: {
   darkMode: boolean;
   setDarkMode: (arg: boolean) => void;
+  hideThemeSwitch?: boolean;
 }) {
   const { vechaiTheme, setBgOpacity, setActiveTheme, themeIds } =
     useStore.getState();
@@ -82,7 +83,7 @@ export default function SettingsButton(props: {
         title: 'Theme Options',
         position: { x: 0, y: isWide ? 0 : 65 }
       }}
-      hidden={!isWide}
+      hidden={props.hideThemeSwitch}
       collapsed={true}
       theme={vechaiThemeToLeva}
     />

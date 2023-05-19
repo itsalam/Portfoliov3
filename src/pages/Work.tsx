@@ -46,7 +46,7 @@ export default function Work(props: HTMLProps<HTMLDivElement>) {
       >
         {work.experiences.map((experience, i) => (
           <div className="flex flex-col gap-3 xl:px-4" key={i}>
-            <h1 className="subTitle text-muted whitespace-pre-wrap sm:whitespace-nowrap">
+            <h1 className="mainText text-muted whitespace-pre-wrap font-normal sm:whitespace-nowrap">
               <span>
                 {experience.title}
                 <span className="text-foreground">
@@ -55,7 +55,7 @@ export default function Work(props: HTMLProps<HTMLDivElement>) {
                 </span>
               </span>
             </h1>
-            <p className="mainText text-muted">
+            <p className="subTitle text-muted font-light">
               {convertDate(experience.from)} - {convertDate(experience.to)}
             </p>
             <div className="subText w-full xl:px-4">
