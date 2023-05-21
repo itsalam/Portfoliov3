@@ -24,7 +24,7 @@ export default function Settings(props: {
     Theme: {
       options: themeIds,
       value: activeTheme,
-      onChange: (v: any) => {
+      onChange: (v: string) => {
         setActiveTheme(v);
       },
       transient: true
@@ -34,7 +34,7 @@ export default function Settings(props: {
       min: 0,
       max: 1,
       step: 0.1,
-      onChange: (v: any) => {
+      onChange: (v: number) => {
         setBgOpacity(v);
       }
     }

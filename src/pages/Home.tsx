@@ -30,7 +30,7 @@ const BODY =
 
 export default function Home(props: HTMLProps<HTMLDivElement>) {
   const { pages, setActivePage } = useStore.getState();
-  const { imageBuilder, technologies } = useStore.getState();
+  const { getSrc, technologies } = useStore.getState();
 
   const titleLoop = () =>
     anime
@@ -164,11 +164,11 @@ export default function Home(props: HTMLProps<HTMLDivElement>) {
         <span className={'revealerSpan'}>Things I like Using:</span>
         <div className="flex w-full flex-wrap justify-evenly p-1 md:p-4 xl:flex-nowrap">
           {technologies &&
-            imageBuilder &&
+            getSrc &&
             technologies
               .filter((t) => t.mainTech)
               .map((tech) => {
-                const svgUrl = imageBuilder.image(tech.thumbnail).url();
+                const svgUrl = getSrc(tech.thumbnail);
                 return (
                   <div
                     key={svgUrl}

@@ -1,5 +1,4 @@
 import { AnimeTimelineInstance } from 'animejs';
-import { cx } from '@vechaiui/react';
 import React, {
   HTMLProps,
   WheelEventHandler,
@@ -8,19 +7,17 @@ import React, {
 } from 'react';
 import { useEffect, useState } from 'react';
 import useStore from '@src/store';
-import Link from '@src/assets/link.svg';
-import Github from '@src/assets/github.svg';
 import { animateProject, animateProjectReverse } from './animations';
 import { Project } from '@src/store/types';
 import { Swiper, SwiperRef, SwiperSlide } from 'swiper/react';
 import { FreeMode, Mousewheel, Pagination, Scrollbar } from 'swiper';
 
 import {
-  handleScroll,
   isMobileListener,
   isWideListener
 } from '@src/etc/Helpers';
 import { debounce } from 'lodash';
+import ProjectContent from './components/ProjectSlide';
 
 export default function Projects(props: HTMLProps<HTMLDivElement>) {
   const [focusedProj, setFocusedProj] = useState<number>();
@@ -33,7 +30,7 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
   const isMobile = isMobileListener();
   const isWide = isWideListener();
 
-  const { projects, imageBuilder } = useStore.getState();
+  const { projects, getSrc } = useStore.getState();
   const { activePage } = useStore();
 
   const swiperRef = useRef<SwiperRef | null>(null);
@@ -100,81 +97,14 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
       setFocusedProj(i === focusedProj ? undefined : i);
     };
 
-  const LinkHref = useCallback((props: { dataSrc: string; href: string }) => {
-    const onAnchorClick = (
-      e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
-    ) => {
-      e.stopPropagation(); //
-    };
-
-    return (
-      <a
-        className="hover:bg-foreground/10 h-7 w-7 rounded-sm"
-        href={props.href}
-        onClick={onAnchorClick}
-      >
-        <svg fill="currentColor" data-src={props.dataSrc}></svg>
-      </a>
-    );
-  }, []);
-
   const renderProjects = (project: Project, i: number) => (
     <SwiperSlide key={`p-${i}`} className="flex items-center justify-center">
-      <div
+      <ProjectContent
+        project={project}
+        index={i}
         onClick={onProjectClick(i)}
-        className={cx(
-          'transition project rounded-md shadow-md flex hover:bg-base/80 bg-base/30 md:h-3/6',
-          'w-full md:w-2/3',
-          'flex-col md:flex-row',
-          { right: i % 2 === 0, left: i % 2 === 1, mobile: isMobile }
-        )}
-      >
-        <img
-          src={imageBuilder?.image(project.thumbnails[0]).url()}
-          className={cx(
-            'cursor-pointer md:w-1/4 object-cover object-center z-10',
-            'w-full h-60 md:h-auto rounded-t-md',
-            { 'md:rounded-r-md': i % 2 === 0, 'md:rounded-l-md': i % 2 === 1 }
-          )}
-        />
-        <div
-          className={cx(
-            'cursor-pointer flex flex-col p-4 justify-center md:w-3/4 h-full',
-            {
-              'md:items-end md:text-end md:left-0': i % 2 === 0,
-              'md:items-start md:right-0': i % 2 === 1
-            }
-          )}
-        >
-          <div className="revealer flex shrink-0 justify-between md:flex-col">
-            <h1 className="subTitle whitespace-no-wrap shrink-0">
-              {project.name}
-            </h1>
-            <div className="revealer w-auto">
-              <div
-                className={cx('links flex', {
-                  'md:flex-row-reverse': i % 2 === 0
-                })}
-              >
-                <LinkHref dataSrc={Link} href={project.link} />
-                <LinkHref dataSrc={Github} href={project.githublink} />
-              </div>
-            </div>
-          </div>
-          <div className="revealer shrink-0">
-            <p className="subText description">{project.description}</p>
-          </div>
-          <div className="bg-foreground my-3 h-[1px] w-full" />
-          <div
-            className="revealer fullDescription shrink-1 h-0 overflow-y-scroll opacity-0"
-            onWheel={handleScroll}
-          >
-            <div className="subText absolute">
-              <p>{project.fullDescription}</p>
-            </div>
-          </div>
-        </div>
-      </div>
+        imgSrc={getSrc ? getSrc(project.thumbnails[0]) : ""}
+      />
     </SwiperSlide>
   );
 

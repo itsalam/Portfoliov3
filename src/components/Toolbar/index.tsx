@@ -12,9 +12,9 @@ function Toolbar(props: {
   const { activePage, pages } = useStore();
   const [currPage, setCurrPage] = useState<number>();
 
-  const animationVals = (isDownwards?: boolean) => [
-    ['0%', `${isDownwards ? '' : '-'}100%`],
-    [`${isDownwards ? '-' : ''}100%`, '0%']
+  const animationVals = (downwards?: boolean) => [
+    ['0%', `${downwards ? '' : '-'}100%`],
+    [`${downwards ? '-' : ''}100%`, '0%']
   ];
 
   const isWide = isWideListener(1280);

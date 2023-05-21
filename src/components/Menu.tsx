@@ -1,14 +1,7 @@
 import { cx } from '@vechaiui/react';
 import { debounce } from 'lodash';
 import useStore from '@src/store';
-import {
-  ReactNode,
-  useRef,
-  useState,
-  useEffect,
-  useCallback,
-  SVGProps
-} from 'react';
+import { ReactNode, useRef, useState, useEffect, SVGProps } from 'react';
 import React from 'react';
 import { isWideListener } from '@src/etc/Helpers';
 
@@ -81,7 +74,10 @@ const Divider = () => (
 const RADIUS = 12;
 const STROKE = 3;
 
-function Menu({ vertical = isWideListener(), isToolBar = false }) {
+function Menu(props: { vertical?: boolean; isToolBar?: boolean }) {
+  let { vertical, isToolBar } = props;
+  vertical = vertical ?? isWideListener(1280);
+  isToolBar = isToolBar ?? false;
   const START = vertical ? 'top' : 'left';
   const END = vertical ? 'bottom' : 'right';
 
@@ -138,7 +134,7 @@ function Menu({ vertical = isWideListener(), isToolBar = false }) {
     moveSelector(activePage);
 
     setProgress(activePage / (pages.length - 1));
-  }, [activePage]);
+  }, [activePage, vertical]);
 
   useEffect(() => {
     moveSelector(activePage);

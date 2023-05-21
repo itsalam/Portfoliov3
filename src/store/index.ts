@@ -1,7 +1,7 @@
 import { StateCreator, create } from 'zustand';
 import createThemeSlice, { ThemeStore } from '../themes';
 import createCMSSlice from './client';
-import { AsyncCMSStore } from './types';
+import { CMSStore } from './types';
 import { debounce } from 'lodash';
 
 interface AppStore {
@@ -18,7 +18,7 @@ const createAppSlice: StateCreator<AppStore> = (set) => ({
   hideForeground: false
 });
 
-export default create<AppStore & AsyncCMSStore & ThemeStore>((...a) => ({
+export default create<AppStore & Partial<CMSStore> & ThemeStore>((...a) => ({
   ...createThemeSlice(...a),
   ...createCMSSlice(...a),
   ...createAppSlice(...a)

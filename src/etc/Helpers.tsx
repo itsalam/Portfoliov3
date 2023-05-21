@@ -32,17 +32,17 @@ export const isMobileListener = () => {
 
 export const isWideListener = (breakpoint?: number) => {
   const [isWide, setIsWide] = useState<boolean>(
-    window.innerWidth >= (breakpoint || 1024)
+    window.innerWidth >= (breakpoint ?? 1024)
   );
 
   useEffect(() => {
     const updateIsWide = () => {
-      setIsWide(window.innerWidth >= (breakpoint || 1024));
+      setIsWide(window.innerWidth >= (breakpoint ?? 1024));
     };
 
     updateIsWide();
     window.addEventListener('resize', updateIsWide);
-    return () => window.removeEventListener('resize', updateIsWide);
+    return () => document.removeEventListener('resize', updateIsWide);
   }, []);
 
   return isWide;

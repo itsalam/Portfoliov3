@@ -32,7 +32,6 @@ export default function Background() {
   const [meshs, setMeshes] = useState<Mesh[]>([]);
 
   useEffect(() => {
-    console.log("boo")
     if (filterRef.current) {
       if (firstRender) {
         filterRef.current.style.opacity = hideForeground ? '0' : '0.8';

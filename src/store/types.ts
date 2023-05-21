@@ -1,11 +1,11 @@
 import { ImageUrlBuilder } from '@sanity/image-url/lib/types/builder';
+import { SanityImageSource } from '@sanity/image-url/lib/types/types';
+
+type SanityImageSrc = SanityImageSource & { stroke: boolean };
 
 export type Technology = {
   name: string;
-  thumbnail: {
-    stroke?: boolean;
-    name: string;
-  };
+  thumbnail: SanityImageSrc;
   mainTech: boolean;
   [key: string]: unknown;
 };
@@ -23,10 +23,7 @@ export type Work = {
 
 export type Social = {
   value: string;
-  thumbnail: {
-    stroke?: boolean;
-    name: string;
-  };
+  thumbnail: SanityImageSrc;
   link?: string;
   [key: string]: unknown;
 };
@@ -37,15 +34,12 @@ export type Project = {
   fullDescription: string;
   githublink: string;
   link: string;
-  thumbnails: any;
+  thumbnails: SanityImageSrc[];
   [key: string]: unknown;
 };
 
 export type Resume = {
-  icon: {
-    stroke?: boolean;
-    name: string;
-  };
+  icon: SanityImageSrc;
   url: string;
   title: string;
 };
@@ -57,7 +51,6 @@ export type CMSStore = {
   contacts: Social[];
   resume: Resume;
   imageBuilder: ImageUrlBuilder;
+  getSrc: (src: SanityImageSrc) => string;
   isLoading: boolean;
 };
-
-export type AsyncCMSStore = Partial<CMSStore>;

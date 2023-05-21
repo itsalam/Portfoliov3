@@ -76,7 +76,7 @@ export default function Work(props: HTMLProps<HTMLDivElement>) {
     <Tab.Group
       // @ts-ignore
       as={'div'}
-      className="flex h-screen flex-col gap-5 py-16 pb-24 md:h-full md:px-4 md:py-[10vh]"
+      className="flex h-full flex-col gap-5 py-16 pb-24 md:h-full md:px-4 md:py-[10vh]"
       selectedIndex={activeWork}
       // @ts-ignore
       onChange={handleTabChange}

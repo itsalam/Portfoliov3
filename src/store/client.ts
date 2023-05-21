@@ -1,7 +1,8 @@
 import { createClient } from '@sanity/client';
 import { StateCreator } from 'zustand';
 import imageUrlBuilder from '@sanity/image-url';
-import { AsyncCMSStore, CMSStore } from './types';
+import { CMSStore } from './types';
+import { SanityImageSource } from '@sanity/image-url/lib/types/types';
 
 export const client = createClient({
   projectId: 'tjaus1w5',
@@ -26,8 +27,11 @@ export async function getResume() {
   return schema[0];
 }
 
-const createCMSSlice: StateCreator<AsyncCMSStore> = (setState) => {
-  const initialState: AsyncCMSStore = {
+const createCMSSlice: StateCreator<Partial<CMSStore>> = (
+  setState,
+  getState
+) => {
+  const initialState: Partial<CMSStore> = {
     technologies: [],
     projects: [],
     works: [],
@@ -35,6 +39,7 @@ const createCMSSlice: StateCreator<AsyncCMSStore> = (setState) => {
     imageBuilder: imageUrlBuilder(client),
     isLoading: true
   };
+
   async function fetchData() {
     const schema: CMSStore = await {
       technologies: await getSchema('technology'),
@@ -43,6 +48,8 @@ const createCMSSlice: StateCreator<AsyncCMSStore> = (setState) => {
       contacts: await getSchema('contact'),
       resume: await getResume(),
       imageBuilder: imageUrlBuilder(client),
+      getSrc: (src: SanityImageSource) =>
+        getState().imageBuilder?.image(src).url() ?? '',
       isLoading: false
     };
     setState(schema);
