@@ -1,4 +1,9 @@
-import {
+import { isMobileListener, isWideListener } from '@src/etc/Helpers';
+import useStore from '@src/store';
+import { cx } from '@vechaiui/react';
+import { useControls } from 'leva';
+import { debounce } from 'lodash';
+import React, {
   HTMLProps,
   ReactNode,
   WheelEventHandler,
@@ -6,23 +11,16 @@ import {
   useEffect,
   useRef
 } from 'react';
-import { cx } from '@vechaiui/react';
-import Menu from './Menu';
-import { isWideListener, isMobileListener } from '@src/etc/Helpers';
-import 'swiper/css';
-import 'swiper/css/pagination';
-import { Swiper, SwiperRef, SwiperSlide } from 'swiper/react';
 import {
   HashNavigation,
   Keyboard,
   Mousewheel,
-  Pagination,
   Scrollbar
 } from 'swiper';
-import React from 'react';
-import useStore from '@src/store';
-import { useControls } from 'leva';
-import { debounce } from 'lodash';
+import 'swiper/css';
+import 'swiper/css/pagination';
+import { Swiper, SwiperRef, SwiperSlide } from 'swiper/react';
+import Menu from './Menu';
 
 function Content(props: HTMLProps<HTMLDivElement> & { children?: ReactNode }) {
   const isWide = isWideListener(1280);
@@ -31,7 +29,7 @@ function Content(props: HTMLProps<HTMLDivElement> & { children?: ReactNode }) {
   const contentRef = useRef<HTMLDivElement>(null);
 
   const { activePage, pages } = useStore.getState();
-  const { hideForeground } = useStore();
+  const { hideForeground } = useStore.getState();
 
   const swiperRef = useRef<SwiperRef | null>(null);
 
@@ -107,7 +105,6 @@ function Content(props: HTMLProps<HTMLDivElement> & { children?: ReactNode }) {
             useStore.setState({ activePage: swiper.activeIndex });
           }}
           modules={[
-            Pagination,
             Keyboard,
             Scrollbar,
             Mousewheel,

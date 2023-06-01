@@ -1,10 +1,10 @@
-import { isMobileListener, handleScroll } from "@src/etc/Helpers";
+import Github from '@src/assets/github.svg';
+import Link from '@src/assets/link.svg';
+import { handleScroll, isMobileListener } from "@src/etc/Helpers";
 import { Project } from "@src/store/types";
 import { cx } from "@vechaiui/react";
 import { HTMLProps, useCallback } from "react";
 import LinkHref from "./HrefLink";
-import Link from '@src/assets/link.svg';
-import Github from '@src/assets/github.svg';
 
 const ProjectSlide = (props: HTMLProps<HTMLDivElement> & { imgSrc: string, index: number, project: Project }) => {
     const { imgSrc, index: i, project } = props;
@@ -17,7 +17,7 @@ const ProjectSlide = (props: HTMLProps<HTMLDivElement> & { imgSrc: string, index
     return <div
         onClick={props.onClick}
         className={cx(
-            'transition project rounded-md shadow-md flex hover:brightness-125 bg-base/70 md:h-4/6',
+            'transition project rounded-md shadow-md flex hover:brightness-110 bg-base/70 h-2/3 md:h-3/6',
             'w-full md:w-2/3',
             'flex-col md:flex-row',
             { right: i % 2 === 0, left: i % 2 === 1, mobile: isMobile },
@@ -58,7 +58,7 @@ const ProjectSlide = (props: HTMLProps<HTMLDivElement> & { imgSrc: string, index
             <div className="revealer shrink-0">
                 <p className="subText description">{project.description}</p>
             </div>
-            <div className="bg-foreground my-3 h-[1px] w-full" />
+            <div className="bg-foreground my-1 h-[1px] w-full" />
             <div
                 className="revealer fullDescription shrink-1 h-0 overflow-y-scroll opacity-0"
                 onWheel={handleScroll}

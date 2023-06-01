@@ -1,5 +1,5 @@
-import { FormControlProps, FormControl, Textarea, Input, InputProps, TextareaProps, FormLabel } from "@vechaiui/react";
-import { HTMLProps, ReactNode } from "react";
+import { FormControl, FormControlProps, FormLabel, Input, InputProps, Textarea, TextareaProps } from "@vechaiui/react";
+import { HTMLProps, ReactNode, forwardRef } from "react";
 import { FieldValues, UseFormRegister } from "react-hook-form";
 
 type FormInputProps = {
@@ -12,19 +12,19 @@ type FormInputProps = {
 };
 
 const Label = (props: { children: ReactNode }) =>
-    <FormLabel className="subText capitalize">{props.children}</FormLabel>
+    <FormLabel className="capitalize">{props.children}</FormLabel>
 
-const TextInput = (props: HTMLProps<HTMLTextAreaElement> & InputProps) =>
+const TextInput = forwardRef((props: HTMLProps<HTMLTextAreaElement> & InputProps, _) =>
     <Input
         {...props}
         className="border-foreground bg-fill/10 w-full rounded-md border-2 "
-    />
+    />)
 
-const TextArea = (props: HTMLProps<HTMLTextAreaElement> & TextareaProps) =>
+const TextArea = forwardRef((props: HTMLProps<HTMLTextAreaElement> & TextareaProps, _) =>
     <Textarea
         {...props}
         className="border-foreground bg-fill/10 w-full flex-1 rounded-md border-2 "
-    />
+    />)
 
 const FormInput = (props: HTMLProps<HTMLDivElement>
     & FormControlProps

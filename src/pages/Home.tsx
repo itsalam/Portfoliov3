@@ -1,6 +1,6 @@
-import { HTMLProps, useEffect } from 'react';
-import anime from 'animejs';
 import { cx } from '@vechaiui/react';
+import anime from 'animejs';
+import { HTMLProps, useEffect } from 'react';
 import useStore from '../store';
 
 const SPIN_DURATION = 2000;
@@ -128,9 +128,9 @@ export default function Home(props: HTMLProps<HTMLDivElement>) {
     >
       <div className={cx('greeting-revealer mainText mix-blend-difference')}>
         <span className={'revealerSpan'}>
-          {GREETING.split(' ').map((text) => (
-            <span className={'introText'}>{text} </span>
-          ))}
+          {GREETING.split(' ').map((text, i) =>
+            <span key={`word-${i}`} className={'introText'}>{text} </span>
+          )}
           <div className={'aTitle -translate-y-full whitespace-pre'}>(a)</div>
         </span>
       </div>

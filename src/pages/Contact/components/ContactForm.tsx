@@ -1,7 +1,7 @@
 import { ArrowSVG, isWideListener } from "@src/etc/Helpers";
 import { Button, useNotification } from "@vechaiui/react";
-import FormInput from "./FormInput";
 import { useForm } from "react-hook-form";
+import FormInput from "./FormInput";
 
 const FormSubmitButton = () => (
     <Button

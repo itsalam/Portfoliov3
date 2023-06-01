@@ -1,27 +1,27 @@
-import React, { useRef, useMemo, forwardRef, useEffect, useState } from 'react';
-import fragmentShader from './fragment.glsl';
-import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader';
-import { Mesh, Vector2, Shape, Group, Color } from 'three';
+import { Html, OrbitControls } from '@react-three/drei';
 import { useFrame, useLoader, useThree } from '@react-three/fiber';
 import {
-  EffectComposer,
   Bloom,
+  EffectComposer,
   Noise,
   Scanline,
   Vignette
 } from '@react-three/postprocessing';
-import useStore from '@src/store';
 import Smiley from '@src/assets/smile1.svg';
+import useStore from '@src/store';
 import { useControls } from 'leva';
+import { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
+import { Color, Group, Mesh, Shape, Vector2 } from 'three';
+import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader';
 import { CustomEffect } from '../helper';
-import { Html, OrbitControls } from '@react-three/drei';
+import fragmentShader from './fragment.glsl';
 
 export default function Background() {
   const NUM_ICONS = 32;
   const ROW_PER_ICON = 4;
   const OFFSET_FACTOR = 1.065;
 
-  const { hideForeground } = useStore();
+  const { hideForeground } = useStore.getState();
 
   const [firstRender, setFirstRender] = useState(true);
   const filterRef = useRef<HTMLDivElement>(null);
