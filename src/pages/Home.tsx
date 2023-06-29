@@ -30,7 +30,7 @@ const BODY =
 
 export default function Home(props: HTMLProps<HTMLDivElement>) {
   const { pages, setActivePage } = useStore.getState();
-  const { getSrc, technologies } = useStore.getState();
+  const { getSrc, technology } = useStore.getState();
 
   const titleLoop = () =>
     anime
@@ -128,9 +128,11 @@ export default function Home(props: HTMLProps<HTMLDivElement>) {
     >
       <div className={cx('greeting-revealer mainText mix-blend-difference')}>
         <span className={'revealerSpan'}>
-          {GREETING.split(' ').map((text, i) =>
-            <span key={`word-${i}`} className={'introText'}>{text} </span>
-          )}
+          {GREETING.split(' ').map((text, i) => (
+            <span key={`word-${i}`} className={'introText'}>
+              {text}{' '}
+            </span>
+          ))}
           <div className={'aTitle -translate-y-full whitespace-pre'}>(a)</div>
         </span>
       </div>
@@ -163,9 +165,9 @@ export default function Home(props: HTMLProps<HTMLDivElement>) {
       <div className={cx(['revealer subTitle text-muted p-5 md:pt-10'])}>
         <span className={'revealerSpan'}>Things I like Using:</span>
         <div className="flex w-full flex-wrap justify-evenly p-1 md:p-4 xl:flex-nowrap">
-          {technologies &&
+          {technology &&
             getSrc &&
-            technologies
+            technology
               .filter((t) => t.mainTech)
               .map((tech) => {
                 const svgUrl = getSrc(tech.thumbnail);

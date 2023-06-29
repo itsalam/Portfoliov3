@@ -1,15 +1,14 @@
-import { HTMLProps, useCallback } from 'react';
-import useStore from '@src/store';
-import { isWideListener } from '@src/etc/Helpers';
-import { Resume } from '@src/store/types';
 import { Title } from '@src/components/Commons';
-import DownloadButton from './components/DownloadButton';
+import { isWideListener } from '@src/etc/Helpers';
+import useStore from '@src/store';
+import { Resume } from '@src/store/types';
+import { HTMLProps, useCallback } from 'react';
 import ContactForm from './components/ContactForm';
+import DownloadButton from './components/DownloadButton';
 import SocialInfo from './components/SocialInfo';
 
 export default function Contact(props: HTMLProps<HTMLDivElement>) {
   const { getSrc, resume } = useStore.getState();
-
   const isWide = isWideListener();
 
   const ResumeSideColumn = useCallback(
@@ -24,7 +23,8 @@ export default function Contact(props: HTMLProps<HTMLDivElement>) {
         <DownloadButton
           resume={props.resume}
           className="h-20 w-1/3"
-          svgSrc={getSrc ? getSrc(props.resume.icon) : ""} />
+          svgSrc={getSrc ? getSrc(props.resume.icon) : ''}
+        />
       </div>
     ),
     []

@@ -1,21 +1,19 @@
+import useStore from '@src/store';
+import { Project } from '@src/store/types';
 import { AnimeTimelineInstance } from 'animejs';
 import React, {
   HTMLProps,
   WheelEventHandler,
   useCallback,
-  useRef
+  useEffect,
+  useRef,
+  useState
 } from 'react';
-import { useEffect, useState } from 'react';
-import useStore from '@src/store';
-import { animateProject, animateProjectReverse } from './animations';
-import { Project } from '@src/store/types';
-import { Swiper, SwiperRef, SwiperSlide } from 'swiper/react';
 import { FreeMode, Mousewheel, Pagination, Scrollbar } from 'swiper';
+import { Swiper, SwiperRef, SwiperSlide } from 'swiper/react';
+import { animateProject, animateProjectReverse } from './animations';
 
-import {
-  isMobileListener,
-  isWideListener
-} from '@src/etc/Helpers';
+import { isMobileListener, isWideListener } from '@src/etc/Helpers';
 import { debounce } from 'lodash';
 import ProjectContent from './components/ProjectSlide';
 
@@ -30,7 +28,7 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
   const isMobile = isMobileListener();
   const isWide = isWideListener();
 
-  const { projects, getSrc } = useStore.getState();
+  const { project, getSrc } = useStore.getState();
   const { activePage } = useStore();
 
   const swiperRef = useRef<SwiperRef | null>(null);
@@ -51,13 +49,13 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
   );
 
   useEffect(() => {
-    projects && animateProgress(1 / projects.length);
+    project && animateProgress(1 / project.length);
   }, []);
 
   useEffect(() => {
     const firstProj = document.querySelector('.project');
     firstProj && setCenteredElem(firstProj);
-  }, [projects]);
+  }, [project]);
 
   useEffect(() => {
     setFocusedProj(undefined);
@@ -103,7 +101,7 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
         project={project}
         index={i}
         onClick={onProjectClick(i)}
-        imgSrc={getSrc ? getSrc(project.thumbnails[0]) : ""}
+        imgSrc={getSrc ? getSrc(project.thumbnails[0]) : ''}
       />
     </SwiperSlide>
   );
@@ -140,7 +138,7 @@ export default function Projects(props: HTMLProps<HTMLDivElement>) {
         className="h-auto w-full"
         ref={swiperRef}
       >
-        {projects?.map(renderProjects)}
+        {project?.map(renderProjects)}
       </Swiper>
     </div>
   );

@@ -11,12 +11,7 @@ import React, {
   useEffect,
   useRef
 } from 'react';
-import {
-  HashNavigation,
-  Keyboard,
-  Mousewheel,
-  Scrollbar
-} from 'swiper';
+import { HashNavigation, Keyboard, Mousewheel, Scrollbar } from 'swiper';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import { Swiper, SwiperRef, SwiperSlide } from 'swiper/react';
@@ -104,12 +99,7 @@ function Content(props: HTMLProps<HTMLDivElement> & { children?: ReactNode }) {
           onSlideChangeTransitionStart={(swiper) => {
             useStore.setState({ activePage: swiper.activeIndex });
           }}
-          modules={[
-            Keyboard,
-            Scrollbar,
-            Mousewheel,
-            HashNavigation
-          ]}
+          modules={[Keyboard, Scrollbar, Mousewheel, HashNavigation]}
           className="flex w-full flex-col gap-[20vh] px-4 "
         >
           {props.children &&

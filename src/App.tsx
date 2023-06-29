@@ -1,19 +1,22 @@
+import { VechaiProvider, cx } from '@vechaiui/react';
 import { Suspense, useEffect } from 'react';
-import Toolbar from './components/Toolbar';
+import Background from './components/Background';
 import Content from './components/Content';
-import { VechaiProvider } from '@vechaiui/react';
-import useStore from './store';
-import { cx } from '@vechaiui/react';
+import Toolbar from './components/Toolbar';
+import { DefaultLoader } from './etc/Helpers';
+import Contact from './pages/Contact';
 import Home from './pages/Home';
 import Projects from './pages/Projects';
-import Contact from './pages/Contact';
 import Work from './pages/Work';
-import { DefaultLoader } from './etc/Helpers';
-import Background from './components/Background';
+import useStore from './store';
 
 function App() {
-  const { vechaiTheme } = useStore.getState();
+
+  console.log(useStore());
+  const { vechaiTheme, loadingProgress } = useStore.getState();
   const { isLoading, activeTheme, darkMode, setDarkMode } = useStore();
+
+  useStore.subscribe(() => console.log(loadingProgress ? loadingProgress() : ""));
 
   const colorSchemeId = `${activeTheme}${darkMode ? 'Dark' : 'Light'}`;
 

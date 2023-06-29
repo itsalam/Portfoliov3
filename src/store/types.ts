@@ -44,13 +44,25 @@ export type Resume = {
   title: string;
 };
 
-export type CMSStore = {
-  technologies: Technology[];
-  projects: Project[];
+export enum Schemas {
+  technology = 'technology',
+  project = 'project',
+  works = 'works',
+  contact = 'contact',
+  resume = 'resume'
+}
+
+export type SchemaStores = {
+  technology: Technology[];
+  project: Project[];
   works: Work[];
-  contacts: Social[];
+  contact: Social[];
   resume: Resume;
+};
+
+export type CMSStore = SchemaStores & {
   imageBuilder: ImageUrlBuilder;
   getSrc: (src: SanityImageSrc) => string;
   isLoading: boolean;
+  loadingProgress: () => number;
 };
