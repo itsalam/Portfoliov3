@@ -1,46 +1,34 @@
-import { forwardRef, useEffect } from 'react';
-import { useMemo, useRef } from 'react';
-import fragmentShader from './fragment.glsl';
-import { Vector2 } from 'three';
+import { useMantineTheme } from '@mantine/core';
 import { useFrame, useThree } from '@react-three/fiber';
-import { EffectComposer } from '@react-three/postprocessing';
+import { Bloom, EffectComposer } from '@react-three/postprocessing';
 import { useControls } from 'leva';
+import { forwardRef, useMemo, useRef } from 'react';
+import { Vector2 } from 'three';
 import { CustomEffect } from '../helper';
-import { Html } from '@react-three/drei/web/Html';
-import useStore from '@src/store';
+import fragmentShader from './fragment.glsl';
 
 export default function Background() {
-  const { darkMode, hideForeground } = useStore();
-
   const effectRef = useRef<CustomEffect>(null);
-  const filterRef = useRef<HTMLDivElement>(null);
   const time = useRef<number>(0);
-  const { size } = useThree();
-
-  useEffect(() => {
-    if (filterRef.current) {
-      const opacity = darkMode ? (hideForeground ? 0.3 : 0.95) : 0;
-      filterRef.current.animate(
-        { opacity },
-        { duration: 350, fill: 'forwards' }
-      );
-    }
-  }, [hideForeground, darkMode]);
+  const { size, scene } = useThree();
+  const theme = useMantineTheme();
 
   const configs = useControls(
     'Theme Configs',
     {
-      color1: '#22c55e',
+      color1: '#233e2d',
       color2: '#d9f99d',
       color3: '#10b981',
       color4: '#facc15',
-      alpha: 3.0
+      alpha: 3.0,
+      multiply: 1,
     },
     { collapsed: true }
   );
 
   const DomainWarp = forwardRef((_, ref) => {
     const resolution = new Vector2(size.width, size.height);
+    configs.multiply *= theme.colorScheme === 'dark' ? 2 : 1;
     const effect = useMemo(
       () => new CustomEffect(fragmentShader, resolution, time.current, configs),
       []
@@ -57,13 +45,10 @@ export default function Background() {
 
   return (
     <group>
-      <Html
-        center
-        className="bg-base h-screen w-screen opacity-[.95]"
-        ref={filterRef}
-      ></Html>
+
       <EffectComposer>
         <DomainWarp ref={effectRef} />
+        <Bloom luminanceThreshold={0} luminanceSmoothing={0.9} height={300} />
       </EffectComposer>
     </group>
   );

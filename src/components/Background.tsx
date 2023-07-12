@@ -32,19 +32,19 @@ export default function Background() {
       label: 'Hide Content',
       onChange: (value: boolean) => {
         useStore.setState({ hideForeground: value });
-      }
-    }
+      },
+    },
   });
 
   return (
     <div
-      className="canvas-holder bg-base fixed h-screen w-screen"
+      className="canvas-holder fixed -z-10 h-screen w-screen"
       style={{ opacity: bgOpacity }}
     >
       <Canvas
         id="canvas"
         shadows="percentage"
-        className="intro-revealer"
+        className="intro-revealer mask"
         style={{ opacity: 0 }}
       >
         <OrbitControls />

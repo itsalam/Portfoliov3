@@ -1,9 +1,8 @@
+import { isWideListener } from '@src/etc/Helpers';
+import useStore from '@src/store';
 import { cx } from '@vechaiui/react';
 import { debounce } from 'lodash';
-import useStore from '@src/store';
-import { ReactNode, useRef, useState, useEffect, SVGProps } from 'react';
-import React from 'react';
-import { isWideListener } from '@src/etc/Helpers';
+import React, { ReactNode, SVGProps, useEffect, useRef, useState } from 'react';
 
 interface SelectorProps {
   radius: number;
@@ -32,10 +31,10 @@ function Selector(props: SelectorProps & SVGProps<SVGSVGElement>) {
   return (
     <svg {...otherProps} height={radius * 2} width={radius * 2}>
       <circle
-        stroke={'currentColor'}
+        stroke="currentColor"
         fill="transparent"
         strokeWidth={strokeWidth / 2}
-        strokeDasharray={circumference + ' ' + circumference}
+        strokeDasharray={`${circumference} ${circumference}`}
         strokeDashoffset={0}
         transform={`rotate(-90, ${radius}, ${radius})`}
         r={normalizedRadius}
@@ -44,17 +43,17 @@ function Selector(props: SelectorProps & SVGProps<SVGSVGElement>) {
         ref={progCircleRef}
       />
       <circle
-        stroke={'currentColor'}
+        stroke="currentColor"
         fill="transparent"
         strokeWidth={strokeWidth / 2}
-        strokeDasharray={circumference + ' ' + circumference}
+        strokeDasharray={`${circumference} ${circumference}`}
         r={normalizedRadius}
         cx={radius}
         cy={radius}
         opacity={0.2}
       />
       <circle
-        fill={'currentColor'}
+        fill="currentColor"
         r={normalizedRadius / 2}
         cx={radius}
         cy={radius}
@@ -65,9 +64,7 @@ function Selector(props: SelectorProps & SVGProps<SVGSVGElement>) {
 
 const Divider = () => (
   <div
-    className={
-      'bg-foreground invisible m-auto h-4 w-[2px] brightness-75 xl:visible'
-    }
+    className="bg-foreground invisible m-auto h-4 w-[2px] brightness-75 xl:visible"
   />
 );
 
@@ -99,9 +96,8 @@ function Menu(props: { vertical?: boolean; isToolBar?: boolean }) {
       const menuCoords = currMenuItem.getBoundingClientRect();
       const offset = menuRef.current?.getBoundingClientRect()[START] ?? 0;
       return (menuCoords[START] + menuCoords[END]) / 2 - RADIUS - offset;
-    } else {
-      return 0;
     }
+    return 0;
   };
 
   const moveSelector = debounce(
@@ -110,11 +106,11 @@ function Menu(props: { vertical?: boolean; isToolBar?: boolean }) {
       document.querySelector('#selector')?.animate(
         vertical
           ? {
-              top: `${moveVal}px`
-            }
+            top: `${moveVal}px`,
+          }
           : {
-              left: `${moveVal}px`
-            },
+            left: `${moveVal}px`,
+          },
         { duration: 250, fill: 'forwards', easing: 'ease-out' }
       );
     },
@@ -161,17 +157,15 @@ function Menu(props: { vertical?: boolean; isToolBar?: boolean }) {
         onMouseEnter={() => moveSelector(index)}
         href={`#${text.toLocaleLowerCase()}`}
         className={cx(
-          `flex items-center justify-center w-full px-1.5 hover:brightness-125 text-base sm:text-lg`,
+          'flex items-center justify-center w-full px-1.5 hover:brightness-125 text-base sm:text-lg',
           {
             'brightness-125': index === activePage,
             'brightness-75': index !== activePage,
-            'py-3': !isToolBar,
-            '': isToolBar
           },
-          'xl:py-6 sm:h-full'
+          'sm:h-full'
         )}
       >
-        <p className={cx(`xl:-translate-y-2 -translate-y-0.5`)}>
+        <p className={cx('-translate-y-0.5')}>
           {text.toUpperCase()}
         </p>
       </a>
@@ -181,10 +175,8 @@ function Menu(props: { vertical?: boolean; isToolBar?: boolean }) {
   const MenuContent = () => (
     <>
       {pages
-        .map<ReactNode>((item, i) => {
-          return <MenuButton key={`${i}`} index={i} text={item} />;
-        })
-        .reduce((prev, curr) => [prev, <Divider key={`divider-i`} />, curr])}
+        .map<ReactNode>((item, i) => <MenuButton key={`${i}`} index={i} text={item} />)
+        .reduce((prev, curr) => [prev, <Divider key="divider-i" />, curr])}
     </>
   );
 
@@ -193,13 +185,10 @@ function Menu(props: { vertical?: boolean; isToolBar?: boolean }) {
       ref={menuRef}
       onMouseLeave={() => moveSelector(activePage)}
       className={cx(
-        'intro-revealer flex group flex-row items-center font-display my-auto py-2 z-50',
-        'xl:rounded-xl xl:flex-col xl:-translate-x-full xl:-translate-y-1/2 xl:top-1/2 xl:w-40 xl:bottom-auto xl:left-auto xl:right-auto',
-        {
-          'fixed bg-foreground/10 left-0 bottom-0 m-auto right-0 flex-shrink-1 w-full shadow-2xl':
-            !isToolBar,
-          'sticky flex-1': isToolBar
-        }
+        'intro-revealer flex group flex-row items-center font-display my-auto z-50 muted-color',
+        'xl:rounded-xl',
+
+        'sticky flex-1'
       )}
     >
       <MenuContent />
@@ -208,7 +197,7 @@ function Menu(props: { vertical?: boolean; isToolBar?: boolean }) {
         progress={progress}
         strokeWidth={STROKE}
         radius={RADIUS}
-        className={cx(`absolute brightness-125 translate-y-4 xl:translate-y-3`)}
+        className={cx('absolute brightness-125 translate-y-5 mix-blend-screen')}
         style={currCoords !== undefined ? { [START]: `${currCoords}px` } : {}}
       />
     </div>

@@ -1,58 +1,61 @@
-import { cx } from '@vechaiui/react';
+import { Container, Flex, Text } from '@mantine/core';
+import Revealer from '@src/components/core/Revealer';
+import { getCX } from '@src/etc/Helpers';
 import anime from 'animejs';
-import { HTMLProps, useEffect } from 'react';
+import { useEffect } from 'react';
 import useStore from '../store';
 
-const SPIN_DURATION = 2000;
-const LOOP_DELAY = 3500;
+const SPIN_DURATION = 2500;
+const LOOP_DELAY = 2500;
 
 const titleKeyframes = [
   ['0%', '100%'],
   ['100%', '100%'],
-  ['-100%', '0%']
+  ['-100%', '0%'],
 ];
 
 const translateY = (offset: number) => ({
   translateY: (_el: Element, i: number) =>
     titleKeyframes[(i + offset) % titleKeyframes.length],
   opacity: 1,
-  duration: SPIN_DURATION
+  duration: SPIN_DURATION,
 });
 
 const GREETING = 'Hey there, I’m';
 const TITLES = [
   'Vincent\nLam',
   'Full-Stack\nDeveloper',
-  'Front-end\nDeveloper'
+  'Front-end\nDeveloper',
 ];
 const BODY =
   'I’m a developer based in Vancouver with a knack for developing web applications for internal company use. I like building things that are both elegant and robust with the most modern tools available.';
 
-export default function Home(props: HTMLProps<HTMLDivElement>) {
+export default function Home() {
   const { pages, setActivePage } = useStore.getState();
   const { getSrc, technology } = useStore.getState();
+  const { cx } = getCX();
 
   const titleLoop = () =>
     anime
       .timeline({
         loop: true,
-        delay: SPIN_DURATION
+        delay: SPIN_DURATION,
       })
       .add({
-        targets: `#home .titleContent>.homeTitle`,
+        targets: '.homeTitle',
         keyframes: [translateY(0), translateY(1), translateY(2)],
         delay: LOOP_DELAY,
-        easing: 'easeOutQuint'
+        easing: 'easeOutQuint',
       })
       .add(
         {
-          targets: `#home .aTitle`,
+          targets: '.a-revealer',
           keyframes: [
             translateY(2),
-            { ...translateY(0), delay: SPIN_DURATION }
+            { ...translateY(0), delay: SPIN_DURATION },
           ],
           delay: LOOP_DELAY,
-          easing: 'easeOutQuint'
+          easing: 'easeOutQuint',
         },
         0
       );
@@ -61,57 +64,57 @@ export default function Home(props: HTMLProps<HTMLDivElement>) {
     anime
       .timeline({
         begin(anim) {
-          addEventListener('mousedown', () => anim.seek(anim.duration), {
-            once: true
+          window.addEventListener('mousedown', () => anim.seek(anim.duration), {
+            once: true,
           });
         },
         complete: () => {
           const activePage = pages.findIndex(
             (page) =>
               page.localeCompare(window.location.hash.substring(1), undefined, {
-                sensitivity: 'base'
+                sensitivity: 'base',
               }) === 0
           );
 
           setActivePage(Math.max(activePage, 0));
-        }
+        },
       })
       .add(
         {
-          targets: `#home .introText`,
+          targets: '#home .introText',
           translateY: ['-25%', '0%'],
           opacity: [0, 1],
           easing: 'easeOutQuint',
-          delay: (_, i, l) => [500, 800, 1500, 2050][i % l]
+          delay: (_, i, l) => [250, 400, 750, 1000][i % l],
         },
         0
       )
       .add(
         {
-          targets: `#home .revealer>*:first-child`,
+          targets: '#home .revealer>*:first-child',
           translateY: ['-25%', '0%'],
           opacity: [0, 1],
           easing: 'easeOutQuint',
-          delay: anime.stagger(1250)
+          delay: anime.stagger(1000),
         },
-        2500
+        1500
       )
       .add({
-        targets: `#home .techs`,
+        targets: '#home .techs',
         opacity: [0, 1],
         delay: () => anime.random(150, 350),
         complete: () => {
           titleLoop();
-        }
+        },
       })
       .add(
         {
           targets: '.intro-revealer',
           opacity: [0, 1],
           duration: 500,
-          easing: 'linear'
+          easing: 'linear',
         },
-        3500
+        3000
       );
 
   useEffect(() => {
@@ -119,77 +122,79 @@ export default function Home(props: HTMLProps<HTMLDivElement>) {
   }, []);
 
   return (
-    <div
-      className={
-        'm-auto flex h-screen w-full snap-center flex-col justify-center'
-      }
-      id="home"
-      {...props}
-    >
-      <div className={cx('greeting-revealer mainText mix-blend-difference')}>
-        <span className={'revealerSpan'}>
-          {GREETING.split(' ').map((text, i) => (
-            <span key={`word-${i}`} className={'introText'}>
-              {text}{' '}
-            </span>
-          ))}
-          <div className={'aTitle -translate-y-full whitespace-pre'}>(a)</div>
-        </span>
-      </div>
-      <div className={cx(['revealer flex xl:my-2'])}>
-        <div
-          className={
-            'titleContent text-w-full relative h-40 w-full sm:h-20 2xl:h-28'
-          }
+    <div className="sm:w-1/2 sm:pl-8" id="home">
+      <Container>
+        <Flex
+          h="100vh"
+          direction="column"
+          justify="center"
+          className="justify-end overflow-x-visible pb-[25%]"
         >
-          {TITLES.map((text, i) => (
+          <Revealer className="mainText">
+            <span className="revealer-span">
+              {GREETING.split(' ').map((text, i) => (
+                <span key={`word-${i}`} className="introText">
+                  {text}{' '}
+                </span>
+              ))}
+              <div className="a-revealer -translate-y-full whitespace-pre">(a)</div>
+            </span>
+          </Revealer>
+          <Revealer className="revealer overflow-x-visible">
             <div
-              className={cx('homeTitle', 'w-full h-full', {
-                ['text-foreground']: i == 0,
-                ['text-foreground/75 opacity-0']: i == 1,
-                ['text-muted opacity-0']: i == 2
-              })}
-              key={text}
+              className="titleContent relative h-12 w-full overflow-x-visible sm:h-16 2xl:h-20"
             >
-              <span className="relative flex whitespace-pre-wrap sm:whitespace-nowrap">
-                {`${text} /`}
-                <br />
-              </span>
+              {TITLES.map((text, i) => (
+                <Text
+                  variant="gradient"
+                  gradient={{ deg: 95, from: 'primaryColor.3', to: 'secondaryColor.3' }}
+                  className={cx('absolute w-full h-full title homeTitle overflow-x-visible whitespace-nowrap', {
+                    'opacity-0': i !== 0,
+                  })}
+                  key={text}
+                >
+                  {`${text}/`}
+                </Text>
+              ))}
             </div>
-          ))}
-        </div>
-      </div>
-      <div className={cx(['revealer mainText mix-blend-difference'])}>
-        <span className={'revealerSpan'}>{BODY}</span>
-      </div>
-      <div className={cx(['revealer subTitle text-muted p-5 md:pt-10'])}>
-        <span className={'revealerSpan'}>Things I like Using:</span>
-        <div className="flex w-full flex-wrap justify-evenly p-1 md:p-4 xl:flex-nowrap">
-          {technology &&
-            getSrc &&
-            technology
-              .filter((t) => t.mainTech)
-              .map((tech) => {
-                const svgUrl = getSrc(tech.thumbnail);
-                return (
-                  <div
-                    key={svgUrl}
-                    className="techs text-foreground m-2 flex h-12 w-12 flex-col items-center md:h-16 md:w-16"
-                  >
-                    <svg
-                      className="icon h-12 w-12"
-                      data-src={svgUrl}
-                      {...{
-                        [tech.thumbnail.stroke ? 'stroke' : 'fill']:
-                          'currentColor'
-                      }}
-                    />
-                    <p className="text-sm xl:text-base">{tech.name}</p>
-                  </div>
-                );
-              })}
-        </div>
-      </div>
+          </Revealer>
+          <Revealer className="revealer mainText">
+            <span className="revealer-span">{BODY}</span>
+          </Revealer>
+          <Revealer className="revealer subTitle p-4">
+            <span className="revealer-span muted-color">Things I like Using:</span>
+            <Flex
+              className="w-full flex-wrap justify-center p-1 md:p-4 xl:flex-nowrap"
+
+            >
+              {technology &&
+                getSrc &&
+                technology
+                  .filter((t) => t.mainTech)
+                  .map((tech) => {
+                    const svgUrl = getSrc(tech.thumbnail);
+                    return (
+                      <Flex
+                        key={svgUrl}
+                        className="techs text-foreground m-2 flex h-12 w-12 flex-col items-center md:h-16 md:w-16 "
+                      >
+                        <svg
+                          className="icon h-12 w-12"
+                          data-src={svgUrl}
+                          {...{
+                            [tech.thumbnail.stroke ? 'stroke' : 'fill']:
+                              'currentColor',
+                          }}
+                        />
+                        <p className="text-sm xl:text-base">{tech.name}</p>
+                      </Flex>
+                    );
+                  })}
+            </Flex>
+          </Revealer>
+        </Flex>
+      </Container>
     </div>
+
   );
 }

@@ -3,6 +3,7 @@
 - [ ] Domain Warp mouse effect
 - [ ] Image Carosel
 - [ ] Update the loading icon?
+- [ ] Fade side on mobile
 
 ## Quick Install
 

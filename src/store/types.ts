@@ -35,6 +35,7 @@ export type Project = {
   githublink: string;
   link: string;
   thumbnails: SanityImageSrc[];
+  stack: Technology[];
   [key: string]: unknown;
 };
 
@@ -46,7 +47,7 @@ export type Resume = {
 
 export enum Schemas {
   technology = 'technology',
-  project = 'project',
+  projects = 'projects',
   works = 'works',
   contact = 'contact',
   resume = 'resume'
@@ -54,7 +55,7 @@ export enum Schemas {
 
 export type SchemaStores = {
   technology: Technology[];
-  project: Project[];
+  projects: Project[];
   works: Work[];
   contact: Social[];
   resume: Resume;

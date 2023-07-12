@@ -8,13 +8,11 @@ import DownloadButton from './DownloadButton';
 const Social = (props: { info: Social; svgSrc: string }) => {
   const contents = (
     <>
-      {
-        <svg
-          className="icon h-8 w-8 p-1 md:h-8 md:w-8"
-          data-src={props.svgSrc}
-          {...{ fill: 'currentColor' }}
-        />
-      }
+      <svg
+        className="icon h-8 w-8 p-1 md:h-8 md:w-8"
+        data-src={props.svgSrc}
+        {...{ fill: 'currentColor' }}
+      />
       {props.info.value}
     </>
   );
@@ -24,7 +22,7 @@ const Social = (props: { info: Social; svgSrc: string }) => {
       key={props.info.value}
       href={props.info.link}
       className={cx(
-        'subText flex w-full items-center gap-1 py-0 align-middle',
+        'subText flex items-center gap-1 py-0 align-middle',
         { 'underline cursor-pointer': props.info.link !== undefined },
         'hover:brightness-125 transition-all '
       )}
@@ -46,7 +44,7 @@ const SocialInfo = () => {
         <Social
           {...{
             info: contact,
-            svgSrc: getSrc ? getSrc(contact.thumbnail) : ''
+            svgSrc: getSrc ? getSrc(contact.thumbnail) : '',
           }}
           key={contact.value}
         />

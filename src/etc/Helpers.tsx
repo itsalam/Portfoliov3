@@ -1,8 +1,20 @@
+import { createStyles } from '@mantine/core';
 import { SVGProps, useEffect, useState } from 'react';
 
-const valToHex = (color: string): string => {
-  const hexadecimal = parseInt(color).toString(16);
-  return hexadecimal.length == 1 ? '0' + hexadecimal : hexadecimal;
+export const getCX = createStyles(() => ({}));
+
+export const valToHex = (val: string): string => {
+  let radix = 10;
+  let res = '';
+  if (val.startsWith('#')) {
+    res += '0x';
+    radix = 16;
+    val = val.substring(1);
+  }
+
+  const hexadecimal = parseInt(val, radix).toString(16);
+  console.log(hexadecimal);
+  return res + (hexadecimal.length === 1 ? `0${hexadecimal}` : hexadecimal);
 };
 
 export const RGBtoHex = (vals: string[]) => {
@@ -10,7 +22,7 @@ export const RGBtoHex = (vals: string[]) => {
     .map((val) => (val.includes('#') ? val : valToHex(val)))
     .join('');
   if (!hex.includes('#')) {
-    hex = '#' + hex;
+    hex = `#${hex}`;
   }
   return hex;
 };
@@ -69,7 +81,7 @@ export const ArrowSVG = (props: SVGProps<SVGSVGElement>) => (
 export function DefaultLoader() {
   return (
     <div className="absolute bottom-1/2 right-1/2  translate-x-1/2 translate-y-1/2">
-      <div className="h-32 w-32 animate-spin  rounded-full border-8 border-solid border-gray-500/50 border-t-transparent"></div>
+      <div className="h-32 w-32 animate-spin  rounded-full border-8 border-solid border-gray-500/50 border-t-transparent" />
     </div>
   );
 }

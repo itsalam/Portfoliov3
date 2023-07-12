@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;500;600&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@300;400;500;600&display=swap');
+@import './preflight.css';
 
 @import 'tailwindcss/base';
 @import 'tailwindcss/components';
@@ -27,33 +28,47 @@
   flex: 1 1 0%;
 }
 
-body {
-  background-color: var(--vc-colors-bg-base, rgb(0, 0, 0));
-}
-
 @layer base {
   html {
     scroll-behavior: smooth;
   }
 
-  .title {
-    font-family: Source Sans Pro;
-    @apply font-normal 2xl:text-8xl md:text-7xl text-6xl leading-tight;
+  #canvas {
+    --mask-position-x: 50%;
+    --mask: linear-gradient(
+        to left,
+        rgb(255 255 255 / 100%) 0%,
+        rgb(255 255 255 / 100%) 40%,
+        rgba(255, 255, 255, 0.11) 50%,
+        rgb(255 255 255 / 2%) 55%,
+        rgb(255 255 255 / 2%) 100%
+      )
+      0 100% / auto 212%;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    border-radius: var(--border-radius);
   }
 
-  .subTitle {
-    font-family: Source Sans Pro;
-    @apply 2xl:text-4xl md:text-2xl text-2xl leading-tight;
+  .project-overlay {
+    --mask-position-x: 50%;
+    --mask: linear-gradient(
+        to bottom,
+        rgb(255 255 255 / 100%) 0%,
+        rgb(255 255 255 / 100%) 40%,
+        rgba(255, 255, 255, 0.4) 50%,
+        rgb(255 255 255 / 30%) 55%,
+        rgb(255 255 255 / 30%) 100%
+      )
+      0 100% / auto 212%;
+    padding-left: inherit;
   }
 
-  .subTitle.expanded {
-    @apply 2xl:text-5xl md:text-4xl text-2xl;
-  }
-
-  .mainText {
-    font-family: Source Sans Pro;
-    white-space: break-spaces;
-    @apply md:font-light 2xl:text-2xl md:text-2xl text-xl leading-tight;
+  .mask {
+    -webkit-mask: var(--mask);
+    mask: var(--mask);
+    -webkit-mask-position: var(--mask-position-x) 50%;
+    mask-position: var(--mask-position-x) 50%;
   }
 
   .subText {
@@ -62,68 +77,25 @@ body {
     @apply md:font-light 2xl:text-lg md:text-lg text-base leading-tight;
   }
 
-  .border-foreground {
-    border-color: rgba(
-      var(--vc-colors-text-foreground),
-      var(--tw-text-opacity)
-    );
-  }
-
   .icon svg {
     fill: var(--vc-colors-text-foreground);
   }
 
-  .revealer,
-  .link-revealer {
-    @apply relative w-full overflow-x-clip overflow-y-hidden;
-  }
+  .project-carousel.mask {
+    --mask-position-x: 50%;
+    --mask: linear-gradient(
+        to right,
+        rgb(255 255 255 / 100%) 0%,
+        rgb(255 255 255 / 100%) 97%,
+        rgb(255 255 255 / 5%) 98.5%,
+        rgb(255 255 255 / 0%) 100%
+      )
+      0 100% / auto 212%;
 
-  .greeting-revealer {
-    @apply relative w-full overflow-x-clip overflow-y-hidden;
-  }
-
-  .titleContent {
-    @apply h-full w-full absolute overflow-y-visible top-0 left-0;
-  }
-
-  .text-w-full {
-    word-spacing: 100%;
-  }
-
-  .homeTitle {
-    @apply flex absolute title;
-  }
-
-  .revealerSpan {
-    @apply flex relative transform-none;
-  }
-
-  .project img {
-    filter: blur(2px);
-    transition: 0.2s filter linear;
-  }
-
-  .centered img,
-  .focused img {
-    filter: blur(0px);
-  }
-
-  .project.right {
-    @apply md:ml-auto md:flex-row-reverse;
-  }
-
-  .project.left {
-    @apply md:mr-auto;
-  }
-
-  .project.centered {
-    background-color: rgba(var(--vc-colors-bg-base), 0.9);
-    opacity: 100% !important;
-  }
-
-  input::placeholder,
-  textarea::placeholder {
-    color: rgba(var(--vc-colors-text-muted), 0.4);
+    -webkit-mask: var(--mask);
+    mask: var(--mask);
+    -webkit-mask-position: var(--mask-position-x) 50%;
+    mask-position: var(--mask-position-x) 50%;
   }
 
   ::-webkit-scrollbar {
@@ -138,13 +110,13 @@ body {
 
   ::-webkit-scrollbar-thumb {
     border-radius: 3px;
-    background: rgba(var(--vc-colors-text-foreground));
+    background: rgba(var(--vc-colors-text-primary-color));
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(var(--vc-colors-text-foreground));
+    background: rgba(var(--vc-colors-text-primary-color));
   }
   ::-webkit-scrollbar-thumb:active {
-    background: rgba(var(--vc-colors-text-foreground), 0.9);
+    background: rgba(var(--vc-colors-text-primary-color), 0.9);
   }
 }
 
@@ -159,4 +131,42 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
+}
+
+@layer components {
+  .title {
+    font-family: Source Sans Pro;
+    @apply font-normal 2xl:text-7xl md:text-5xl text-xl leading-tight;
+  }
+
+  .subTitle {
+    font-family: Source Sans Pro;
+    @apply 2xl:text-4xl md:text-2xl text-2xl leading-tight;
+  }
+
+  .mainText {
+    font-family: Source Sans Pro;
+    white-space: break-spaces;
+    @apply md:font-light 2xl:text-2xl md:text-xl text-lg leading-tight;
+  }
+  .revealer,
+  .link-revealer,
+  .greeting-revealer {
+    @apply relative w-full overflow-x-clip overflow-y-hidden;
+  }
+
+  .revealer-span {
+    @apply relative flex transform-none;
+  }
+
+  .titleContent {
+    word-spacing: 100%;
+  }
+
+  .glass {
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(6.9px);
+    -webkit-backdrop-filter: blur(6.9px);
+  }
 }

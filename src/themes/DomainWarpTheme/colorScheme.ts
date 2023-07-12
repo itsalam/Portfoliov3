@@ -1,42 +1,36 @@
-import { ColorScheme, colors } from '@vechaiui/react';
-import { BgColorScheme } from '..';
+import { MantineThemeOverride } from '@mantine/core';
 
-const DomainWarpLight: ColorScheme & BgColorScheme = {
-  id: 'DomainWarpLight',
-  type: 'light',
+export const DomainWarp: MantineThemeOverride = {
   colors: {
-    bg: {
-      base: colors.trueGray['400'],
-      fill: colors.trueGray['500']
-    },
-    text: {
-      foreground: colors.green['900'],
-      muted: colors.emerald['800']
-    },
-    primary: colors.emerald,
-    neutral: colors.lime,
-    hightlight1: '#00cc69',
-    hightlight2: '#e3aa00'
-  }
+    primaryColor: [
+      '#FDFFFE',
+      '#A8FFD5',
+      '#61FFB3',
+      '#26FF96',
+      '#00F67E',
+      '#00CC69',
+      '#00A454',
+      '#008343',
+      '#006936',
+      '#00542B',
+      '#004322',
+      '#00361C'
+    ],
+    secondaryColor: [
+      '#FFF5D8',
+      '#FFE289',
+      '#FFD147',
+      '#FFC410',
+      '#E3AA00',
+      '#B78800',
+      '#926D00',
+      '#755700',
+      '#5D4600',
+      '#4B3800',
+      '#3C2D00'
+    ]
+  },
+  primaryColor: 'primaryColor'
 };
 
-const DomainWarpDark: ColorScheme & BgColorScheme = {
-  id: 'DomainWarpDark',
-  type: 'dark',
-  colors: {
-    bg: {
-      base: colors.gray['900'],
-      fill: colors.gray['600']
-    },
-    text: {
-      foreground: colors.green['200'],
-      muted: colors.lime['200']
-    },
-    primary: colors.green,
-    neutral: colors.lime,
-    hightlight1: '#00cc69',
-    hightlight2: '#e3aa00'
-  }
-};
-
-export default { DomainWarpLight, DomainWarpDark };
+export default { DomainWarp };

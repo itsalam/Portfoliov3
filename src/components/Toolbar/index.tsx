@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { isMobileListener, isWideListener } from '@src/etc/Helpers';
 import useStore from '@src/store';
+import { useEffect, useState } from 'react';
 import Menu from '../Menu';
-import ThemeSwitch from './ThemeSwitch';
 import Settings from './Settings';
-import { isWideListener, isMobileListener } from '@src/etc/Helpers';
+import ThemeSwitch from './ThemeSwitch';
 
 function Toolbar(props: {
   darkMode: boolean;
@@ -14,7 +14,7 @@ function Toolbar(props: {
 
   const animationVals = (downwards?: boolean) => [
     ['0%', `${downwards ? '' : '-'}100%`],
-    [`${downwards ? '-' : ''}100%`, '0%']
+    [`${downwards ? '-' : ''}100%`, '0%'],
   ];
 
   const isWide = isWideListener(1280);
@@ -26,13 +26,13 @@ function Toolbar(props: {
       return;
     }
     document
-      .querySelectorAll(`#toolbar .titleContent>div`)
+      .querySelectorAll('#toolbar .titleContent>div')
       ?.forEach((element: Element, i: number) => {
         const animation = element.animate(
           {
             transform: animationVals(activePage > currPage)[i].map(
               (val: string) => `translateY(${val})`
-            )
+            ),
           },
           { duration: 450, fill: 'forwards', easing: 'ease-out' }
         );
@@ -42,12 +42,10 @@ function Toolbar(props: {
 
   return (
     <div
-      className={
-        'intro-revealer bg-foreground/10 fixed z-20 flex w-full items-center justify-between space-x-4 rounded p-4 md:bg-transparent'
-      }
+      className="intro-revealer bg-primary-color/10 fixed z-20 flex w-full items-center justify-between space-x-4 rounded p-4 md:bg-transparent"
       id="toolbar"
     >
-      <div className="text-foreground flex flex-1 whitespace-pre text-xl tracking-widest md:pl-4">
+      <div className="text-primary-color flex flex-1 whitespace-pre text-xl tracking-widest md:pl-4">
         Vincent Lam /
         <div className="revealer w-24">
           <div className="titleContent whitespace-pre md:w-24">
@@ -57,7 +55,7 @@ function Toolbar(props: {
         </div>
       </div>
       <div className="flex gap-4">
-        {!isMobile && !isWide && <Menu isToolBar vertical={false} />}
+        {!isMobile && <Menu isToolBar vertical={false} />}
         {!isWide && (
           <ThemeSwitch
             darkMode={props.darkMode}

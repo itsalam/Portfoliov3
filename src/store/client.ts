@@ -1,7 +1,7 @@
 import { createClient } from '@sanity/client';
 import imageUrlBuilder from '@sanity/image-url';
 import { SanityImageSource } from '@sanity/image-url/lib/types/types';
-import { StateCreator, StoreApi } from 'zustand';
+import { StateCreator } from 'zustand';
 import {
   CMSStore,
   Project,
@@ -29,15 +29,17 @@ async function getSchema<T>(schemaName: string, additionalQuery?: string) {
   return schema;
 }
 
-type Slice<T> = StateCreator<T> | StoreApi<T>;
-
-function makeSanityStore<T>(schemaName: string, additionalQuery?: string) {
+function makeSanityStore<T>(
+  schemaName: string,
+  additionalQuery?: string,
+  keyName?: string
+) {
   return (set) => {
     getSchema<T>(schemaName, additionalQuery).then((res) =>
-      set({ [schemaName]: res })
+      set({ [keyName ?? schemaName]: res })
     );
     return {
-      [schemaName]: null
+      [keyName ?? schemaName]: null
     };
   };
 }
@@ -47,10 +49,10 @@ const createCMSSlice: StateCreator<Partial<CMSStore>> = (
   getState
 ) => {
   const initialState: Partial<CMSStore> = {
-    technology: [],
-    project: [],
-    works: [],
-    contact: [],
+    technology: undefined,
+    projects: undefined,
+    works: undefined,
+    contact: undefined,
     resume: undefined,
     imageBuilder: imageUrlBuilder(client),
     loadingProgress: () => {
@@ -58,7 +60,7 @@ const createCMSSlice: StateCreator<Partial<CMSStore>> = (
       const schemas = Object.keys(Schemas);
       const total = schemas.length;
       const loaded = Object.entries(state).filter(
-        ([k, v]) => schemas.includes(k) && v
+        ([k, v]) => schemas.includes(k) && !!v
       ).length;
       if (loaded === total && state.isLoading) {
         setState({ isLoading: false });
@@ -71,7 +73,11 @@ const createCMSSlice: StateCreator<Partial<CMSStore>> = (
   };
 
   const technology = makeSanityStore<Technology>('technology');
-  const project = makeSanityStore<Project>('project');
+  const projects = makeSanityStore<Project>(
+    'project',
+    '{..., stack[]->}',
+    'projects'
+  );
   const works = makeSanityStore<Work>('works');
   const contact = makeSanityStore<Social>('contact');
   const resume = makeSanityStore<Resume>(
@@ -81,7 +87,7 @@ const createCMSSlice: StateCreator<Partial<CMSStore>> = (
 
   return {
     ...technology(setState),
-    ...project(setState),
+    ...projects(setState),
     ...works(setState),
     ...contact(setState),
     ...resume(setState),

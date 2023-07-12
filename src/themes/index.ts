@@ -1,23 +1,16 @@
-import dwThemes from './DomainWarpTheme/colorScheme';
-import smileyThemes from './SmileyTheme/colorScheme';
-import { extendTheme, VechaiTheme } from '@vechaiui/react';
-import { StateCreator } from 'zustand';
+import { MantineThemeOverride } from '@mantine/core';
 import { GroupProps, RootState } from '@react-three/fiber';
-import { ComponentType, lazy, LazyExoticComponent } from 'react';
-
-const theme = extendTheme({
-  cursor: 'pointer',
-  colorSchemes: {
-    ...dwThemes,
-    ...smileyThemes
-  }
-});
+import { ComponentType, LazyExoticComponent, lazy } from 'react';
+import { StateCreator } from 'zustand';
+import { DomainWarp } from './DomainWarpTheme/colorScheme';
+import { Smiley } from './SmileyTheme/colorScheme';
 
 export type Theme = {
   id: string;
   background: LazyExoticComponent<
     ComponentType<GroupProps> & Partial<RootState>
   >;
+  mantineTheme: MantineThemeOverride;
 };
 
 export type BgColorScheme = {
@@ -30,9 +23,7 @@ export type BgColorScheme = {
 export type ThemeStore = {
   darkMode: boolean;
   setDarkMode: (darkMode: boolean) => void;
-  vechaiTheme: VechaiTheme;
   themes: Record<string, Theme>;
-  themeIds: string[];
   activeTheme: string;
   setActiveTheme: (id: string) => void;
   bgOpacity: number;
@@ -54,21 +45,20 @@ const fadeInOutCanvas = (callback: () => void) => {
 };
 
 const createThemeSlice: StateCreator<ThemeStore> = (set, get) => ({
-  darkMode: localStorage.theme == 'dark',
+  darkMode: localStorage.theme === 'dark',
   setDarkMode: (darkMode: boolean) => set((state) => ({ ...state, darkMode })),
-  vechaiTheme: theme,
   themes: {
     Smiley: {
-      id: 'smileyTheme',
-      background: lazy(() => import('../themes/SmileyTheme'))
+      background: lazy(() => import('./SmileyTheme')),
+      mantineTheme: Smiley
     },
     DomainWarp: {
-      id: 'dwTheme',
-      background: lazy(() => import('../themes/DomainWarpTheme'))
+      background: lazy(() => import('./DomainWarpTheme')),
+      mantineTheme: DomainWarp
     }
   },
   themeIds: ['Smiley', 'DomainWarp'],
-  activeTheme: 'Smiley',
+  activeTheme: 'DomainWarp',
   setActiveTheme: async (id: string) => {
     if (get().activeTheme !== id) {
       fadeInOutCanvas(() =>

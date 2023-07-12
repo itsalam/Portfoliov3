@@ -1,8 +1,8 @@
+import { debounce } from 'lodash';
 import { StateCreator, create } from 'zustand';
 import createThemeSlice, { ThemeStore } from '../themes';
 import createCMSSlice from './client';
 import { CMSStore } from './types';
-import { debounce } from 'lodash';
 
 interface AppStore {
   activePage: number;
@@ -11,10 +11,14 @@ interface AppStore {
   hideForeground: boolean;
 }
 
-const createAppSlice: StateCreator<AppStore> = (set) => ({
+const createAppSlice: StateCreator<AppStore> = (set, get) => ({
   activePage: 0,
   pages: ['Home', 'Projects', 'Work', 'Contact'],
-  setActivePage: debounce((index: number) => set({ activePage: index }), 300),
+  setActivePage: debounce((index: number) => {
+    const p = get().pages[index].toLowerCase();
+    document.getElementById(p)?.scrollIntoView({ behavior: 'smooth' });
+    set({ activePage: index });
+  }, 300),
   hideForeground: false
 });
 

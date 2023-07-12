@@ -1,46 +1,43 @@
+import { AspectRatio, Container } from '@mantine/core';
 import { Title } from '@src/components/Commons';
 import { isWideListener } from '@src/etc/Helpers';
 import useStore from '@src/store';
 import { Resume } from '@src/store/types';
-import { HTMLProps, useCallback } from 'react';
+import { useCallback } from 'react';
 import ContactForm from './components/ContactForm';
-import DownloadButton from './components/DownloadButton';
 import SocialInfo from './components/SocialInfo';
 
-export default function Contact(props: HTMLProps<HTMLDivElement>) {
+export default function Contact() {
   const { getSrc, resume } = useStore.getState();
   const isWide = isWideListener();
 
   const ResumeSideColumn = useCallback(
     (props: { resume: Resume }) => (
-      <div className="flex h-full w-1/2 flex-col items-center justify-center gap-4 self-center ">
-        <div className="h-full w-full">
-          <embed
-            src={props.resume.url}
-            className="h-[65vh] min-h-[300px]  w-full xl:h-[70vh]"
+      <div className="flex h-[80vh] w-1/3 flex-col items-center justify-center gap-4 self-center ">
+        <AspectRatio ratio={1 / 1.414} className="h-full max-h-[680px] w-full max-w-[490px]">
+          <object
+            type="application/pdf"
+            data={props.resume.url}
           />
-        </div>
-        <DownloadButton
-          resume={props.resume}
-          className="h-20 w-1/3"
-          svgSrc={getSrc ? getSrc(props.resume.icon) : ''}
-        />
+        </AspectRatio>
       </div>
+
     ),
     []
   );
 
   return (
     <div
-      id={'contact'}
-      className="flex h-full items-start justify-center py-16 md:items-center md:py-[10vh]"
-      {...props}
+      id="contact"
+      className="flex items-start justify-center sm:h-full sm:p-16 md:items-center"
     >
       <div className="flex h-auto w-full gap-10 xl:px-4">
-        <div className="flex h-full w-full flex-1 flex-col gap-2">
+        <div className="flex h-full flex-col gap-2 py-16">
           <Title>Contact</Title>
-          <ContactForm />
-          <SocialInfo />
+          <Container className="ml-0 flex h-full w-full flex-1 flex-col gap-2">
+            <ContactForm />
+            <SocialInfo />
+          </Container>
         </div>
         {isWide && resume && <ResumeSideColumn resume={resume} />}
       </div>

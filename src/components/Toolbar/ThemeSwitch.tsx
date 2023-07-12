@@ -1,6 +1,6 @@
-import { useRef } from 'react';
 import useStore from '@src/store';
 import { debounce } from 'lodash';
+import { useRef } from 'react';
 
 export default function ThemeSwitch(props: {
   darkMode: boolean;
@@ -28,11 +28,11 @@ export default function ThemeSwitch(props: {
     />
   );
 
-  const sunClasses = ['bg-foreground', 'text-white'];
+  const sunClasses = ['bg-primary-color', 'text-white'];
   const moonClasses = [
-    'bg-foreground/.5',
+    'bg-primary-color/.5',
     'text-white-400',
-    'translate-x-full'
+    'translate-x-full',
   ];
 
   const toggleLightDark = debounce(
@@ -63,11 +63,10 @@ export default function ThemeSwitch(props: {
     <>
       <button
         onClick={() => toggleThemes()}
-        className={`flex h-7 w-7 items-center rounded-full p-1 shadow transition duration-150 focus:outline-none ${
-          darkMode
-            ? 'bg-slate-600/15 hover:bg-primary-300/20'
-            : 'bg-slate-300/15 hover:bg-slate-300/40'
-        }`}
+        className={`flex h-7 w-7 items-center rounded-full p-1 shadow transition duration-150 focus:outline-none ${darkMode
+          ? 'bg-slate-600/15 hover:bg-primary-300/20'
+          : 'bg-slate-300/15 hover:bg-slate-300/40'
+          }`}
       >
         <svg
           className="h-5 w-5"
@@ -92,19 +91,17 @@ export default function ThemeSwitch(props: {
         </svg>
       </button>
       <button
-        className={`flex h-7 w-12 items-center rounded-full p-1 shadow transition duration-150 focus:outline-none ${
-          darkMode
-            ? 'bg-slate-600/15 hover:bg-primary-300/20'
-            : 'bg-slate-300/15 hover:bg-slate-300/40'
-        }`}
+        className={`flex h-7 w-12 items-center rounded-full p-1 shadow transition duration-150 focus:outline-none ${darkMode
+          ? 'bg-slate-600/15 hover:bg-primary-300/20'
+          : 'bg-slate-300/15 hover:bg-slate-300/40'
+          }`}
         onClick={() => toggleLightDark()}
       >
         <div
           ref={toggleRef}
           id="switch-toggle"
           className={
-            'w-5 h-5 relative rounded-full transition duration-500 transform p-0.5 ' +
-            (darkMode ? moonClasses : sunClasses).join(' ')
+            `relative h-5 w-5 rounded-full p-0.5 transition duration-500${(darkMode ? moonClasses : sunClasses).join(' ')}`
           }
         >
           <svg

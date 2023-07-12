@@ -7,11 +7,11 @@ const LinkHref = (props: { dataSrc: string; href: string }) => {
 
   return (
     <a
-      className="hover:bg-foreground/10 h-7 w-7 rounded-sm hover:brightness-125"
+      className="hover:bg-primary-color/10 block h-8 w-8 rounded-sm transition-all hover:-translate-y-1 hover:brightness-125"
       href={props.href}
       onClick={onAnchorClick}
     >
-      <svg fill="currentColor" data-src={props.dataSrc}></svg>
+      <svg fill="currentColor" data-src={props.dataSrc} />
     </a>
   );
 };

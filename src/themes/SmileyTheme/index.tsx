@@ -1,14 +1,12 @@
-import { Html, OrbitControls } from '@react-three/drei';
 import { useFrame, useLoader, useThree } from '@react-three/fiber';
 import {
   Bloom,
   EffectComposer,
   Noise,
   Scanline,
-  Vignette
+  Vignette,
 } from '@react-three/postprocessing';
 import Smiley from '@src/assets/smile1.svg';
-import useStore from '@src/store';
 import { useControls } from 'leva';
 import { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
 import { Color, Group, Mesh, Shape, Vector2 } from 'three';
@@ -21,29 +19,11 @@ export default function Background() {
   const ROW_PER_ICON = 4;
   const OFFSET_FACTOR = 1.065;
 
-  const { hideForeground } = useStore.getState();
-
-  const [firstRender, setFirstRender] = useState(true);
-  const filterRef = useRef<HTMLDivElement>(null);
   const groupRef = useRef<Group>(null);
   const effectRef = useRef<CustomEffect>(null);
   const time = useRef<number>(0);
 
   const [meshs, setMeshes] = useState<Mesh[]>([]);
-
-  useEffect(() => {
-    if (filterRef.current) {
-      if (firstRender) {
-        filterRef.current.style.opacity = hideForeground ? '0' : '0.8';
-        setFirstRender(false);
-      } else {
-        filterRef.current.animate(
-          { opacity: hideForeground ? 0 : 0.8 },
-          { duration: 350, fill: 'forwards' }
-        );
-      }
-    }
-  }, [hideForeground]);
 
   const {
     speed,
@@ -53,7 +33,7 @@ export default function Background() {
     verticalOffset,
     colorA,
     colorB,
-    cameraPosition
+    cameraPosition,
   } = useControls(
     'Theme Configs',
     {
@@ -64,7 +44,7 @@ export default function Background() {
       scale: 7,
       horizontalOffset: 1.0,
       verticalOffset: 0.6,
-      cameraPosition: [7, -4, 5]
+      cameraPosition: [7, -4, 5],
     },
     { collapsed: true }
   );
@@ -85,7 +65,7 @@ export default function Background() {
       angle: 13,
 
       // reflection
-      delta: 145
+      delta: 145,
     },
     { collapsed: true }
   );
@@ -96,6 +76,7 @@ export default function Background() {
       cameraPosition[1],
       cameraPosition[2]
     );
+    camera.lookAt(0, 0, 0);
     return { size };
   });
 
@@ -148,7 +129,7 @@ export default function Background() {
       return (
         <mesh
           key={i}
-          name={'icon'}
+          name="icon"
           rotation={[0, 0, Math.PI]}
           scale={scale / 10000}
           position={[offSet + offsetX, offSet + offsetY, 0]}
@@ -178,22 +159,19 @@ export default function Background() {
   });
 
   return (
-    <>
-      <group>
-        <group position={[-3, -6, 0]} ref={groupRef} castShadow>
-          {smileys}
-        </group>
-        <OrbitControls />
-        <EffectComposer>
-          <Scanline opacity={0.1} />
-          <Distort ref={effectRef} />
-          <Noise opacity={0.3} />
-          <Bloom luminanceThreshold={0.1} />
-          <Vignette eskil offset={0.6} darkness={0.8} />
-        </EffectComposer>
-
-        <Html center className="bg-base h-screen w-screen" ref={filterRef} />
+    <group>
+      <group position={[-3, -6, 0]} ref={groupRef} castShadow>
+        {smileys}
       </group>
-    </>
+      {/* <OrbitControls /> */}
+      <EffectComposer>
+        <Scanline opacity={0.1} />
+        <Distort ref={effectRef} />
+        <Noise opacity={0.3} />
+        <Bloom luminanceThreshold={0.1} />
+        <Vignette eskil offset={0.6} darkness={0.8} />
+      </EffectComposer>
+
+    </group>
   );
 }

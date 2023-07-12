@@ -9,7 +9,7 @@ uniform vec3 color1;
 uniform vec3 color2;
 uniform vec3 color3;
 uniform vec3 color4;
-
+uniform int multiply;
 
 float random (in vec2 st) {
     return fract(sin(dot(st.xy,
@@ -118,16 +118,19 @@ vec4 noise_func(vec3 p){
     // step function removes the color at a specific threshold
     color = mix( color, color4, 0.7*smoothstep(0.5,1.75,abs(n.y)+abs(n.x)) );
 
-    color *= f*f*f;
-    color *= color;
+    color *= f*f*f*f;
+    for (int i = 0; i < multiply; ++i){
+        color *= color;
+    }
     
     float height = max(max(color.x,color.y), color.z)/3.;
     height /= 3.;
     height = min(height, .75);
     height /= 5.;
+    height += 0.5;
     return vec4(color, height);
 }
 
 void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor) {
-    outputColor = noise_func(vec3(uv, 1.0));;
+    outputColor = noise_func(vec3(uv, 0.5));;
 }
