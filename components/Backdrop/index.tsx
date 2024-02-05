@@ -1,10 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import React, { useEffect, useRef, useState } from "react";
-import { debounce } from "lodash";
-import Grid, { Dimensions } from "./Grid";
 import Effect from "./Effect";
+import Grid from "./Grid";
 
 const Backdrop = () => {
   return (
@@ -13,6 +11,7 @@ const Backdrop = () => {
       animate="view"
       initial="initial"
       viewport={{ once: true }}
+      className="-z-50 absolute h-screen w-screen "
     >
       <Effect />
       <Grid />

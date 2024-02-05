@@ -1,17 +1,31 @@
 const generateGridUtils = () => ({
   ...(() => {
     let newPaddingUtilities = {};
-    for (let i = 1; i <= 12; i++) {
-      newPaddingUtilities[`g-x-${i}`] = `calc(var(--grid-width) * ${i})`;
-      newPaddingUtilities[`g-y-${i}`] = `calc(var(--grid-height) * ${i})`;
+    for (let i = 0; i <= 12; i++) {
+      if (i !== 0) {
+        newPaddingUtilities[`g-x-${i}`] = `calc(var(--grid-width) * ${i})`;
+        newPaddingUtilities[`g-y-${i}`] = `calc(var(--grid-height) * ${i})`;
+      }
+      newPaddingUtilities[`g-x-${i}.25`] =
+        `calc(var(--grid-width) * ${i + 0.25})`;
+      newPaddingUtilities[`g-x-${i}.5`] =
+        `calc(var(--grid-width) * ${i + 0.5})`;
+      newPaddingUtilities[`g-x-${i}.75`] =
+        `calc(var(--grid-width) * ${i + 0.75})`;
+      newPaddingUtilities[`g-y-${i}.25`] =
+        `calc(var(--grid-height) * ${i + 0.25})`;
+      newPaddingUtilities[`g-y-${i}.5`] =
+        `calc(var(--grid-height) * ${i + 0.5})`;
+      newPaddingUtilities[`g-y-${i}.75`] =
+        `calc(var(--grid-height) * ${i + 0.75})`;
     }
     newPaddingUtilities["g-x-1/2"] = "calc(var(--grid-width) * 0.5)";
     newPaddingUtilities["g-y-1/2"] = "calc(var(--grid-height) * 0.5)";
     return newPaddingUtilities;
   })(),
   gap: "var(--x-padding) var(--y-padding)",
-  gapx: "var(--x-padding) 0",
-  gapy: "0 var(--y-padding)",
+  gapx: "var(--x-padding)",
+  gapy: "var(--y-padding)",
 });
 
 const propertyUtilities = (properties) =>
@@ -29,6 +43,9 @@ module.exports = {
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
+    screens: {
+      "3xl": "1800px",
+    },
     container: {
       center: true,
       padding: "2rem",
@@ -87,6 +104,12 @@ module.exports = {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      gridTemplateRows: {
+        18: "repeat(18, minmax(0, 1fr))",
+      },
+      gridTemplateColumns: {
+        24: "repeat(24, minmax(0, 1fr))",
       },
       keyframes: {
         "accordion-down": {

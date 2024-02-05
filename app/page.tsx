@@ -1,17 +1,34 @@
-import Backdrop from "@/components/Backdrop";
-import NavBar from "@/components/NavBar";
-import { Theme } from "@radix-ui/themes";
-import "@radix-ui/themes/styles.css";
-import Hero from "./hero";
+"use client";
 
-export default function Home() {
+import ContactCard from "@/components/Cards/ContactsCard";
+import ExperienceCard from "@/components/Cards/ExperienceCard";
+import HeroCard from "@/components/Cards/HeroCard";
+import ProjectsCard from "@/components/Cards/ProjectsCard";
+import "@radix-ui/themes/styles.css";
+import { motion } from "framer-motion";
+import { useRef } from "react";
+
+export default function Hero() {
+  const heroRef = useRef<HTMLDivElement>(null);
+
   return (
-    <Theme>
-      <main className="relative w-screen h-screen overflow-x-hidden">
-        <NavBar />
-        <Backdrop />
-        <Hero />
-      </main>
-    </Theme>
+    <motion.div
+      ref={heroRef}
+      className="h-full w-full items-start block relative flex-wrap gap-y-g-x-0.25"
+    >
+      <HeroCard className="left-g-x-1 top-g-y-0.5" dragConstraints={heroRef} />
+      <ProjectsCard
+        className="bottom-g-y-0.5 right-g-x-0.5"
+        dragConstraints={heroRef}
+      />
+      <ExperienceCard
+        className="top-g-y-0.5 right-g-x-0.5"
+        dragConstraints={heroRef}
+      />
+      <ContactCard
+        className="bottom-g-y-0.5 left-g-x-0.5"
+        dragConstraints={heroRef}
+      />
+    </motion.div>
   );
 }
