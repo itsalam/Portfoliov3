@@ -5,12 +5,12 @@ const Effect = () => {
   const [scope, animate] = useAnimate();
   const x = useMotionValue(200);
   const y = useMotionValue(200);
-  const handleMouse = (ev: MouseEvent) => {
-    x.set(ev.clientX);
-    y.set(ev.clientY);
-  };
 
   useEffect(() => {
+    const handleMouse = (ev: MouseEvent) => {
+      x.set(ev.clientX);
+      y.set(ev.clientY);
+    };
     const animation = async () => {
       animate(
         ".blob",
@@ -27,18 +27,18 @@ const Effect = () => {
       clearInterval(interval);
       window.removeEventListener("mousemove", handleMouse);
     };
-  }, [animate, handleMouse]);
+  }, [animate, x, y]);
 
   return (
     <motion.div className="absolute w-screen h-screen">
       <motion.div
         ref={scope}
-        className="absolute backdrop w-screen h-screen bg-[#edfcf71f] overflow-hidden "
+        className="absolute backdrop w-screen h-screen overflow-hidden "
       >
-        <motion.div className="blob absolute w-4/5 h-2/3 top-0 left-0 bg-gradient-radial from-[#EC6142] via-transparent to-transparent" />
-        <motion.div className="blob absolute w-2/3 h-1/2 top-0 left-0 bg-gradient-radial from-[#9A5CD0] via-transparent to-transparent" />
+        <motion.div className="blob absolute w-4/5 h-2/3 top-0 left-0 bg-gradient-radial from-[--tomato-10] via-[--tomato-a10] to-transparent" />
+        <motion.div className="blob absolute w-2/3 h-1/2 top-0 left-0 bg-gradient-radial from-[--purple-10] via-[--plum-a10] to-transparent" />
         <motion.div
-          className="mouse-effect rounded-full w-g-x-3 aspect-square absolute top-0 left-0 blur-md opacity-50"
+          className="mouse-effect rounded-full w-g-x-3 aspect-square absolute top-0 left-0 blur-md"
           style={{ x, y }}
         />
       </motion.div>

@@ -8,21 +8,18 @@ import GithubSvg from "@/public/github.svg";
 import LinkedinSvg from "@/public/linkedin.svg";
 import ResumeSvg from "@/public/resume.svg";
 import { Separator as BaseSeparator, Text as BaseText } from "@radix-ui/themes";
-import "@radix-ui/themes/styles.css";
 import { AnimatePresence, motion, useAnimate } from "framer-motion";
-import { LoremIpsum } from "lorem-ipsum";
 import { ArrowUpRight as ArrowUpRightBase } from "lucide-react";
-import Image from "next/image";
+import BaseImage from "next/image";
 import {
-    ComponentProps,
-    ComponentPropsWithoutRef,
-    ElementRef,
-    forwardRef,
-    useEffect,
-    useState,
+  ComponentProps,
+  ComponentPropsWithoutRef,
+  ElementRef,
+  forwardRef,
+  useState,
 } from "react";
 
-const lorem = new LoremIpsum();
+const Image = motion(BaseImage);
 const Text = motion(BaseText);
 const Separator = motion(BaseSeparator);
 const ArrowUpRight = motion(ArrowUpRightBase);
@@ -65,8 +62,9 @@ const Link = forwardRef<
         rel="noreferrer"
       >
         <Text
+          size="2"
           className={cn(
-            "flex items-center text-[--gray-12] hover:text-[--gray-10] transition-colors duration-300 overflow-hidden"
+            "flex items-center text-[--sage-11] hover:text-[--sage-12] transition-colors duration-300 overflow-hidden"
           )}
         >
           {text}
@@ -90,6 +88,7 @@ const Link = forwardRef<
         </Text>
         <Separator
           size="3"
+          className="bg-[--sage-11]"
           variants={{
             initial: {
               width: "0%",
@@ -114,18 +113,14 @@ Link.displayName = "Link";
 export default function ContactCard(props: ComponentProps<typeof motion.div>) {
   const { className, ...rest } = props;
   const [projectsRef] = useAnimate();
-  const { controls } = useScrollNavigation(projectsRef, false);
+  const { controls } = useScrollNavigation(projectsRef, true);
   const [hoveredLink, setHoveredLink] = useState<string>();
-
-  useEffect(() => {
-    console.log(hoveredLink);
-  }, [hoveredLink]);
 
   return (
     <TitleCard
       {...rest}
       containerClassName={className}
-      className={cn("flex relative w-g-x-2 h-g-y-2 p-g-y-0.25")}
+      className={cn("flex relative w-g-x-2 h-g-y-2 p-3 gap-3")}
       title="Contact"
       animate={controls}
       ref={projectsRef}
@@ -135,32 +130,43 @@ export default function ContactCard(props: ComponentProps<typeof motion.div>) {
     >
       <motion.div className="flex-1 rounded-full my-auto">
         <motion.div
-          className="aspect-square rounded-full bg-[--gray-a5] bg-blur-xl"
-          variants={{
-            initial: {
-              scale: 0.75,
-            },
-            hover: {
-              scale: 1,
-              transition: {
-                duration: 0.5,
-              },
-            },
-          }}
+          className="aspect-square relative rounded-full bg-[--gray-a5] bg-blur-xl"
+          variants={{}}
         >
-          <AnimatePresence mode="wait">
+          <AnimatePresence>
             {hoveredLink && (
               <Image
-                priority
+                className="absolute top-0 left-0 w-full h-full p-4"
                 src={CONTACTS[hoveredLink]?.iconSrc}
                 alt="Follow us on Twitter"
+                key={hoveredLink}
+                priority
+                initial={{
+                  opacity: 1,
+                }}
+                animate={{
+                  y: [-10, -10, 0],
+                  rotate: [-90, -90, 0],
+                  opacity: [0, 0, 1],
+                  transition: {
+                    duration: 0.266,
+                  },
+                }}
+                exit={{
+                  y: [-10, -10, -10],
+                  rotate: [0, 90, 180],
+                  opacity: [1, 0.5, 0],
+                  transition: {
+                    duration: 0.266,
+                  },
+                }}
               />
             )}
           </AnimatePresence>
         </motion.div>
       </motion.div>
 
-      <div className="flex flex-col relative justify-center p-4 py-g-y-0.25 ">
+      <div className="flex flex-1 flex-col relative justify-center gap-2">
         {Object.entries(CONTACTS).map(([key, { value }], i) => (
           <Link
             key={i}

@@ -24,9 +24,9 @@ const Overlay: React.FC = () => {
   );
 
   return (
-    <nav className="w-0 h-0 fixed top-g-y-0.5 z-50">
-      <div className="relative p-4 3xl:w-g-x-4 3xl:left-g-x-4 h-g-y-1 w-g-x-6 left-g-x-3">
-        <div className="flex relative flex-row items-center justify-between glass bg-[--gray-a9] p-4 px-8 w-auto">
+    <nav className="w-screen h-screen fixed top-g-y-4/8 ">
+      <div className="relative p-4 3xl:w-g-x-4 3xl:left-g-x-4 h-g-y-1 w-g-x-6 left-g-x-3 z-50">
+        <div className="flex relative flex-row items-center justify-between glass bg-[--sage-a7] p-4 px-8 w-auto">
           <Text
             size={{ xl: "6", md: "3" }}
             className="dark:text-[--sage-4] text-black font-favorit relative"
@@ -61,7 +61,7 @@ const Overlay: React.FC = () => {
           </ul>
         </div>
       </div>
-      <div className="absolute 3xl:top-0 top-g-y-0.5 left-g-x-10 3xl:left-g-x-11 font-favorit 3xl:w-g-x-0.5 w-g-x-1">
+      <div className="absolute 3xl:top-0 top-0 right-g-x-1 3xl:left-g-x-11 font-favorit 3xl:w-g-x-4/8 w-g-x-1">
         <Text className="w-full text-right block" size={{ xl: "5", md: "2" }}>
           {currentDate}
         </Text>

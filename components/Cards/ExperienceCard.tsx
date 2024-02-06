@@ -1,13 +1,13 @@
 "use client";
 
 import { TitleCard } from "@/components/Card";
-import { useScrollNavigation } from "@/lib/clientUtils";
+import { maskScrollArea, useScrollNavigation } from "@/lib/clientUtils";
 import { cn } from "@/lib/utils";
 import { ScrollArea, Separator, Text } from "@radix-ui/themes";
 import "@radix-ui/themes/styles.css";
 import { motion, useAnimate } from "framer-motion";
 import { LoremIpsum } from "lorem-ipsum";
-import { ComponentProps } from "react";
+import { ComponentProps, UIEvent, useRef } from "react";
 
 const lorem = new LoremIpsum();
 
@@ -41,13 +41,21 @@ export default function ExperienceCard(
 ) {
   const { className, ...rest } = props;
   const [projectsRef] = useAnimate();
+  const containerRef = useRef<HTMLDivElement>(null);
   const { controls } = useScrollNavigation(projectsRef, true);
+  const handleScroll = (e: UIEvent) => {
+    const h = e.target as HTMLElement;
+    const st = h.scrollTop || document.body.scrollTop;
+    const sh = h.scrollHeight || document.body.scrollHeight;
+    const percent = st / (sh - h.clientHeight);
+    maskScrollArea("bottom", containerRef.current as HTMLElement, percent, 20);
+  };
 
   return (
     <TitleCard
       {...rest}
       containerClassName={className}
-      className={cn("flex-col flex relative w-g-x-4 h-g-y-4 p-4 py-g-y-0.25")}
+      className={cn("flex-col flex relative w-g-x-3-6/8 h-g-y-4-3/8 p-4")}
       title="Experience"
       animate={controls}
       ref={projectsRef}
@@ -55,7 +63,13 @@ export default function ExperienceCard(
       id="experience"
       key={"experience"}
     >
-      <ScrollArea type="always" scrollbars="vertical">
+      <ScrollArea
+        onScroll={handleScroll}
+        type="always"
+        scrollbars="vertical"
+        className="py-g-y-2/8"
+        ref={containerRef}
+      >
         {Experiences.map((experience, i) => (
           <div key={i} className="flex flex-col gap-y-2 mr-4 pb-6">
             <Text size="3" className="font-bold">

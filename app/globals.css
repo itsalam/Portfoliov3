@@ -6,6 +6,7 @@
 
 @layer base {
   :root {
+
     --grid-size: 96px;
     --background: 0 0% 100%;
     --foreground: 224 71.4% 4.1%;
@@ -39,7 +40,7 @@
   }
 
   .dark {
-    --color-page-background: var(--slate-4) --background: 224 71.4% 4.1%;
+    --background: 224 71.4% 4.1%;
     --foreground: 210 20% 98%;
 
     --card: 224 71.4% 4.1%;
@@ -76,6 +77,14 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+html.dark {
+  --color-page-background: var(--sage-12);
+}
+
+html.dark {
+  --color-page-background: var(--sage-2);
 }
 
 body {
@@ -139,10 +148,14 @@ body {
   object-position: var(--x-Pos) center;
 }
 
+.mapboxgl-ctrl-logo {
+  display: none !important;
+}
+
 .card {
   /* From https://css.glass */
-  background: rgba(var(--gray-a5) 0.05);
-  border-radius: 16px;
+  background: var(--gray-a2);
+  border-radius: 12px;
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(2.7px);
   -webkit-backdrop-filter: blur(5.7px);

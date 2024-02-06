@@ -12,7 +12,7 @@ import { ComponentProps, useRef } from "react";
 export default function HeroCard(props: ComponentProps<typeof motion.div>) {
   const { className, ...rest } = props;
   const heroRef = useRef<HTMLDivElement>(null);
-  const { controls } = useScrollNavigation(heroRef, false, (controls) =>
+  const { controls } = useScrollNavigation(heroRef, true, (controls) =>
     controls.start("rotate")
   );
 
@@ -49,7 +49,7 @@ export default function HeroCard(props: ComponentProps<typeof motion.div>) {
           text="(a)"
         />
       </MText>
-      <div className="flex flex-col gap-0 relative h-g-y-0.5 my-gapy pr-0 font-bold ">
+      <div className="flex flex-col gap-0 relative h-g-y-4/8 my-gapy pr-0 font-bold ">
         <RotateText
           size={"8"}
           className="absolute font-bold"
@@ -86,7 +86,9 @@ export default function HeroCard(props: ComponentProps<typeof motion.div>) {
     <TitleCard
       {...rest}
       containerClassName={cn("flex-col", className)}
-      className={cn("flex-col flex relative w-g-x-4 px-g-x-0.25 py-g-y-0.25")}
+      className={cn(
+        "flex-col flex relative w-g-x-5-1/8 h-g-y-5-3/8 px-g-x-2/8 py-g-y-2/8 justify-end"
+      )}
       title="Hero"
       animate={controls}
       ref={heroRef}

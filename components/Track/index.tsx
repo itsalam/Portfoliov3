@@ -1,10 +1,11 @@
-import { useResizeCallBack } from "@/lib/clientUtils";
+import { maskScrollArea, useResizeCallBack } from "@/lib/clientUtils";
 import { cn } from "@/lib/utils";
 import { MotionStyle, motion, useMotionValue, useSpring } from "framer-motion";
 import {
   Children,
   ComponentPropsWithRef,
   HTMLAttributes,
+  MouseEvent,
   MouseEventHandler,
   MutableRefObject,
   ReactNode,
@@ -40,10 +41,7 @@ const Track = (
     const containerElement = containerRef.current;
     if (containerElement) {
       const middleStepPercent = Math.abs(value / maxDist);
-      const maskImageStep1 = value !== 0 ? "rgba(0, 0, 0, 0) 0%, " : "";
-      const maskImageStep2 = value !== maxDist ? ", rgba(0, 0, 0, 0) 100%" : "";
-      const middleSteps = `rgb(0, 0, 0) ${middleStepPercent * 5}%, rgb(0, 0, 0) ${middleStepPercent * 5 + 95}%`;
-      containerElement.style.maskImage = `linear-gradient(to right, ${maskImageStep1}${middleSteps}${maskImageStep2})`;
+      maskScrollArea("right", containerElement, middleStepPercent);
     }
   });
 
@@ -79,25 +77,28 @@ const Track = (
     }
   };
 
+  const childOnClick =
+    (index: number, priorOnClick?: MouseEventHandler) => (e: MouseEvent) => {
+      const track = trackRef.current;
+      const elem = track?.children[index];
+      const container = containerRef.current;
+      if (elem && track && container) {
+        setTrackDist(
+          track.getBoundingClientRect().x -
+            elem.getBoundingClientRect().x +
+            (container.getBoundingClientRect().width -
+              elem.getBoundingClientRect().width) /
+              2
+        );
+      }
+      priorOnClick?.(e);
+    };
+
   const trackChildren = Children.map(children as ReactNode, (child, index) =>
     isValidElement(child) && typeof child.type !== "string"
       ? cloneElement(child, {
-        onClick: (e) => {
-          const track = trackRef.current;
-          const elem = track?.children[index];
-          const container = containerRef.current;
-          if (elem && track && container) {
-            setTrackDist(
-              track.getBoundingClientRect().x -
-                  elem.getBoundingClientRect().x +
-                  (container.getBoundingClientRect().width -
-                    elem.getBoundingClientRect().width) /
-                    2
-            );
-          }
-          child.props.onClick?.(e);
-        },
-      } as HTMLAttributes<unknown>)
+        onClick: childOnClick(index, child.props.onClick),
+      } as HTMLAttributes<HTMLElement>)
       : child
   );
 
@@ -137,7 +138,7 @@ const Track = (
               x: springDist,
             } as MotionStyle
           }
-          className={cn("track flex items-start relative gap-g-x-0.25", {})}
+          className={cn("track flex items-start relative gap-g-x-2/8", {})}
           suppressHydrationWarning
           id="track"
         >

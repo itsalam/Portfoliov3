@@ -57,7 +57,6 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
   };
 
   const changeFocusTitle = debounce((project?: Project) => {
-    console.log(focusedProject, selectedProject, project, clickedProject);
     if (
       focusedProject &&
       selectedProject &&
@@ -119,7 +118,9 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
     <TitleCard
       {...rest}
       containerClassName={className}
-      className={cn("flex-col flex relative w-g-x-4 h-g-y-3 p-4 py-g-y-0.25")}
+      className={cn(
+        "flex-col flex relative w-g-x-3-6/8 h-g-y-3 p-4 py-g-y-2/8"
+      )}
       title="Projects"
       animate={controls}
       ref={projectsRef}
@@ -129,7 +130,7 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
     >
       <LayoutGroup>
         <Track
-          className={cn("gap-g-x-0.25", {
+          className={cn("gap-g-x-2/8", {
             "w-auto": selectedProject,
           })}
           dragRef={dragRef}
@@ -141,7 +142,7 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
               key={index}
               custom={index}
               className={cn(
-                "relative p-0 h-g-y-2.25 w-g-x-2.75 overflow-hidden group cursor-pointer duration-300 rounded-sm"
+                "relative p-0 h-g-y-2-2/8 w-g-x-2-6/8 overflow-hidden group cursor-pointer duration-300 rounded-sm"
               )}
               onHoverStart={() => changeFocusTitle(project)}
               onClick={() => !dragRef.current && changeSelectedProject(project)}
@@ -167,7 +168,7 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
             </motion.div>
           ))}
         </Track>
-        <TextBody className="bottom-g-y-0.75 left-g-x-0.25" />
+        <TextBody className="bottom-g-y-6/8 left-g-x-2/8" />
       </LayoutGroup>
     </TitleCard>
   );

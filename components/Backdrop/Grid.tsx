@@ -111,7 +111,7 @@ const Grid: React.FC<GridProps> = (props) => {
       const isVertical = orientation === "vertical";
       const length = dimensions[isVertical ? "height" : "width"];
       const numLines = isVertical ? numCols : numRows;
-      const strokeDasharray = (factor) =>
+      const strokeDasharray = (factor: number) =>
         isVertical
           ? `${dashSize(gridHeight * factor)} ${gapSize}`
           : `${dashSize(gridWidth * factor)} ${gapSize}`;

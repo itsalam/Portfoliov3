@@ -103,3 +103,19 @@ export const animateTransition = {
     },
   },
 };
+
+export function isAnimationControl(obj: object): obj is AnimationControls {
+  return "start" in obj && typeof obj.start === "function";
+}
+
+export const maskScrollArea = (
+  direction: "right" | "left" | "top" | "bottom",
+  element: HTMLElement,
+  percentage: number,
+  threshold = 5
+) => {
+  const maskImageStep1 = percentage > 0 ? "rgba(0, 0, 0, 0) 0%, " : "";
+  const maskImageStep2 = percentage < 100 ? ", rgba(0, 0, 0, 0) 100%" : "";
+  const middleSteps = `rgb(0, 0, 0) ${percentage * threshold}%, rgb(0, 0, 0) ${percentage * threshold + 100 - threshold}%`;
+  element.style.maskImage = `linear-gradient(to ${direction}, ${maskImageStep1}${middleSteps}${maskImageStep2})`;
+};

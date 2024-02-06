@@ -1,26 +1,22 @@
 const generateGridUtils = () => ({
   ...(() => {
     let newPaddingUtilities = {};
-    for (let i = 0; i <= 12; i++) {
-      if (i !== 0) {
-        newPaddingUtilities[`g-x-${i}`] = `calc(var(--grid-width) * ${i})`;
-        newPaddingUtilities[`g-y-${i}`] = `calc(var(--grid-height) * ${i})`;
+    for (let i = 1; i <= 12; i++) {
+      newPaddingUtilities[`g-x-${i}`] = `calc(var(--grid-width) * ${i})`;
+      newPaddingUtilities[`g-y-${i}`] = `calc(var(--grid-height) * ${i})`;
+      for (let j = 1; j < 8; j++) {
+        newPaddingUtilities[`g-x-${i}-${j}/8`] =
+          `calc(var(--grid-width) * ${(i + j / 8).toFixed(3)})`;
+        newPaddingUtilities[`g-y-${i}-${j}/8`] =
+          `calc(var(--grid-height) * ${(i + j / 8).toFixed(3)})`;
       }
-      newPaddingUtilities[`g-x-${i}.25`] =
-        `calc(var(--grid-width) * ${i + 0.25})`;
-      newPaddingUtilities[`g-x-${i}.5`] =
-        `calc(var(--grid-width) * ${i + 0.5})`;
-      newPaddingUtilities[`g-x-${i}.75`] =
-        `calc(var(--grid-width) * ${i + 0.75})`;
-      newPaddingUtilities[`g-y-${i}.25`] =
-        `calc(var(--grid-height) * ${i + 0.25})`;
-      newPaddingUtilities[`g-y-${i}.5`] =
-        `calc(var(--grid-height) * ${i + 0.5})`;
-      newPaddingUtilities[`g-y-${i}.75`] =
-        `calc(var(--grid-height) * ${i + 0.75})`;
     }
-    newPaddingUtilities["g-x-1/2"] = "calc(var(--grid-width) * 0.5)";
-    newPaddingUtilities["g-y-1/2"] = "calc(var(--grid-height) * 0.5)";
+    for (let j = 1; j < 8; j++) {
+      newPaddingUtilities[`g-x-${j}/8`] =
+        `calc(var(--grid-width) * ${(j / 8).toFixed(3)})`;
+      newPaddingUtilities[`g-y-${j}/8`] =
+        `calc(var(--grid-height) * ${(j / 8).toFixed(3)})`;
+    }
     return newPaddingUtilities;
   })(),
   gap: "var(--x-padding) var(--y-padding)",
