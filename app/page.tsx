@@ -1,11 +1,13 @@
 "use client";
 
+import Backdrop from "@/components/Backdrop";
 import ContactCard from "@/components/Cards/ContactsCard";
 import ExperienceCard from "@/components/Cards/ExperienceCard";
 import HeroCard from "@/components/Cards/HeroCard";
 import LocationCard from "@/components/Cards/LocationCard";
 import MenuCard from "@/components/Cards/MenuCard";
 import ProjectsCard from "@/components/Cards/ProjectsCard";
+import Overlay from "@/components/Overlay";
 import { useWindowDimensions } from "@/lib/clientUtils";
 import { dimensionAtom, gridAtom } from "@/lib/state";
 import "@radix-ui/themes/styles.css";
@@ -32,7 +34,10 @@ export default function Hero() {
   }, [grid]);
 
   return (
-    <motion.div
+    <>
+              <Overlay />
+          <Backdrop />
+              <motion.div
       ref={heroRef}
       className="h-full w-full items-start block relative flex-wrap gap-y-g-x-1/4"
     >
@@ -58,5 +63,7 @@ export default function Hero() {
         dragConstraints={heroRef}
       />
     </motion.div>
+    </>
   );
+
 }

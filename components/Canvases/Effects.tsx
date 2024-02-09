@@ -1,5 +1,5 @@
 import { extend } from "@react-three/fiber";
-import { Bloom, EffectComposer, Noise, SSAO, Vignette } from '@react-three/postprocessing';
+import { Bloom, EffectComposer } from '@react-three/postprocessing';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { SSAOPass } from 'three/addons/postprocessing/SSAOPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
@@ -10,7 +10,8 @@ export default function Effects() {
 
   return (
     <EffectComposer  multisampling={0} disableNormalPass={true}>
-      <SSAO
+      
+      {/* <SSAO
           samples={30} // amount of samples per pixel (shouldn't be a multiple of the ring count)
           rings={4} // amount of rings in the occlusion sampling pattern
           distanceThreshold={1.0} // global distance threshold at which the occlusion effect starts to fade out. min: 0, max: 1
@@ -21,10 +22,10 @@ export default function Effects() {
           radius={20} // occlusion sampling radius
           scale={0.5} // scale of the ambient occlusion
           bias={0.5} // occlusion bias
-      />
-      <Bloom/>
-      <Noise opacity={0.025} />
-        <Vignette eskil={false} offset={0.1} darkness={1.1} />
+      /> */}
+      <Bloom intensity={0.1} luminanceThreshold={0.5}/>
+      {/* <Noise opacity={0.025} />
+        <Vignette eskil={false} offset={0.1} darkness={1.1} /> */}
     </EffectComposer>
   );
 }

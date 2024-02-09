@@ -1,5 +1,3 @@
-import Backdrop from "@/components/Backdrop";
-import Overlay from "@/components/Overlay";
 import { Theme } from "@radix-ui/themes";
 import "@radix-ui/themes/styles.css";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -18,8 +16,6 @@ export default function RootLayout({
         <Providers>
           <Theme>
             <main className="relative flex flex-col w-screen h-screen overflow-hidden">
-              <Overlay />
-              <Backdrop />
               {children}
             </main>
           </Theme>

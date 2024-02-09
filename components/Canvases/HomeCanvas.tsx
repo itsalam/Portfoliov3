@@ -3,6 +3,7 @@ import { Canvas } from "@react-three/fiber";
 import { Suspense, forwardRef, useEffect, useRef } from "react";
 import { Group, MeshPhongMaterial, Object3DEventMap } from "three";
 import Effects from "./Effects";
+import ShaderPlane from "./ShaderPlane";
 
 const M1 = forwardRef(({ texture, children, ...props }, ref) => {
   const { nodes } = useGLTF("/mac.glb");
@@ -65,8 +66,6 @@ export default function HomeCanvas() {
         // Quick shortcut for setting up shadow maps
         style={{ position: "absolute" }}
         shadows
-        
-    colorManagement
         className="absolute top-0 left-0"
         // Only render on changes and movement
         frameloop="demand"
@@ -76,18 +75,19 @@ export default function HomeCanvas() {
         {/* {positions.map((props, i) => (
           <M1 key={i} {...props} scale={3} />
         ))} */}
-        <pointLight position={[0, 0, 0]} intensity={100.0} />
+        {/* <pointLight position={[0, 0, 0]} intensity={10.0} /> */}
         {/* <spotLight intensity={2.5} position={[50, 50, 50]} castShadow /> */}
         <Environment preset="city" />
         <ambientLight />
-        <pointLight position={[-20, 20, 20]} />
-        <M1
+        {/* <pointLight position={[-20, 20, 20]} /> */}
+        {/* <M1
           ref={m1Ref}
           scale={7}
           position={[10, -10, 0]}
           rotation={[(-Math.PI * 4) / 10, -Math.PI / 4, -Math.PI / 8]}
-        />
+        /> */}
 
+        <ShaderPlane />
       {/* <color attach="background" args={["#050505"]} /> */}
       {/* <fog color="#161616" attach="fog" near={8} far={30} /> */}
         <OrbitControls zoomSpeed={0.5} />
