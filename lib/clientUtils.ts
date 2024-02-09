@@ -1,7 +1,7 @@
+"use client";
+
 import { AnimationControls, useAnimation } from "framer-motion";
-import { debounce } from "lodash";
-import { usePathname, useRouter } from "next/navigation";
-import { RefObject, useEffect, useMemo, useRef } from "react";
+import { RefObject, useEffect, useRef, useState } from "react";
 
 export const useScrollNavigation = (
   ref: RefObject<HTMLElement>,
@@ -10,40 +10,6 @@ export const useScrollNavigation = (
 ) => {
   const isMounted = useRef(false);
   const controls = useAnimation();
-  const router = useRouter();
-  const pathname = usePathname();
-  const PATHS = useMemo(() => ["/", "/about"], []);
-
-  useEffect(() => {
-    const handleScroll = debounce(
-      (ev: WheelEvent) => {
-        const index = PATHS.indexOf(pathname);
-        const direction = ev.deltaY > 0 || ev.deltaX > 0 ? 1 : -1;
-        controls.stop();
-        if (!disable && isMounted.current && PATHS[index + direction]) {
-          controls.start("exit").then(() => {
-            setTimeout(() => {
-              router.push(PATHS[index + direction]);
-            }, 400);
-          });
-        }
-      },
-      100,
-      { leading: true }
-    );
-
-    isMounted.current = true;
-    const refElem = ref.current;
-    if (ref.current) {
-      ref.current.addEventListener("wheel", handleScroll, { passive: true });
-    }
-    return () => {
-      if (refElem) {
-        refElem.removeEventListener("wheel", handleScroll);
-      }
-      isMounted.current = false;
-    };
-  }, [PATHS, pathname, ref, router, controls, disable]);
 
   useEffect(() => {
     isMounted.current = true;
@@ -82,6 +48,35 @@ export const useResizeCallBack = (
     return () => window.removeEventListener("resize", cb);
   }, [cb, ref]);
 };
+
+function getWindowDimensions() {
+  if (typeof window !== "undefined") {
+    const { innerWidth: width, innerHeight: height } = window;
+    return {
+      width,
+      height,
+    };
+  }
+  // Default values when window is not available (e.g., during SSR)
+  return { width: 0, height: 0 };
+}
+
+export function useWindowDimensions() {
+  const [windowDimensions, setWindowDimensions] = useState(
+    getWindowDimensions()
+  );
+
+  useEffect(() => {
+    function handleResize() {
+      setWindowDimensions(getWindowDimensions());
+    }
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  return windowDimensions;
+}
 
 export const animateTransition = {
   initial: {

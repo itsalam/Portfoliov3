@@ -16,7 +16,7 @@ const Clock: React.FC = () => {
       const formattedMinutes = minutes.toString().padStart(2, "0");
       const formattedSeconds = seconds.toString().padStart(2, "0");
       setCurrentTime(
-        `${formattedHours}:${formattedMinutes}:${formattedSeconds}:${ampm}`
+        `${formattedHours}:${formattedMinutes} ${ampm}`
       );
     }, 1000);
 

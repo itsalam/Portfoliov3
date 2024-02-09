@@ -17,7 +17,7 @@ export default function LocationCard(props: ComponentProps<typeof motion.div>) {
     <TitleCard
       {...rest}
       containerClassName={className}
-      className={cn("flex relative w-g-x-3 h-g-y-2 gap-4")}
+      className={cn("flex relative w-g-x-4 h-g-y-2 gap-4")}
       title="Location"
       animate={controls}
       ref={projectsRef}

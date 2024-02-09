@@ -71,9 +71,8 @@ const Track = (
     e.preventDefault();
     e.stopPropagation();
     const containerElement = containerRef.current;
-    if (containerElement) {
-      const delta = startDrag.current ? 1 : -0.025;
-      setTrackDist(dist.get() + e.movementX * delta, 0.1);
+    if (containerElement && startDrag.current) {
+      setTrackDist(dist.get() + e.movementX, 0.1);
     }
   };
 

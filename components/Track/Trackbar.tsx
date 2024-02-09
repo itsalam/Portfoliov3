@@ -35,7 +35,7 @@ export const TrackBar = (
         <motion.div
           key={i}
           style={{
-            width: itemWidth * ratio,
+            width: itemWidth * ratio || 0,
             x: i * (itemWidth + gapWidth) * ratio,
           }}
           className="absolute h-[3px] top-0 left-0 bg-[--sage-5]"

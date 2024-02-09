@@ -8,6 +8,7 @@ import { Text } from "@radix-ui/themes";
 import "@radix-ui/themes/styles.css";
 import { motion } from "framer-motion";
 import { ComponentProps, useRef } from "react";
+import HomeCanvas from "../Canvases/HomeCanvas";
 
 export default function HeroCard(props: ComponentProps<typeof motion.div>) {
   const { className, ...rest } = props;
@@ -87,7 +88,7 @@ export default function HeroCard(props: ComponentProps<typeof motion.div>) {
       {...rest}
       containerClassName={cn("flex-col", className)}
       className={cn(
-        "flex-col flex relative w-g-x-5-1/8 h-g-y-5-3/8 px-g-x-2/8 py-g-y-2/8 justify-end"
+        "flex-col flex relative w-g-x-6-2/8 h-g-y-5-2/8 px-g-x-2/8 py-g-y-2/8 justify-end"
       )}
       title="Hero"
       animate={controls}
@@ -115,13 +116,14 @@ export default function HeroCard(props: ComponentProps<typeof motion.div>) {
         },
       }}
     >
+      <HomeCanvas></HomeCanvas>
       <TextRotateBody />
-      <Text size={"2"}>
+      <Text size={"2"} className="z-30 w-g-x-3">
         I build services for businesses professionally and enjoy creating web
         projects in my free time. I&apos;m keen on JavaScript, web design, and
         AI.
       </Text>
-      <Text size={"2"} className="font-favorit py-4">
+      <Text size={"2"} className="font-favorit py-4 z-30">
         Stuff I use:
       </Text>
     </TitleCard>

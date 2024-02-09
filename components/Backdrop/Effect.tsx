@@ -18,10 +18,10 @@ const Effect = () => {
           x: `${Math.random() * 100}%`,
           y: `${Math.random() * 100}%`,
         },
-        { duration: 2 }
+        { duration: 10 }
       );
     };
-    const interval = setInterval(() => animation(), 3000);
+    const interval = setInterval(() => animation(), 30000);
     window.addEventListener("mousemove", handleMouse);
     return () => {
       clearInterval(interval);
@@ -33,12 +33,12 @@ const Effect = () => {
     <motion.div className="absolute w-screen h-screen">
       <motion.div
         ref={scope}
-        className="absolute backdrop w-screen h-screen overflow-hidden "
+        className="absolute backdrop w-screen h-screen overflow-hidden bg-[--cyan-5]"
       >
         <motion.div className="blob absolute w-4/5 h-2/3 top-0 left-0 bg-gradient-radial from-[--tomato-10] via-[--tomato-a10] to-transparent" />
         <motion.div className="blob absolute w-2/3 h-1/2 top-0 left-0 bg-gradient-radial from-[--purple-10] via-[--plum-a10] to-transparent" />
         <motion.div
-          className="mouse-effect rounded-full w-g-x-3 aspect-square absolute top-0 left-0 blur-md"
+          className="mouse-effect rounded-full w-g-x-3 aspect-square absolute top-0 left-0"
           style={{ x, y }}
         />
       </motion.div>

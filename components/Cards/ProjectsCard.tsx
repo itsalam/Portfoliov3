@@ -1,6 +1,5 @@
 "use client";
 
-import { ProjectTitle } from "@/app/about/components";
 import { TitleCard } from "@/components/Card";
 import { useScrollNavigation } from "@/lib/clientUtils";
 import { cn } from "@/lib/utils";
@@ -30,6 +29,29 @@ const PROJECTS: Project[] = Array.from({ length: 4 }).map((_, i) => ({
   url: `https://example.com/project${i + 1}`,
   tags: ["React", "TypeScript", "CSS"],
 }));
+
+import { AnimateText } from "@/components/TextEffects";
+import { animateTransition } from "@/lib/clientUtils";
+import { FC } from "react";
+
+export const ProjectTitle = (props: { className?: string; title: string }) => {
+  const { className, title } = props;
+  const Title: FC<{ className: string }> = ({ className }) => (
+    <AnimateText
+      size={"7"}
+      className={cn("font-bold", className)}
+      text={title}
+      variants={animateTransition}
+    />
+  );
+
+  return (
+    <>
+      <Title className={cn("mix-blend-color-dodge", className)} />
+      <Title className="absolute blur-sm mix-blend-lighten text-[--gray-4]" />
+    </>
+  );
+};
 
 export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
   const { className, ...rest } = props;
@@ -119,7 +141,7 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
       {...rest}
       containerClassName={className}
       className={cn(
-        "flex-col flex relative w-g-x-3-6/8 h-g-y-3 p-4 py-g-y-2/8"
+        "flex-col flex relative w-g-x-3-6/8 h-g-y-2-7/8 p-4 py-g-y-2/8"
       )}
       title="Projects"
       animate={controls}

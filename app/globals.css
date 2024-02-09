@@ -77,6 +77,16 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  .card {
+    /* From https://css.glass */
+    background: var(--gray-a2);
+    border-radius: 12px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(2.7px);
+    -webkit-backdrop-filter: blur(5.7px);
+    border: 1px solid rgba(255, 255, 255, 0.43);
+  }
 }
 
 html.dark {
@@ -152,12 +162,15 @@ body {
   display: none !important;
 }
 
-.card {
-  /* From https://css.glass */
-  background: var(--gray-a2);
-  border-radius: 12px;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(2.7px);
-  -webkit-backdrop-filter: blur(5.7px);
-  border: 1px solid rgba(255, 255, 255, 0.43);
+.rt-TooltipContent>span:first-of-type {
+  display: none;
 }
+
+.dark .rt-TooltipContent {
+  background-color: var(--gray-5);
+}
+
+.dark .rt-TooltipText {
+  color: var(--gray-12);
+}
+

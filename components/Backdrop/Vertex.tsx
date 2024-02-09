@@ -1,7 +1,6 @@
-import { motion, useAnimation } from "framer-motion";
-import React, { useEffect } from "react";
+import React, { HTMLProps } from "react";
 
-type VertexProps = Parameters<typeof motion.svg>[0] & {
+type VertexProps = HTMLProps<SVGSVGElement> & {
   position: [number, number];
   size: number;
   thickness?: number;
@@ -16,43 +15,22 @@ const Vertex: React.FC<VertexProps> = (props) => {
     fill = "#ffffff",
     ...otherProps
   } = props;
-  const controls = useAnimation();
-
-  useEffect(() => {
-    controls.start("view");
-  }, [controls]);
 
   return (
-    <motion.svg
-      animate={controls}
-      initial={"initial"}
-      variants={{
-        initial: { opacity: 0 },
-        view: (i) => ({
-          opacity: 1,
-          transition: {
-            delay: i * 0.025,
-            duration: 0.33,
-          },
-        }),
-      }}
-      x={position[0] - size / 2}
-      y={position[1] - size / 2}
-      {...otherProps}
-    >
-      <motion.rect
+    <svg x={position[0] - size / 2} y={position[1] - size / 2} {...otherProps}>
+      <rect
         y={(size - thickness) / 2}
         width={size}
         height={thickness}
         fill={fill}
       />
-      <motion.rect
+      <rect
         x={(size - thickness) / 2}
         width={thickness}
         height={size}
         fill={fill}
       />
-    </motion.svg>
+    </svg>
   );
 };
 

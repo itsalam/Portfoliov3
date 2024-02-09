@@ -1,23 +1,35 @@
 "use client";
 
+import { gridAtom } from "@/lib/state";
 import { cn } from "@/lib/utils";
 import { Separator } from "@radix-ui/themes";
 import "@radix-ui/themes/styles.css";
-import { motion, useAnimationControls, useDragControls } from "framer-motion";
+import {
+  AnimationControls,
+  motion,
+  useAnimationControls,
+  useDragControls,
+} from "framer-motion";
+import { useAtomValue } from "jotai";
 import {
   ComponentPropsWithoutRef,
   ElementRef,
   PointerEvent,
   forwardRef,
+  useRef,
 } from "react";
 
 const Card = forwardRef<
   ElementRef<typeof motion.div>,
   ComponentPropsWithoutRef<typeof motion.div>
 >((props, ref) => {
-  const { className, children, ...rest } = props;
-  const animationControls = useAnimationControls();
+  const { animate, className, children, ...rest } = props;
+  const defaultAnimationControls = useAnimationControls();
+  const animationControls = useRef(
+    (animate as AnimationControls) || defaultAnimationControls
+  );
   const dragControls = useDragControls();
+  const { gridUnitWidth, gridUnitHeight } = useAtomValue(gridAtom);
   function startDrag(event: PointerEvent) {
     dragControls.start(event);
   }
@@ -32,14 +44,6 @@ const Card = forwardRef<
       onDragEnd={() => {
         if (!ref || typeof ref === "function" || !ref.current) return;
         const element = ref.current;
-        const gridWidth = parseInt(
-          document.documentElement.style.getPropertyValue("--grid-width"),
-          10
-        );
-        const gridHeight = parseInt(
-          document.documentElement.style.getPropertyValue("--grid-height"),
-          10
-        );
         const matches = window
           .getComputedStyle(element)
           .getPropertyValue("transform")
@@ -49,10 +53,12 @@ const Card = forwardRef<
           // Get the last two matches and convert them to numbers
           const x = parseFloat(matches[matches.length - 2]);
           const y = parseFloat(matches[matches.length - 1]); // Output: 123.871, 133.571
-          const fixedX = Math.round(x / (gridWidth / 8)) * (gridWidth / 8);
-          const fixedY = Math.round(y / (gridHeight / 8)) * (gridHeight / 8);
+          const fixedX =
+            Math.round(x / (gridUnitWidth / 8)) * (gridUnitWidth / 8);
+          const fixedY =
+            Math.round(y / (gridUnitHeight / 8)) * (gridUnitHeight / 8);
           setTimeout(() => {
-            animationControls.start({
+            animationControls.current.start({
               x: fixedX,
               y: fixedY,
             });
@@ -60,7 +66,7 @@ const Card = forwardRef<
         }
       }}
       className={cn("card overflow-hidden absolute", className)}
-      animate={animationControls}
+      animate={animationControls.current}
       ref={ref}
       {...rest}
     >
@@ -91,7 +97,7 @@ export const TitleCard = forwardRef<
     >
       <div
         onPointerDown={startDrag}
-        className="flex flex-col px-3 h-g-y-2/4 relative bg-[--gray-a5] justify-center bg-blur-xl"
+        className="flex flex-col px-3 h-g-y-2/8 relative bg-[--gray-a5] justify-center bg-blur-xl"
       >
         <p className="text-xs">{title?.toUpperCase()}</p>
         <div className="absolute bottom-0 w-full">

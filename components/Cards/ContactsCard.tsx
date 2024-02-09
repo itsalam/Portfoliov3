@@ -57,7 +57,7 @@ const Link = forwardRef<
     >
       <a
         href={value}
-        className="relative w-min"
+        className="relative w-min overflow-hidden"
         target="_blank"
         rel="noreferrer"
       >
@@ -77,6 +77,7 @@ const Link = forwardRef<
                   y: ["0%", "-100%", "100%", "0%"],
                   transition: {
                     times: [0, 0.5, 0.5, 1],
+                    duration: 0.33,
                   },
                 },
                 initial: {
@@ -91,15 +92,18 @@ const Link = forwardRef<
           className="bg-[--sage-11]"
           variants={{
             initial: {
-              width: "0%",
+              width: "100%",
             },
             hover: {
-              width: "100%",
-              marginLeft: "0%",
+              width: [null, "100%", "0%", "100%"],
+              marginLeft: [null, "100%", "0%", "0%"],
+              transition: {
+                times: [0, 0.5, 0.5, 1],
+                duration: 0.33,
+              },
             },
             exit: {
-              width: "0%",
-              marginLeft: "100%",
+              width: "100%",
             },
           }}
         />
@@ -128,9 +132,9 @@ export default function ContactCard(props: ComponentProps<typeof motion.div>) {
       id="contact"
       key={"contact"}
     >
-      <motion.div className="flex-1 rounded-full my-auto">
+      <motion.div className="flex-1 rounded-full my-auto p-5">
         <motion.div
-          className="aspect-square relative rounded-full bg-[--gray-a5] bg-blur-xl"
+          className="aspect-square relative rounded-full bg-[--gray-a5] bg-blur-xl overflow-hidden"
           variants={{}}
         >
           <AnimatePresence>
@@ -145,19 +149,19 @@ export default function ContactCard(props: ComponentProps<typeof motion.div>) {
                   opacity: 1,
                 }}
                 animate={{
-                  y: [-10, -10, 0],
-                  rotate: [-90, -90, 0],
-                  opacity: [0, 0, 1],
+                  x: [-45, 0],
+                  rotate: [-30, 0],
+                  opacity: [0, 1],
                   transition: {
-                    duration: 0.266,
+                    duration: 0.366,
                   },
                 }}
                 exit={{
-                  y: [-10, -10, -10],
-                  rotate: [0, 90, 180],
-                  opacity: [1, 0.5, 0],
+                  x: [0, 45],
+                  rotate: [0, 30],
+                  opacity: [0.5, 0],
                   transition: {
-                    duration: 0.266,
+                    duration: 0.366,
                   },
                 }}
               />
