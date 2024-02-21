@@ -35,35 +35,37 @@ export default function Hero() {
 
   return (
     <>
-              <Overlay />
-          <Backdrop />
-              <motion.div
-      ref={heroRef}
-      className="h-full w-full items-start block relative flex-wrap gap-y-g-x-1/4"
-    >
-      <HeroCard className="left-g-x-4/8 top-g-y-4/8" dragConstraints={heroRef} />
-      <ProjectsCard
-        className="bottom-g-y-4/8 right-g-x-1-3/8"
-        dragConstraints={heroRef}
-      />
-      <ExperienceCard
-        className="top-g-y-4/8 right-g-x-1-3/8"
-        dragConstraints={heroRef}
-      />
-      <ContactCard
-        className="bottom-g-y-4/8 left-g-x-4-5/8"
-        dragConstraints={heroRef}
-      />
-      <MenuCard
-        className="right-g-x-4/8 top-g-y-2-5/8"
-        dragConstraints={heroRef}
-      />
-      <LocationCard
-        className="left-g-x-4/8 bottom-g-y-4/8"
-        dragConstraints={heroRef}
-      />
-    </motion.div>
+      <Overlay />
+      <Backdrop />
+      <motion.div
+        ref={heroRef}
+        className="h-full w-full items-start block relative flex-wrap gap-y-g-x-1/4"
+      >
+        <HeroCard
+          className="left-g-x-4/8 top-g-y-4/8"
+          dragConstraints={heroRef}
+        />
+        <ProjectsCard
+          className="bottom-g-y-4/8 right-g-x-1-3/8"
+          dragConstraints={heroRef}
+        />
+        <ExperienceCard
+          className="top-g-y-4/8 right-g-x-1-3/8"
+          dragConstraints={heroRef}
+        />
+        <ContactCard
+          className="bottom-g-y-4/8 left-g-x-4-5/8"
+          dragConstraints={heroRef}
+        />
+        <MenuCard
+          className="right-g-x-4/8 top-g-y-2-5/8"
+          dragConstraints={heroRef}
+        />
+        <LocationCard
+          className="left-g-x-4/8 bottom-g-y-4/8"
+          dragConstraints={heroRef}
+        />
+      </motion.div>
     </>
   );
-
 }

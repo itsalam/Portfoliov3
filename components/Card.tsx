@@ -2,7 +2,7 @@
 
 import { gridAtom } from "@/lib/state";
 import { cn } from "@/lib/utils";
-import { Separator } from "@radix-ui/themes";
+import { Separator, Text } from "@radix-ui/themes";
 import "@radix-ui/themes/styles.css";
 import {
   AnimationControls,
@@ -99,7 +99,7 @@ export const TitleCard = forwardRef<
         onPointerDown={startDrag}
         className="flex flex-col px-3 h-g-y-2/8 relative bg-[--gray-a5] justify-center bg-blur-xl"
       >
-        <p className="text-xs">{title?.toUpperCase()}</p>
+        <Text size="3">{title?.toUpperCase()}</Text>
         <div className="absolute bottom-0 w-full">
           <Separator size="4" />
         </div>
