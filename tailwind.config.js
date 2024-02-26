@@ -39,9 +39,6 @@ module.exports = {
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
-    screens: {
-      "3xl": "1800px",
-    },
     container: {
       center: true,
       padding: "2rem",
@@ -56,6 +53,9 @@ module.exports = {
       apercu: ["Apercu"],
     },
     extend: {
+      screens: {
+        "3xl": "1800px",
+      },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic":

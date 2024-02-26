@@ -58,7 +58,7 @@ const RotateText: React.FC<
           y: y,
           opacity,
           transition: {
-            duration: 7,
+            duration: 9,
             times: [0.4, 0.5, 0.65, 0.75, 0.9, 1],
             repeatDelay: 0.5,
             repeat: Infinity,
@@ -93,7 +93,7 @@ export const AnimateText: React.FC<
     >
       {(text as string).split("").map((child, i) => (
         <MText
-          key={`${text}-${i}-${child}`}
+          key={`${i}-${child}`}
           className="relative origin-[50%_50%_4rem] my-auto whitespace-pre"
           variants={variants}
           {...textProps}

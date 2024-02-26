@@ -2,18 +2,13 @@
 
 import Canvas from "@/components/Canvases/ParticlesCanvas";
 import { useWindowDimensions } from "@/lib/clientUtils";
-import { dimensionAtom, gridAtom } from "@/lib/state";
-import { useAtomValue, useSetAtom } from "jotai";
+import { gridAtom } from "@/lib/state";
+import { useAtomValue } from "jotai";
 import { useEffect } from "react";
 
 const Page = () => {
-  const setDimensions = useSetAtom(dimensionAtom);
   const grid = useAtomValue(gridAtom);
-  const { width, height } = useWindowDimensions();
-
-  useEffect(() => {
-    setDimensions({ width, height });
-  }, [width, height, setDimensions]);
+  useWindowDimensions();
 
   useEffect(() => {
     const root = document.documentElement;

@@ -46,26 +46,34 @@ const Item = (props: {
   });
   const width = useTransform(
     dist,
-    [0, gridCellWidth * 4],
-    [gridCellWidth * 2.75, gridCellWidth * 2]
+    [0, gridCellWidth * 2],
+    [gridCellWidth * 1.66, gridCellWidth * 1.33]
   );
 
-  const springWidth = useSpring(width, { damping: 15, stiffness: 90 });
+  const springWidth = useSpring(width, { damping: 15, stiffness: 150 });
   const iconScale = useSpring(
-    useTransform(width, [gridCellWidth * 2, gridCellWidth * 2.75], [1, 1.375])
+    useTransform(width, [gridCellWidth * 1.33, gridCellWidth * 1.66], [1, 1.1])
   );
 
   return (
-    <Tooltip sideOffset={10} side="left" content={<Text size="3">{text}</Text>}>
+    <Tooltip
+      sideOffset={10}
+      side="top"
+      content={
+        <Text className="font-favorit" size="3">
+          {text}
+        </Text>
+      }
+    >
       <motion.div
         ref={ref}
         style={{
           width: springWidth,
         }}
-        className="cursor-pointer aspect-square flex flex-col items-end justify-end w-g-x-3/8 relative rounded-full bg-[--sage-6] opacity-90"
+        className="cursor-pointer aspect-square flex items-end justify-end w-g-x-3/8 relative rounded-full bg-[--sage-1] opacity-90"
         variants={{
           leave: {
-            width: [null, gridCellWidth * 2],
+            width: [null, gridCellWidth * 1.33],
           },
         }}
       >
@@ -100,7 +108,7 @@ export default function MenuCard(props: ComponentProps<typeof motion.div>) {
     <Card
       {...rest}
       className={cn(
-        "flex flex-col absolute w-g-x-5/8 gap-4 items-end rounded-full overflow-visible p-2 bg-[--sage-a3]",
+        "flex absolute gap-4 items-end overflow-visible p-2 h-g-x-4/8",
         className
       )}
       ref={ref}
@@ -119,12 +127,13 @@ export default function MenuCard(props: ComponentProps<typeof motion.div>) {
         <Item key={i} text={key} {...{ x, y }}>
           <Icon
             className="text-[--sage-11] m-auto"
-            size={"32"}
+            size={"28"}
             absoluteStrokeWidth
             strokeWidth={3.5}
           />
         </Item>
       ))}
+      <div className="absolute h-g-y-2/8 bottom-0 rounded-full bg-[--sage-a3] mix-blend-color-burn w-full left-0" />
     </Card>
   );
 }

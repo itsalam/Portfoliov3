@@ -1,7 +1,9 @@
 "use client";
 
 import { AnimationControls, useAnimation } from "framer-motion";
-import { RefObject, useEffect, useRef, useState } from "react";
+import { useAtomValue, useSetAtom } from "jotai";
+import { RefObject, useEffect, useRef } from "react";
+import { dimensionAtom, gridAtom } from "./state";
 
 export const useScrollNavigation = (
   ref: RefObject<HTMLElement>,
@@ -62,20 +64,26 @@ function getWindowDimensions() {
 }
 
 export function useWindowDimensions() {
-  const [windowDimensions, setWindowDimensions] = useState(
-    getWindowDimensions()
-  );
+  const setDimensions = useSetAtom(dimensionAtom);
+  const grid = useAtomValue(gridAtom);
 
   useEffect(() => {
+    setDimensions(getWindowDimensions());
     function handleResize() {
-      setWindowDimensions(getWindowDimensions());
+      setDimensions(getWindowDimensions());
     }
 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  }, [setDimensions]);
 
-  return windowDimensions;
+  useEffect(() => {
+    const root = document.documentElement;
+    root.style.setProperty("--grid-width", `${grid.gridUnitWidth}px`);
+    root.style.setProperty("--grid-height", `${grid.gridUnitHeight}px`);
+    root.style.setProperty("--x-padding", `${grid.gapSize / 4}px`);
+    root.style.setProperty("--y-padding", `${grid.gapSize / 4}px`);
+  }, [grid]);
 }
 
 export const animateTransition = {

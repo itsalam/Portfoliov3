@@ -80,12 +80,12 @@
 
   .card {
     /* From https://css.glass */
-    background: var(--sage-a1);
+    /* background: var(--sage-a1); */
     border-radius: 12px;
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(2.7px);
-    -webkit-backdrop-filter: blur(5.7px);
-    border: 1px solid rgba(255, 255, 255, 0.43);
+    /* box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); */
+    /* backdrop-filter: blur(2.7px); */
+    /* -webkit-backdrop-filter: blur(5.7px); */
+    /* border: 1px solid rgba(255, 255, 255, 0.43); */
   }
 }
 
@@ -108,9 +108,9 @@ body {
   background: linear-gradient(
     70deg,
     var(--background-color) 0%,
-    rgba(64, 70, 149, 0.5) 25%,
+    var(--grass-a4) 25%,
     var(--background-color) 50%,
-    rgba(64, 70, 149, 0.5) 75%,
+    var(--grass-a4)  75%,
     var(--background-color) 100%
   );
   z-index: 0;
@@ -134,9 +134,8 @@ body {
 .effect, .mouse-effect {
   background: radial-gradient(
     circle,
-    #ff801f 0%,
-    rgba(207, 204, 205, 0.685) 25%,
-    rgb(70, 9, 144) 50%
+    var(--sage-11) 0%,
+    var(--grass-11) 100%,
   );
   mix-blend-mode: color-dodge;
 }
@@ -167,10 +166,10 @@ body {
 }
 
 .dark .rt-TooltipContent {
-  background-color: var(--gray-5);
+  background-color: var(--sage-1);
 }
 
 .dark .rt-TooltipText {
-  color: var(--gray-12);
+  color: var(--sage-11);
 }
 

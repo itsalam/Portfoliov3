@@ -105,7 +105,7 @@ const Grid: React.FC<GridProps> = (props) => {
       layout
       {...svgProps}
       ref={ref}
-      className={"absolute w-screen h-screen"}
+      className={"absolute w-screen h-screen z-50 top-0"}
     >
       {/* <Sections /> */}
       <motion.mask id="clipping">

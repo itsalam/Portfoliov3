@@ -56,8 +56,6 @@ export default class ExternalForce extends BasePass<UpdateProps> {
 
     const forceX = (velocity.x / 2) * mouseForce;
     const forceY = (velocity.y / 2) * mouseForce;
-    const cursorSizeX = cursorSize * cellScale.x;
-    const cursorSizeY = cursorSize * cellScale.y;
     const centerX = Math.min(
       Math.max(pointer.x, -1 + 0 + cellScale.x * 2),
       1 - 0 - cellScale.x * 2

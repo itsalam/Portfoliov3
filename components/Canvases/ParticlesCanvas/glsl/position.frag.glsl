@@ -1,17 +1,18 @@
 precision highp float;
-
-uniform vec2 force;
-uniform vec2 center;
-uniform float scale;
-uniform vec2 px;
-uniform float time;
+uniform sampler2D particles;
+uniform sampler2D velocity;
 varying vec2 vUv;
+uniform float time;
 
 const float PI = 3.14159265359;
 const float EPI = 0.05;
-const float STEP = 2400.0;
-const float FLUID_STEP = 20.0;
+const float STEP = 100.0;
+const float FLUID_STEP = 1.0;
 const float SPEED = 0.01;
+
+float rand(vec2 co){
+    return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
+}
 
 //	Simplex 4D Noise 
 //	by Ian McEwan, Ashima Arts
@@ -197,13 +198,13 @@ vec3 deltaNoise3D(float x, float y, float z, float t) {
   return vec3(a, b, c);
 }
 
-// vec3 computeCurl(float x, float y, float z, float t){
-//   vec3 p0 = normalize(deltaNoise3D(x, y, z, t));
+vec3 computeCurl(float x, float y, float z, float t){
+  vec3 p0 = normalize(deltaNoise3D(x/ STEP, y/STEP, z/STEP, t));
 
-//   vec3 p1 = normalize(deltaNoise3D(x + 10.5, y + 10.5, z + 10.5, t));
+  vec3 p1 = normalize(deltaNoise3D((x + 10.5)/STEP, (y + 10.5)/STEP, (z + 10.5)/STEP, t));
 
-//   return normalize(cross(p0, p1));
-// }
+  return normalize(cross(p0, p1));
+}
 
 vec3 computeFlow(float x, float y, float z, float t) {
   vec3 pos0 = vec3((x) * FLUID_STEP,(y) * FLUID_STEP,(z) * FLUID_STEP);
@@ -217,17 +218,37 @@ vec3 computeFlow(float x, float y, float z, float t) {
   );
 }
 
-void main(){
-    vec2 adjustedUv = (vUv - 0.5) * 2.0;
+// void main(){
+//     vec2 adjustedUv = (vUv - 0.5) * 2.0;
+//     float t = time * SPEED;
+//     vec3 flow = computeFlow(adjustedUv.x, adjustedUv.y, 0.0, t) * snoise3(vec3(adjustedUv.y, adjustedUv.x, t*10.0));
+//     // vec3 curl = computeCurl(adjustedUv.x, adjustedUv.y, 0.0, t)  * snoise3(vec3(adjustedUv.x, adjustedUv.y, t));
+//     // Calculate the position relative to the center
+//     vec2 pos = adjustedUv - center;
+//     vec2 circle = pos ;
+//     float d = step(length(circle), scale);
+//     d *= d;
+//     flow.x += 0.25;
+//     vec3 forces = (flow)/150.0;
+//     gl_FragColor = vec4(force*d + forces.xy, 0, 1);
+// }
+
+void main() {
     float t = time * SPEED;
-    // vec3 flow = computeFlow(adjustedUv.x, adjustedUv.y, 0.0, t) * snoise3(vec3(adjustedUv.y, adjustedUv.x, t*10.0));
-    // vec3 curl = computeCurl(adjustedUv.x, adjustedUv.y, 0.0, t)  * snoise3(vec3(adjustedUv.x, adjustedUv.y, t));
-    // Calculate the position relative to the center
-    vec2 pos = adjustedUv - center;
-    vec2 circle = pos;
-    float d = step(length(circle), scale);
-    d *= d;
-    // flow.x += 0.25;
-    // vec3 forces = (flow)/150.0;
-    gl_FragColor = vec4(force*d, 0, 1);
+    vec4 pos = texture2D(particles, vUv).xyzw; // basic simulation: displays the particles in place.
+    if (pos.x > 0.95 || pos.y > 0.95 || pos.x < -0.95 || pos.y < -0.95){
+        pos.y = rand(pos.xy) * 1.8 -0.95;
+        pos.x = -0.9 + rand(pos.xz) * 0.1;
+        pos.z = rand(pos.yz) * 1.8 -0.95;
+        pos.w = 1.0;
+    }
+    vec2 adjustedUv = (vUv - 0.5) * 2.0;
+    vec3 flow = computeFlow(pos.x, pos.y, pos.z, t) * snoise3(vec3(pos.x, pos.y, t*10.0));
+    vec3 curl = computeCurl(pos.x, pos.y, pos.z, t)  * snoise3(vec3(pos.z, pos.z, t));
+    
+    flow.x += 0.25;
+    vec3 forces = (flow + curl*2.0)/850.0;
+    pos.xyz += texture2D(velocity, (pos.xy + 1.0)/2.0).xyz * 0.01; // basic simulation: moves the particles.
+    gl_FragColor = vec4(pos.xyz + forces, pos.w);
 }
+         
