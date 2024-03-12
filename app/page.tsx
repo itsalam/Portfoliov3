@@ -1,35 +1,43 @@
 "use client";
 
 import Backdrop from "@/components/Backdrop";
-import HeroCard from "@/components/Cards/HeroCard";
-import MenuCard from "@/components/Cards/MenuCard";
+import Grid from "@/components/Grid";
 import Overlay from "@/components/Overlay";
-import { useWindowDimensions } from "@/lib/clientUtils";
+import { GridContext, useGridStore } from "@/lib/state";
 import "@radix-ui/themes/styles.css";
-import { motion } from "framer-motion";
-import { useRef } from "react";
+import { debounce } from "lodash";
+import { useCallback, useEffect, useRef } from "react";
+import { useStore } from "zustand";
 
 export default function Hero() {
-  const heroRef = useRef<HTMLDivElement>(null);
-  useWindowDimensions();
+  const store = useRef(useGridStore);
+  const setDimensions = useStore(store.current).setDimensions;
+  const getWindowDimensions = useCallback(() => {
+    const { innerWidth: width, innerHeight: height } = window;
+    return {
+      width,
+      height,
+    };
+  }, []);
+
+  const handleResize = useCallback(
+    debounce(() => setDimensions(getWindowDimensions()), 200, {
+      trailing: true,
+    }),
+    [setDimensions, getWindowDimensions]
+  );
+
+  useEffect(() => {
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [handleResize]);
 
   return (
-    <>
+    <GridContext.Provider value={store.current}>
       <Overlay />
       <Backdrop />
-      <motion.div
-        ref={heroRef}
-        className="h-full w-full items-start block relative flex-wrap gap-y-g-x-1/4"
-      >
-        <HeroCard
-          className="left-g-x-4/8 bottom-g-y-4/8"
-          dragConstraints={heroRef}
-        />
-        <MenuCard
-          className="right-g-x-4/8 top-g-y-2-5/8"
-          dragConstraints={heroRef}
-        />
-      </motion.div>
-    </>
+      <Grid />
+    </GridContext.Provider>
   );
 }

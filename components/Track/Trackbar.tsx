@@ -21,9 +21,9 @@ export const TrackBar = (
     ...restProps
   } = props;
   const barRef = useRef<HTMLDivElement>(null);
-  const trackWidth = trackRef.current?.getBoundingClientRect().width  ?? 1;
+  const trackWidth = trackRef.current?.getBoundingClientRect().width ?? 1;
   const gapWidth = ((trackWidth ?? 0) - itemWidth * numItems) / (numItems - 1);
-  const ratio = containerWidth / (trackWidth);
+  const ratio = containerWidth / trackWidth;
   const x = useTransform(dist, (x) => x * -ratio);
   return (
     <motion.div
@@ -44,8 +44,7 @@ export const TrackBar = (
       <motion.div
         onPan={(e, info) => {
           dist.set(
-            -Math.max(Math.min((trackWidth) * ratio, info.offset.x), 0) /
-              ratio
+            -Math.max(Math.min(trackWidth * ratio, info.offset.x), 0) / ratio
           );
         }}
         className="z-20 h-[9px] -top-[3px] absolute border border-[--sage-9]"

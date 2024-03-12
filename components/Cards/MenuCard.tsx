@@ -1,6 +1,6 @@
 "use client";
 
-import { gridAtom } from "@/lib/state";
+import { GridContext } from "@/lib/state";
 import { cn } from "@/lib/utils";
 import { Text, Tooltip } from "@radix-ui/themes";
 import "@radix-ui/themes/styles.css";
@@ -13,26 +13,30 @@ import {
   useSpring,
   useTransform,
 } from "framer-motion";
-import { useAtomValue } from "jotai";
+import { Briefcase, FlaskRound, Home, LucideIcon, Users } from "lucide-react";
 import {
-  FlaskRound,
-  FolderKanban,
-  Home,
-  LucideIcon,
-  Users,
-} from "lucide-react";
-import { ComponentProps, MouseEvent, ReactNode, useRef } from "react";
+  ComponentProps,
+  MouseEvent,
+  ReactNode,
+  useContext,
+  useRef,
+} from "react";
+import { useStore } from "zustand";
 import Card from "../Card";
+import { CARD_TYPES } from "./types";
 
 const Item = (props: {
   x: MotionValue<number>;
   y: MotionValue<number>;
+  size: number;
+  minSize: number;
+  maxSize: number;
   children: ReactNode;
   text: string;
+  onClick: (event: MouseEvent) => void;
 }) => {
-  const { children, text, x, y } = props;
-  const ref = useRef<HTMLDivElement>(null);
-  const { gridCellWidth } = useAtomValue(gridAtom);
+  const { children, text, x, y, onClick, minSize, maxSize, size } = props;
+  const ref = useRef<HTMLButtonElement>(null);
   const dist = useTransform(() => {
     if (!ref.current) return 0;
     const { width, left, top, height } = (
@@ -44,15 +48,20 @@ const Item = (props: {
       Math.pow(x.get() - centerX, 2) + Math.pow(y.get() - centerY, 2)
     );
   });
+
   const width = useTransform(
     dist,
-    [0, gridCellWidth * 2],
-    [gridCellWidth * 1.66, gridCellWidth * 1.33]
+    [0, size * maxSize * 1.5],
+    [size * maxSize, size * minSize]
   );
 
-  const springWidth = useSpring(width, { damping: 15, stiffness: 150 });
+  const springWidth = useSpring(width, { stiffness: 650 });
   const iconScale = useSpring(
-    useTransform(width, [gridCellWidth * 1.33, gridCellWidth * 1.66], [1, 1.1])
+    useTransform(
+      width,
+      [size * minSize, size * maxSize],
+      [1, 1 + (maxSize - minSize)]
+    )
   );
 
   return (
@@ -65,28 +74,33 @@ const Item = (props: {
         </Text>
       }
     >
-      <motion.div
+      <motion.button
         ref={ref}
         style={{
           width: springWidth,
         }}
-        className="cursor-pointer aspect-square flex items-end justify-end w-g-x-3/8 relative rounded-full bg-[--sage-1] opacity-90"
+        className="aspect-square flex items-end justify-end w-g-x-1 relative rounded-full bg-[--sage-5] transition-all brightness-100 hover:brightness-75 z-10"
         variants={{
           leave: {
-            width: [null, gridCellWidth * 1.33],
+            width: [null, size * minSize],
+            transition: { stiffness: 650 },
           },
         }}
+        onClick={onClick}
       >
         <motion.div className="m-auto" style={{ scale: iconScale }}>
           {children}
         </motion.div>
-      </motion.div>
+      </motion.button>
     </Tooltip>
   );
 };
 
-export default function MenuCard(props: ComponentProps<typeof motion.div>) {
+export default function MenuCard(props: ComponentProps<typeof Card>) {
   const { className, ...rest } = props;
+  const store = useContext(GridContext)!;
+  const pushElements = useStore(store).pushElements;
+  const { gridUnitWidth } = useStore(store).grid;
   const [ref] = useAnimate();
   const controls = useAnimationControls();
   const x = useMotionValue(0),
@@ -97,43 +111,62 @@ export default function MenuCard(props: ComponentProps<typeof motion.div>) {
     y.set(ev.clientY);
   };
 
-  const items: Record<string, LucideIcon> = {
-    Home: Home,
-    Works: FolderKanban,
-    Info: Users,
-    Etc: FlaskRound,
+  const items: Record<string, { icon: LucideIcon; cards: CARD_TYPES[] }> = {
+    Home: { icon: Home, cards: [CARD_TYPES.Home] },
+    Projects: { icon: FlaskRound, cards: [CARD_TYPES.Projects] },
+    Work: { icon: Briefcase, cards: [CARD_TYPES.Experience] },
+    Info: {
+      icon: Users,
+      cards: [CARD_TYPES.Contacts, CARD_TYPES.Status, CARD_TYPES.Location],
+    },
   };
 
   return (
     <Card
       {...rest}
       className={cn(
-        "flex absolute gap-4 items-end overflow-visible p-2 h-g-x-4/8",
+        "absolute overflow-visible h-g-y-1 group w-g-x-3",
         className
       )}
       ref={ref}
       initial="initial"
-      id="menu"
-      key={"menu"}
+      id={CARD_TYPES.Menu}
+      key={CARD_TYPES.Menu}
       onMouseMove={trackMouse}
-      animate={controls}
       onMouseLeave={() => {
         controls.start("leave");
         x.set(0);
         y.set(0);
       }}
     >
-      {Object.entries(items).map(([key, Icon], i) => (
-        <Item key={i} text={key} {...{ x, y }}>
-          <Icon
-            className="text-[--sage-11] m-auto"
-            size={"28"}
-            absoluteStrokeWidth
-            strokeWidth={3.5}
-          />
-        </Item>
-      ))}
-      <div className="absolute h-g-y-2/8 bottom-0 rounded-full bg-[--sage-a3] mix-blend-color-burn w-full left-0" />
+      <motion.div
+        animate={controls}
+        className="flex absolute gap-4 items-end overflow-visible p-2 bottom-0 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 "
+      >
+        {Object.entries(items).map(([key, { icon: Icon, cards }], i) => (
+          <Item
+            key={i}
+            text={key}
+            {...{ x, y }}
+            minSize={0.6}
+            maxSize={0.85}
+            size={gridUnitWidth}
+            onClick={() =>
+              pushElements(
+                cards.map((id) => ({ id, coords: [1, 1], isLocked: false }))
+              )
+            }
+          >
+            <Icon
+              className="text-[--sage-11] m-auto"
+              size={"28"}
+              absoluteStrokeWidth
+              strokeWidth={3}
+            />
+          </Item>
+        ))}
+        <div className="absolute transition-all h-full bottom-0 rounded-full group-hover:bg-[--sage-a2] bg-[--sage-a3] mix-blend-color-burn w-full left-0 -z-10" />
+      </motion.div>
     </Card>
   );
 }

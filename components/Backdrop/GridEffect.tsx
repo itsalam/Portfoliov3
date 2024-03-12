@@ -1,9 +1,9 @@
 "use client";
 
-import { dimensionAtom, gridAtom } from "@/lib/state";
+import { GridContext } from "@/lib/state";
 import { motion } from "framer-motion";
-import { useAtomValue } from "jotai";
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useContext, useRef } from "react";
+import { useStore } from "zustand";
 import Vertex from "./Vertex";
 
 export type GridProps = {
@@ -14,11 +14,12 @@ export type GridProps = {
   dotsPerGrid?: number;
 };
 
-const Grid: React.FC<GridProps> = (props) => {
+const GridEffect: React.FC<GridProps> = (props) => {
   const { numCols = 48, numRows = 36, ...svgProps } = props;
-  const { height, width } = useAtomValue(dimensionAtom);
+  const store = useContext(GridContext)!;
+  const { height, width } = useStore(store).dimensions;
   const { gridCellHeight, gridCellWidth, vertexSize, gapSize } =
-    useAtomValue(gridAtom);
+    useStore(store).grid;
   const ref = useRef<SVGSVGElement>(null);
   const strokeDasharray = useCallback(
     (dimension: number, factor: number) => {
@@ -105,7 +106,7 @@ const Grid: React.FC<GridProps> = (props) => {
       layout
       {...svgProps}
       ref={ref}
-      className={"absolute w-screen h-screen z-50 top-0"}
+      className={"absolute w-screen h-screen z-50 top-0 opacity-5"}
     >
       {/* <Sections /> */}
       <motion.mask id="clipping">
@@ -130,6 +131,6 @@ const Grid: React.FC<GridProps> = (props) => {
   );
 };
 
-Grid.displayName = "Grid";
+GridEffect.displayName = "Grid";
 
-export default Grid;
+export default GridEffect;

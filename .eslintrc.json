@@ -16,7 +16,6 @@
     "prettier"
   ],
   "rules": {
-    "indent": ["error", 2, { "SwitchCase": 1 }],
     "linebreak-style": ["error", "unix"],
     "no-console": 0,
     "quotes": ["error", "double"],
@@ -26,8 +25,7 @@
     "react/prop-types": "off",
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn",
-    "react/no-unknown-property": "off",
-    "spelling": "warn"
+    "react/no-unknown-property": "off"
   },
   "settings": {
     "react": {

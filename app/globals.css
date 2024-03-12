@@ -6,7 +6,6 @@
 
 @layer base {
   :root {
-
     --grid-size: 96px;
     --background: 0 0% 100%;
     --foreground: 224 71.4% 4.1%;
@@ -89,12 +88,12 @@
   }
 }
 
-html.dark {
+html {
   --color-page-background: var(--sage-12);
 }
 
 html.dark {
-  --color-page-background: var(--sage-2);
+  --color-page-background: var(--sage-1);
 }
 
 body {
@@ -110,7 +109,7 @@ body {
     var(--background-color) 0%,
     var(--grass-a4) 25%,
     var(--background-color) 50%,
-    var(--grass-a4)  75%,
+    var(--grass-a4) 75%,
     var(--background-color) 100%
   );
   z-index: 0;
@@ -131,12 +130,9 @@ body {
   translate: -50% -50%;
 }
 
-.effect, .mouse-effect {
-  background: radial-gradient(
-    circle,
-    var(--sage-11) 0%,
-    var(--grass-11) 100%,
-  );
+.effect,
+.mouse-effect {
+  background: radial-gradient(circle, var(--sage-11) 0%, var(--grass-11) 100%);
   mix-blend-mode: color-dodge;
 }
 
@@ -161,7 +157,7 @@ body {
   display: none !important;
 }
 
-.rt-TooltipContent>span:first-of-type {
+.rt-TooltipContent > span:first-of-type {
   display: none;
 }
 
@@ -172,4 +168,3 @@ body {
 .dark .rt-TooltipText {
   color: var(--sage-11);
 }
-

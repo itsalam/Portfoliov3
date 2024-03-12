@@ -1,5 +1,6 @@
 "use client";
 
+import { Stats } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import {
@@ -237,10 +238,10 @@ const ParticleScene = () => {
 
     const velocity = options.current.isViscous
       ? viscous.update({
-        viscous: options.current.viscous,
-        iterations: options.current.iterations,
-        dt: options.current.dt,
-      })
+          viscous: options.current.viscous,
+          iterations: options.current.iterations,
+          dt: options.current.dt,
+        })
       : fluidFbos.current.vel_1;
 
     divergence.update({ velocity });
@@ -350,7 +351,7 @@ const ParticleCanvas = () => {
   return (
     <Canvas
       id="particle-canvas"
-      className="z-0"
+      className="z-0 opacity-80"
       gl={{ antialias: true, alpha: true, autoClear: false }}
       camera={{
         position: [0, 0, 4],
@@ -358,6 +359,7 @@ const ParticleCanvas = () => {
       }}
     >
       <ParticleScene />
+      <Stats />
     </Canvas>
   );
 };

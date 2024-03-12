@@ -1,28 +1,25 @@
 "use client";
 
 import { TitleCard } from "@/components/Card";
-import { useScrollNavigation } from "@/lib/clientUtils";
 import { cn } from "@/lib/utils";
 import "@radix-ui/themes/styles.css";
 import { motion, useAnimate } from "framer-motion";
 import { ComponentProps } from "react";
 import Map from "react-map-gl";
+import { CARD_TYPES } from "./types";
 
 export default function LocationCard(props: ComponentProps<typeof motion.div>) {
   const { className, ...rest } = props;
   const [projectsRef] = useAnimate();
-  const { controls } = useScrollNavigation(projectsRef, true);
-
   return (
     <TitleCard
       {...rest}
       containerClassName={className}
-      className={cn("flex relative w-g-x-4 h-g-y-2 gap-4")}
-      title="Location"
-      animate={controls}
+      className={cn("flex relative w-g-x-4-4/8 h-g-y-3 gap-4")}
+      title={CARD_TYPES.Location}
       ref={projectsRef}
       initial="initial"
-      id="location"
+      id={CARD_TYPES.Location}
       key={"location"}
     >
       <Map

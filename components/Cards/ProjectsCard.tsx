@@ -1,11 +1,10 @@
 "use client";
 
 import { TitleCard } from "@/components/Card";
-import { useScrollNavigation } from "@/lib/clientUtils";
 import { cn } from "@/lib/utils";
 import { Text } from "@radix-ui/themes";
 import "@radix-ui/themes/styles.css";
-import { LayoutGroup, motion, useAnimate } from "framer-motion";
+import { LayoutGroup, motion, useAnimationControls } from "framer-motion";
 import { debounce } from "lodash";
 import { LoremIpsum } from "lorem-ipsum";
 import Image from "next/image";
@@ -33,6 +32,7 @@ const PROJECTS: Project[] = Array.from({ length: 4 }).map((_, i) => ({
 import { AnimateText } from "@/components/TextEffects";
 import { animateTransition } from "@/lib/clientUtils";
 import { FC } from "react";
+import { CARD_TYPES } from "./types";
 
 export const ProjectTitle = (props: { className?: string; title: string }) => {
   const { className, title } = props;
@@ -55,8 +55,8 @@ export const ProjectTitle = (props: { className?: string; title: string }) => {
 
 export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
   const { className, ...rest } = props;
-  const [projectsRef] = useAnimate();
-  const { controls } = useScrollNavigation(projectsRef, true);
+  const projectsRef = useRef(null);
+  const controls = useAnimationControls();
   const [focusedProject, setFocusedProject] = useState<Project>();
   const [selectedProject, setSelectedProject] = useState<Project>();
   const clickedProject = useRef<Project>();
@@ -141,14 +141,14 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
       {...rest}
       containerClassName={className}
       className={cn(
-        "flex-col flex relative w-g-x-3-6/8 h-g-y-2-7/8 p-4 py-g-y-2/8"
+        "flex-col flex relative w-g-x-5 h-g-y-6-2/8 p-4 py-g-y-2/8"
       )}
-      title="Projects"
-      animate={controls}
+      title={CARD_TYPES.Projects}
+      // animate={controls}
       ref={projectsRef}
       initial="initial"
-      id="projects"
-      key={"projects"}
+      id={CARD_TYPES.Projects}
+      key={CARD_TYPES.Projects}
     >
       <LayoutGroup>
         <Track

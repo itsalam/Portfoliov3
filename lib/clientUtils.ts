@@ -1,34 +1,10 @@
 "use client";
 
-import { AnimationControls, useAnimation } from "framer-motion";
-import { useAtomValue, useSetAtom } from "jotai";
-import { RefObject, useEffect, useRef } from "react";
-import { dimensionAtom, gridAtom } from "./state";
-
-export const useScrollNavigation = (
-  ref: RefObject<HTMLElement>,
-  disable?: boolean,
-  animationCallback?: (anim: AnimationControls) => void
-) => {
-  const isMounted = useRef(false);
-  const controls = useAnimation();
-
-  useEffect(() => {
-    isMounted.current = true;
-
-    controls.start("animate").then(() => {
-      if (isMounted.current && animationCallback) {
-        animationCallback(controls);
-      }
-    });
-
-    return () => {
-      isMounted.current = false;
-    };
-  }, [animationCallback, controls, isMounted]);
-
-  return { controls, isMounted };
-};
+import { AnimationControls } from "framer-motion";
+import { debounce } from "lodash";
+import { RefObject, useContext, useEffect } from "react";
+import { useStore } from "zustand";
+import { GridContext } from "./state";
 
 export const useResizeCallBack = (
   ref: RefObject<HTMLElement>,
@@ -64,26 +40,19 @@ function getWindowDimensions() {
 }
 
 export function useWindowDimensions() {
-  const setDimensions = useSetAtom(dimensionAtom);
-  const grid = useAtomValue(gridAtom);
+  const store = useContext(GridContext)!;
+  const setDimensions = useStore(store).setDimensions;
+  const handleResize = debounce(
+    () => setDimensions(getWindowDimensions()),
+    200,
+    { trailing: true }
+  );
 
   useEffect(() => {
-    setDimensions(getWindowDimensions());
-    function handleResize() {
-      setDimensions(getWindowDimensions());
-    }
-
+    handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, [setDimensions]);
-
-  useEffect(() => {
-    const root = document.documentElement;
-    root.style.setProperty("--grid-width", `${grid.gridUnitWidth}px`);
-    root.style.setProperty("--grid-height", `${grid.gridUnitHeight}px`);
-    root.style.setProperty("--x-padding", `${grid.gapSize / 4}px`);
-    root.style.setProperty("--y-padding", `${grid.gapSize / 4}px`);
-  }, [grid]);
+  }, [handleResize]);
 }
 
 export const animateTransition = {

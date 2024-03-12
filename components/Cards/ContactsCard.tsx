@@ -1,7 +1,6 @@
 "use client";
 
 import { TitleCard } from "@/components/Card";
-import { useScrollNavigation } from "@/lib/clientUtils";
 import { cn } from "@/lib/utils";
 import EmailSvg from "@/public/email.svg";
 import GithubSvg from "@/public/github.svg";
@@ -18,6 +17,7 @@ import {
   forwardRef,
   useState,
 } from "react";
+import { CARD_TYPES } from "./types";
 
 const Image = motion(BaseImage);
 const Text = motion(BaseText);
@@ -117,20 +117,18 @@ Link.displayName = "Link";
 export default function ContactCard(props: ComponentProps<typeof motion.div>) {
   const { className, ...rest } = props;
   const [projectsRef] = useAnimate();
-  const { controls } = useScrollNavigation(projectsRef, true);
   const [hoveredLink, setHoveredLink] = useState<string>();
 
   return (
     <TitleCard
       {...rest}
       containerClassName={className}
-      className={cn("flex relative w-g-x-2 h-g-y-2 p-3 gap-3")}
-      title="Contact"
-      animate={controls}
+      className={cn("flex relative w-g-x-3 h-g-y-3 p-3 gap-3")}
+      title={CARD_TYPES.Contacts}
       ref={projectsRef}
       initial="initial"
-      id="contact"
-      key={"contact"}
+      id={CARD_TYPES.Contacts}
+      key={CARD_TYPES.Contacts}
     >
       <motion.div className="flex-1 rounded-full my-auto p-5">
         <motion.div

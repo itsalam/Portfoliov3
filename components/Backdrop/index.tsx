@@ -2,8 +2,9 @@
 
 import { motion } from "framer-motion";
 import ParticlesCanvas from "../Canvases/ParticlesCanvas";
+
 import Effect from "./Effect";
-import Grid from "./Grid";
+import Grid from "./GridEffect";
 
 const Backdrop = () => {
   return (

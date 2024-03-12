@@ -37,8 +37,8 @@ class DofPointsMaterial extends ShaderMaterial {
         if (dist > 1.0) discard;
         // color(display-p3 0.69 0.709 0.682)
         float alpha = (0.5 - clamp(vDistance, 0.0 , 0.4));
-        if (vPointSize > 2.0) alpha *= (1.0-dist) * 0.1; 
-        // if (vPointSize < 0.5) alpha = 1.0;
+        if (vPointSize > 2.0) alpha *= (1.0-dist) * 0.4; 
+        if (vPointSize < 0.5) alpha = 1.0;
         gl_FragColor = vec4(vec3(0.69, 0.709, 0.682), alpha);
       }`,
       uniforms: {

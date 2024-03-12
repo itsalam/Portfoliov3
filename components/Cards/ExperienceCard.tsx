@@ -1,13 +1,14 @@
 "use client";
 
 import { TitleCard } from "@/components/Card";
-import { maskScrollArea, useScrollNavigation } from "@/lib/clientUtils";
+import { maskScrollArea } from "@/lib/clientUtils";
 import { cn } from "@/lib/utils";
 import { ScrollArea, Separator, Text } from "@radix-ui/themes";
 import "@radix-ui/themes/styles.css";
 import { motion, useAnimate } from "framer-motion";
 import { LoremIpsum } from "lorem-ipsum";
-import { ComponentProps, UIEvent, useRef } from "react";
+import { ComponentProps, Fragment, UIEvent, useEffect, useRef } from "react";
+import { CARD_TYPES } from "./types";
 
 const lorem = new LoremIpsum();
 
@@ -40,9 +41,9 @@ export default function ExperienceCard(
   props: ComponentProps<typeof motion.div>
 ) {
   const { className, ...rest } = props;
-  const [projectsRef] = useAnimate();
+  const [cardRef] = useAnimate();
   const containerRef = useRef<HTMLDivElement>(null);
-  const { controls } = useScrollNavigation(projectsRef, true);
+
   const handleScroll = (e: UIEvent) => {
     const h = e.target as HTMLElement;
     const st = h.scrollTop || document.body.scrollTop;
@@ -51,17 +52,20 @@ export default function ExperienceCard(
     maskScrollArea("bottom", containerRef.current as HTMLElement, percent, 20);
   };
 
+  useEffect(() => {
+    maskScrollArea("bottom", containerRef.current as HTMLElement, 0, 20);
+  });
+
   return (
     <TitleCard
       {...rest}
       containerClassName={className}
-      className={cn("flex-col flex relative w-g-x-3-6/8 h-g-y-4-3/8 p-4")}
-      title="Experience"
-      animate={controls}
-      ref={projectsRef}
+      className={cn("flex-col flex relative w-g-x-5 h-g-y-6-2/8 p-4")}
+      title={CARD_TYPES.Experience}
+      ref={cardRef}
       initial="initial"
-      id="experience"
-      key={"experience"}
+      id={CARD_TYPES.Experience}
+      key={CARD_TYPES.Experience}
     >
       <ScrollArea
         onScroll={handleScroll}
@@ -76,7 +80,7 @@ export default function ExperienceCard(
               {experience.companyName}
             </Text>
             {experience.tenures.map((tenure, j) => (
-              <>
+              <Fragment key={j}>
                 <Separator
                   size="4"
                   className={cn({
@@ -105,7 +109,7 @@ export default function ExperienceCard(
                     ))}
                   </ul>
                 </div>
-              </>
+              </Fragment>
             ))}
           </div>
         ))}

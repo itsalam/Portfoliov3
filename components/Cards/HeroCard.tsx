@@ -2,30 +2,39 @@
 
 import { TitleCard } from "@/components/Card";
 import { AnimateText, RotateText } from "@/components/TextEffects";
-import { useScrollNavigation } from "@/lib/clientUtils";
 import { cn } from "@/lib/utils";
 import { Text } from "@radix-ui/themes";
 import "@radix-ui/themes/styles.css";
-import { motion } from "framer-motion";
-import { ComponentProps, useRef } from "react";
+import { motion, useAnimationControls } from "framer-motion";
+import { ComponentProps, useEffect, useRef } from "react";
+import { CARD_TYPES } from "./types";
 
-export default function HeroCard(props: ComponentProps<typeof motion.div>) {
+export default function HeroCard(props: ComponentProps<typeof TitleCard>) {
   const { className, ...rest } = props;
   const heroRef = useRef<HTMLDivElement>(null);
-  const { controls } = useScrollNavigation(heroRef, true, (controls) =>
-    controls.start("rotate")
-  );
+
+  const controls = useAnimationControls();
+
+  useEffect(() => {
+    setTimeout(() => {
+      controls.start("animate").then(() => {
+        setTimeout(() => {
+          controls.start("rotate");
+        }, 700);
+      });
+    }, 2000);
+  }, [controls]);
 
   const animateTransition = {
     initial: {
-      y: "50%",
+      y: "100%",
       opacity: 0,
     },
     animate: {
       y: "0%",
       opacity: 1,
       transition: {
-        duration: 0.4,
+        duration: 0.6,
       },
     },
   };
@@ -49,18 +58,18 @@ export default function HeroCard(props: ComponentProps<typeof motion.div>) {
           text="(a)"
         />
       </MText>
-      <div className="flex flex-col gap-0 relative h-g-y-5/8 my-gap-y pr-0 font-bold ">
-        <RotateText
-          size={"9"}
-          className="absolute"
-          range={[2, 0]}
-          text="Vincent Lam"
-          variants={animateTransition}
-        />
+      <div className="flex flex-col gap-0 relative h-g-y-1 my-gap-y pr-0 font-bold ">
         <div className="absolute h-full top-0 flex flex-row gap-0">
           <RotateText
             size={"9"}
-            className="relative top-0 left-0"
+            className="absolute"
+            range={[2, 0]}
+            text="Vincent Lam"
+            variants={animateTransition}
+          />
+          <RotateText
+            size={"9"}
+            className="relative top-0 left-0 h-full"
             range={[0, 1]}
             text="Full-Stack"
           />
@@ -84,39 +93,20 @@ export default function HeroCard(props: ComponentProps<typeof motion.div>) {
 
   return (
     <TitleCard
-      {...rest}
       containerClassName={cn(
-        "flex-col w-g-x-5-4/8 3xl:w-g-x-4 h-g-y-3 dra",
+        "flex-col w-g-x-6 3xl:w-g-x-4 h-g-y-4-4/8",
         className
       )}
       className={cn(
-        "flex-col flex relative px-g-x-2/8 py-g-y-2/8 justify-end my-auto"
+        "flex-col flex relative px-g-x-2/8 py-g-y-3/8 justify-end my-auto"
       )}
-      title="Hero"
+      title={CARD_TYPES.Home}
       animate={controls}
       ref={heroRef}
       initial="initial"
-      id="hero"
-      key={"hero"}
-      variants={{
-        initial: {
-          opacity: 0,
-        },
-        animate: {
-          opacity: 1,
-          y: 0,
-          transition: {
-            duration: 2,
-          },
-        },
-        exit: {
-          opacity: 0,
-          y: "30%",
-          transition: {
-            duration: 0.33,
-          },
-        },
-      }}
+      id={CARD_TYPES.Home}
+      key={CARD_TYPES.Home}
+      {...rest}
     >
       <TextRotateBody />
       <Text asChild key="body" size={"3"} className="z-30 min-w-g-x-3 py-4">

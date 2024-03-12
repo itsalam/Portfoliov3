@@ -1,18 +1,19 @@
 "use client";
 
-import { dimensionAtom } from "@/lib/state";
+import { GridContext } from "@/lib/state";
 import { Text } from "@radix-ui/themes";
-import { useAtomValue } from "jotai";
-import React from "react";
+import React, { useContext } from "react";
+import { useStore } from "zustand";
 import Clock from "./util/Clock";
 
 const Overlay: React.FC = () => {
   const currentDate = new Date().toLocaleDateString("en-GB");
-  const { width, height } = useAtomValue(dimensionAtom);
+  const store = useContext(GridContext);
+  const { width, height } = useStore(store!).dimensions;
 
   return (
     <nav className="w-screen h-screen fixed">
-      <div className="absolute 3xl:top-g-y-4/8  top-g-y-4/8  right-g-x-4/8 3xl:right-g-x-4/8 font-favorit 3xl:w-g-x-1 w-g-x-1">
+      <div className="absolute  top-g-y-2/8  right-g-x-2/8 font-favorit w-g-x-1">
         <Text className="w-full text-right block" size={{ xl: "5", md: "2" }}>
           {currentDate}
         </Text>
@@ -42,7 +43,7 @@ const Overlay: React.FC = () => {
         </svg>
       </div> */}
       <Text
-        className="absolute text-right right-g-x-4/8 w-g-x-1 bottom-g-y-4/8 font-favorit"
+        className="absolute text-right right-g-x-2/8 w-g-x-1 bottom-g-y-2/8 font-favorit"
         size={{ xl: "5", md: "2" }}
       >
         {`${width} x ${height}`}

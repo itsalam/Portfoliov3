@@ -13,6 +13,7 @@ import {
   cloneElement,
   isValidElement,
   useCallback,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -96,10 +97,16 @@ const Track = (
   const trackChildren = Children.map(children as ReactNode, (child, index) =>
     isValidElement(child) && typeof child.type !== "string"
       ? cloneElement(child, {
-        onClick: childOnClick(index, child.props.onClick),
-      } as HTMLAttributes<HTMLElement>)
+          onClick: childOnClick(index, child.props.onClick),
+        } as HTMLAttributes<HTMLElement>)
       : child
   );
+
+  useEffect(() => {
+    const containerElement = containerRef.current;
+    if (!containerElement) return;
+    maskScrollArea("right", containerElement, 0);
+  }, []);
 
   return (
     <div className="relative">

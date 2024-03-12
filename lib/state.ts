@@ -1,4 +1,6 @@
-import { atom } from "jotai";
+import { CARD_TYPES } from "@/components/Cards/types";
+import { createContext } from "react";
+import { createStore } from "zustand";
 
 export type Dimensions = {
   width: number;
@@ -15,51 +17,104 @@ export type Grid = {
   vertexSize: number;
   gapRatio: number;
   gapSize: number;
-  oldVals: Omit<Grid, "oldVals"> | null;
+  oldVals?: Omit<Grid, "oldVals"> | null;
+  bounds: { x: [number, number]; y: [number, number] };
 };
 
-const NUM_COLS = 48;
-const NUM_ROWS = 36;
-const UNIT_SIZE = 4;
+type CardElement = {
+  id: CARD_TYPES;
+  coords: [number, number];
+  isLocked?: boolean;
+};
 
-const baseDimensionAtom = atom<Dimensions>({
-  height: 0,
-  width: 0,
-});
+const NUM_COLS = 60;
+const NUM_ROWS = 48;
+const UNIT_SIZE = 4;
 
 const getGridProps = (dimensions: Dimensions): Omit<Grid, "oldVals"> => {
   const { width, height } = dimensions;
+  const gridCellWidth = width / NUM_COLS;
+  const gridCellHeight = height / NUM_ROWS;
+  const gridUnitWidth = gridCellWidth * UNIT_SIZE;
   return {
     numCols: NUM_COLS,
     numRows: NUM_ROWS,
-    gridCellWidth: width / NUM_COLS,
-    gridCellHeight: height / NUM_ROWS,
-    gridUnitWidth: (width / NUM_COLS) * UNIT_SIZE,
-    gridUnitHeight: (height / NUM_ROWS) * UNIT_SIZE,
+    gridCellWidth,
+    gridCellHeight,
+    gridUnitWidth,
+    gridUnitHeight: gridCellHeight * UNIT_SIZE,
     vertexSize: 9,
     gapRatio: 0.8,
     gapSize: (1 + 0.8) * 9, //fix this later
+    bounds: {
+      x: [gridCellWidth, width - (gridUnitWidth + gridCellWidth)],
+      y: [gridCellHeight, height - gridCellHeight],
+    },
   };
 };
 
-export const dimensionAtom = atom(
-  (get) => {
-    return get(baseDimensionAtom);
-  },
-  (get, set, update: Dimensions) => {
-    console.log(update);
-    // Write function - updates both current and previous grid values
-    const oldDimensions = get(baseDimensionAtom);
-    const oldVals = getGridProps(oldDimensions);
-    set(previousGridAtom, oldVals); // Set the previous grid state
-    set(baseDimensionAtom, update); // Set the
-    set(gridAtom, { ...getGridProps(update), oldVals }); // Set the previous grid state
-  }
-);
+export type GridStore = {
+  dimensions: Dimensions;
+  grid: Grid;
+  elements: CardElement[];
+  pushElements: (elements: CardElement[]) => void;
+  lockElements: (ids: CARD_TYPES[]) => void;
+  setDimensions: (update: Dimensions) => void;
+  closeElements: (ids: CARD_TYPES[]) => void;
+};
 
-export const previousGridAtom = atom<Omit<Grid, "oldVals"> | null>(null);
+export const GridContext = createContext<typeof useGridStore | null>(null);
 
-export const gridAtom = atom<Grid>({
-  ...getGridProps({ width: 0, height: 0 }),
-  oldVals: null,
+export const useGridStore = createStore<GridStore>()((set, get) => {
+  const dimensions = {
+    width: typeof window !== "undefined" ? window.innerWidth : 0,
+    height: typeof window !== "undefined" ? window.innerHeight : 0,
+  };
+  return {
+    dimensions,
+    grid: getGridProps(dimensions),
+    elements: [
+      {
+        id: CARD_TYPES.Home,
+        coords: [1, 1],
+        isLocked: false,
+      },
+      {
+        id: CARD_TYPES.Menu,
+        coords: [42, 42],
+        isLocked: true,
+      },
+    ],
+    pushElements: (elements: CardElement[]) => {
+      set(() => ({
+        elements: get().elements.concat(elements),
+      }));
+    },
+    lockElements: (ids: CARD_TYPES[]) =>
+      set(() => ({
+        elements: get().elements.map((element) => {
+          console.log(!element.isLocked);
+          return ids.includes(element.id)
+            ? { ...element, isLocked: !element.isLocked }
+            : element;
+        }),
+      })),
+    closeElements: (ids: CARD_TYPES[]) => {
+      const currElements = get().elements.filter((e) => !ids.includes(e.id));
+      set(() => ({
+        elements: currElements,
+      }));
+    },
+    setDimensions: (dimensions: Dimensions) => {
+      const oldDimensions = get().dimensions;
+      const newVals = getGridProps(dimensions);
+      const oldVals = getGridProps(oldDimensions);
+      const root = document.documentElement;
+      root.style.setProperty("--grid-width", `${newVals.gridUnitWidth}px`);
+      root.style.setProperty("--grid-height", `${newVals.gridUnitHeight}px`);
+      root.style.setProperty("--x-padding", `${newVals.gapSize / 4}px`);
+      root.style.setProperty("--y-padding", `${newVals.gapSize / 4}px`);
+      set(() => ({ dimensions, grid: { ...newVals, oldVals } }));
+    },
+  };
 });
