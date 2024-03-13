@@ -2,14 +2,25 @@
 
 import { GridContext } from "@/lib/state";
 import { Text } from "@radix-ui/themes";
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useStore } from "zustand";
 import Clock from "./util/Clock";
 
 const Overlay: React.FC = () => {
   const currentDate = new Date().toLocaleDateString("en-GB");
+  const [screenString, setScreenString] = useState("");
   const store = useContext(GridContext);
-  const { width, height } = useStore(store!).dimensions;
+  const dimensions = useStore(store!).dimensions;
+
+  useEffect(() => {
+    const handleWindowSizeChange = () => {
+      const { width, height } = dimensions;
+      setScreenString(`${width} x ${height}`);
+    };
+    handleWindowSizeChange();
+    window.addEventListener("resize", handleWindowSizeChange);
+    return () => window.removeEventListener("resize", handleWindowSizeChange);
+  }, [dimensions]);
 
   return (
     <nav className="w-screen h-screen fixed">
@@ -46,7 +57,7 @@ const Overlay: React.FC = () => {
         className="absolute text-right right-g-x-2/8 w-g-x-1 bottom-g-y-2/8 font-favorit"
         size={{ xl: "5", md: "2" }}
       >
-        {`${width} x ${height}`}
+        {screenString}
       </Text>
     </nav>
   );

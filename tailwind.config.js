@@ -124,7 +124,15 @@ module.exports = {
       fontSize: {
         grid: ["var(--grid-height)", "var(--grid-height)"],
       },
-      ...propertyUtilities(["padding", "margin", "height", "width", "spacing"]),
+      ...propertyUtilities([
+        "padding",
+        "margin",
+        "height",
+        "width",
+        "spacing",
+        "maxWidth",
+        "maxHeight",
+      ]),
     },
   },
   plugins: [require("tailwindcss-animate")],

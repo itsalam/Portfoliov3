@@ -29,6 +29,8 @@ const Card = forwardRef<
   ElementRef<typeof motion.div>,
   ComponentPropsWithoutRef<typeof motion.div> & {
     initCoords?: [number, number];
+    width?: number;
+    height?: number;
     close?: () => void;
     isLocked?: boolean;
   }
@@ -50,9 +52,7 @@ const Card = forwardRef<
   const grid = useStore(context, (state) => state.grid);
 
   useEffect(() => {
-    animationControls.current.start({
-      opacity: [0, 1],
-    });
+    animationControls.current.start("open");
   }, []);
 
   const handleDragEnd = (
@@ -114,15 +114,24 @@ const Card = forwardRef<
     </motion.div>
   );
 });
-
 Card.displayName = "Card";
+
 export const TitleCard = forwardRef<
   ElementRef<typeof Card>,
   ComponentPropsWithoutRef<typeof Card> & {
     containerClassName?: string;
   }
 >((props, ref) => {
-  const { containerClassName, className, id, children, title, ...rest } = props;
+  const {
+    containerClassName,
+    className,
+    id,
+    children,
+    title,
+    width,
+    height,
+    ...rest
+  } = props;
   const dragControls = useDragControls();
   const [isDrag, setIsDrag] = useState(false);
   const { closeElements, lockElements } = useContext(GridContext)!.getState();
@@ -130,6 +139,10 @@ export const TitleCard = forwardRef<
   const isLocked = elements.find((e) => e.id === id)?.isLocked;
 
   function startDrag(event: PointerEvent) {
+    if (event.target.getAttribute("data-button") === "true") {
+      // The event comes from a button inside the trackbar, ignore it for dragging
+      return;
+    }
     event.preventDefault();
     dragControls.start(event);
     setIsDrag(true);
@@ -141,14 +154,16 @@ export const TitleCard = forwardRef<
 
   const Button = forwardRef<
     HTMLButtonElement,
-    ComponentPropsWithoutRef<"button">
+    ComponentPropsWithoutRef<typeof motion.button>
   >(({ className, ...props }, ref) => {
     return (
-      <button
+      <motion.button
         ref={ref}
+        data-button="true"
+        whileTap={{ scale: 0.95, y: -2 }}
         className={cn(
           className,
-          "rounded-full transition-all border-[1px] border-[--sage-a4] hover:border-[--sage-a8] aspect-square flex justify-center items-center"
+          "rounded-full transition-all border-[1px] border-[--sage-a4] hover:border-[--sage-a8] aspect-square flex justify-center items-center z-50"
         )}
         {...props}
       />
@@ -159,7 +174,7 @@ export const TitleCard = forwardRef<
   return (
     <Card
       className={cn(
-        "flex flex-col group border-[1px] border-[--sage-a3] hover:border-[--sage-10] backdrop-blur-sm bg-[--black-a4] hover:bg-[--black-a2]",
+        "flex flex-col group border-[1px] border-[--sage-a3] hover:border-[--sage-10] backdrop-blur-sm bg-[--black-a6] hover:bg-[--black-a4]",
         containerClassName,
         {
           "border-[--sage-12]": isDrag,
@@ -167,6 +182,7 @@ export const TitleCard = forwardRef<
       )}
       ref={ref}
       dragControls={dragControls}
+      dragListener={false}
       onDragEnd={endDrag}
       id={id}
       variants={{
@@ -174,19 +190,30 @@ export const TitleCard = forwardRef<
           opacity: 0,
           width: 0,
         },
+        open: {
+          width: [0, width, width],
+          height: [24, 24, height],
+          opacity: [0, 1, 1],
+          transition: {
+            duration: 0.33,
+          },
+        },
       }}
       isLocked={isLocked}
       {...rest}
     >
-      <div
+      <motion.div
         onPointerDown={startDrag}
         draggable={false}
         className={cn(
-          "flex opacity-20 group-hover:opacity-100 transition-opacity flex-col px-3 py-1 h-6 relative bg-[--gray-a3] justify-center",
+          "flex opacity-50 group-hover:opacity-100 transition-opacity flex-col px-3 py-1 h-6 relative bg-[--gray-a3] justify-center",
           {
             "opacity-100": isDrag,
           }
         )}
+        variants={{
+          open: {},
+        }}
       >
         <Text
           size="2"
@@ -198,7 +225,7 @@ export const TitleCard = forwardRef<
         <div className="absolute bottom-0 w-full">
           <Separator size="4" />
         </div>
-        <div className="absolute right-1 h-3/4 flex gap-1">
+        <div className="absolute right-1 h-3/4 flex gap-1 z-50">
           <Button onClick={() => id && lockElements([id as CARD_TYPES])}>
             {isLocked ? <Lock size={10} /> : <LockOpen size={10} />}
           </Button>
@@ -206,8 +233,21 @@ export const TitleCard = forwardRef<
             <X size={9} />
           </Button>
         </div>
-      </div>
-      <motion.div className={className}>{children}</motion.div>
+      </motion.div>
+      <motion.div
+        variants={{
+          open: {
+            height: ["0%", "0%", "100%"],
+            transition: {
+              delay: 0.43,
+              duration: 0.66,
+            },
+          },
+        }}
+        className={cn(className, "overflow-hidden z-30")}
+      >
+        {children}
+      </motion.div>
     </Card>
   );
 });

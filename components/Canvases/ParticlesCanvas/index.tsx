@@ -5,18 +5,13 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import {
   DataTexture,
-  DoubleSide,
   FloatType,
   HalfFloatType,
   MathUtils,
-  Mesh,
-  MeshBasicMaterial,
   NearestFilter,
-  PlaneGeometry,
   RGBAFormat,
   RepeatWrapping,
   Scene,
-  Texture,
   Vector2,
   Vector4,
   WebGLRenderTarget,
@@ -57,7 +52,7 @@ function getPoint(
   return v.toArray(data, offset);
 }
 
-function getSphere(count, size, p = new Vector4()) {
+function getSphere(count: number, size: number, p = new Vector4()) {
   const data = new Float32Array(count * 4);
   for (let i = 0; i < count * 4; i += 4) getPoint(p, size, data, i);
   return data;
@@ -252,7 +247,7 @@ const ParticleScene = () => {
 
     pressurePass.update({ velocity, pressure });
 
-    const posOut = position.update({
+    position.update({
       velocity: fluidFbos.current.vel_0,
       time: clock.getElapsedTime(),
     });
@@ -335,17 +330,17 @@ const ParticleScene = () => {
   );
 };
 
-const DebugView = ({ texture }: { texture: Texture }) => {
-  texture.needsUpdate = true;
-  const material = new MeshBasicMaterial({
-    map: texture,
-    side: DoubleSide,
-  });
+// const DebugView = ({ texture }: { texture: Texture }) => {
+//   texture.needsUpdate = true;
+//   const material = new MeshBasicMaterial({
+//     map: texture,
+//     side: DoubleSide,
+//   });
 
-  const geometry = new PlaneGeometry(2, 2); // Full viewport quad
+//   const geometry = new PlaneGeometry(2, 2); // Full viewport quad
 
-  return <primitive object={new Mesh(geometry, material)} />;
-};
+//   return <primitive object={new Mesh(geometry, material)} />;
+// };
 
 const ParticleCanvas = () => {
   return (

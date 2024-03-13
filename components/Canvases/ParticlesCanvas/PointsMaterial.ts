@@ -3,7 +3,6 @@ import { NormalBlending, ShaderMaterial, Vector2 } from "three";
 
 class DofPointsMaterial extends ShaderMaterial {
   constructor(particleLength: number, fboSize = new Vector2(1, 1)) {
-    console.log(fboSize);
     super({
       vertexShader: `uniform sampler2D positions;
       uniform float uTime;

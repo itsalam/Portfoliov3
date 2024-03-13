@@ -33,33 +33,20 @@ export const placeUnpositionedRect = (
   gridElements: Map<CARD_TYPES, GridElement>,
   gridInfo: Grid
 ): GridElement => {
-  const elem = document.querySelector(`#${e.id}`);
-  const rect = elem!.getBoundingClientRect().toJSON();
-  let gridElem = {
-    ...e,
-    width: rect.width,
-    height: rect.height,
-  } as GridElement;
-
   const lockedElemArrs = Array.from(gridElements.values()).filter(
-    (e) => e.isLocked && e.id !== gridElem.id
+    (lockedElem) => lockedElem.isLocked && lockedElem.id !== e.id
   );
 
   const getConflictingRect = () =>
     lockedElemArrs.find((lockedElem) =>
-      checkIntersect(gridElem, lockedElem, gridInfo)
+      checkIntersect(e, lockedElem, gridInfo)
     );
   let lockedConflictingRect = getConflictingRect();
   while (lockedConflictingRect) {
-    gridElem = placeElement(
-      gridElem,
-      lockedConflictingRect,
-      gridElements,
-      gridInfo
-    );
+    e = placeElement(e, lockedConflictingRect, gridElements, gridInfo);
     lockedConflictingRect = getConflictingRect();
   }
-  return gridElem;
+  return e;
 };
 
 export const moveDisplacedRects = (

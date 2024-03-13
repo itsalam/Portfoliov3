@@ -14,8 +14,8 @@ export default function StatusCard(props: ComponentProps<typeof motion.div>) {
   return (
     <TitleCard
       {...rest}
-      containerClassName={className}
-      className={cn("flex relative w-g-x-2-4/8 h-g-y-3 gap-4")}
+      containerClassName={cn(className)}
+      className={cn("flex relative gap-4")}
       title={CARD_TYPES.Status}
       ref={projectsRef}
       initial="initial"

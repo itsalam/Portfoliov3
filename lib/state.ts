@@ -24,12 +24,66 @@ export type Grid = {
 type CardElement = {
   id: CARD_TYPES;
   coords: [number, number];
-  isLocked?: boolean;
+  isLocked: boolean;
+  width: number;
+  height: number;
 };
 
 const NUM_COLS = 60;
 const NUM_ROWS = 48;
 const UNIT_SIZE = 4;
+
+const cards: Record<CARD_TYPES, CardElement> = {
+  Home: {
+    id: CARD_TYPES.Home,
+    coords: [1, 1],
+    isLocked: false,
+    width: 6,
+    height: 4.5,
+  },
+  Menu: {
+    id: CARD_TYPES.Menu,
+    coords: [42, 42],
+    isLocked: true,
+    width: 3,
+    height: 1,
+  },
+  Projects: {
+    id: CARD_TYPES.Projects,
+    coords: [1, 1],
+    isLocked: false,
+    width: 5,
+    height: 6.25,
+  },
+  Experience: {
+    id: CARD_TYPES.Experience,
+    coords: [1, 1],
+    isLocked: false,
+    width: 5,
+    height: 6.25,
+  },
+  Contacts: {
+    id: CARD_TYPES.Contacts,
+    coords: [1, 1],
+    isLocked: false,
+    width: 3,
+    height: 3,
+  },
+  Location: {
+    id: CARD_TYPES.Location,
+    coords: [1, 1],
+    isLocked: false,
+    width: 5,
+    height: 6.25,
+  },
+  Status: {
+    id: CARD_TYPES.Status,
+    coords: [1, 1],
+    isLocked: false,
+    width: 3,
+    height: 3,
+  },
+};
 
 const getGridProps = (dimensions: Dimensions): Omit<Grid, "oldVals"> => {
   const { width, height } = dimensions;
@@ -57,7 +111,7 @@ export type GridStore = {
   dimensions: Dimensions;
   grid: Grid;
   elements: CardElement[];
-  pushElements: (elements: CardElement[]) => void;
+  pushElements: (ids: CARD_TYPES[]) => void;
   lockElements: (ids: CARD_TYPES[]) => void;
   setDimensions: (update: Dimensions) => void;
   closeElements: (ids: CARD_TYPES[]) => void;
@@ -73,21 +127,11 @@ export const useGridStore = createStore<GridStore>()((set, get) => {
   return {
     dimensions,
     grid: getGridProps(dimensions),
-    elements: [
-      {
-        id: CARD_TYPES.Home,
-        coords: [1, 1],
-        isLocked: false,
-      },
-      {
-        id: CARD_TYPES.Menu,
-        coords: [42, 42],
-        isLocked: true,
-      },
-    ],
-    pushElements: (elements: CardElement[]) => {
+
+    elements: [CARD_TYPES.Home, CARD_TYPES.Menu].map((id) => cards[id]),
+    pushElements: (ids: CARD_TYPES[]) => {
       set(() => ({
-        elements: get().elements.concat(elements),
+        elements: get().elements.concat(ids.map((id) => cards[id])),
       }));
     },
     lockElements: (ids: CARD_TYPES[]) =>

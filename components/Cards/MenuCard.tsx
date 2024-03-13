@@ -124,10 +124,7 @@ export default function MenuCard(props: ComponentProps<typeof Card>) {
   return (
     <Card
       {...rest}
-      className={cn(
-        "absolute overflow-visible h-g-y-1 group w-g-x-3",
-        className
-      )}
+      className={cn("absolute overflow-visible group", className)}
       ref={ref}
       initial="initial"
       id={CARD_TYPES.Menu}
@@ -151,11 +148,7 @@ export default function MenuCard(props: ComponentProps<typeof Card>) {
             minSize={0.6}
             maxSize={0.85}
             size={gridUnitWidth}
-            onClick={() =>
-              pushElements(
-                cards.map((id) => ({ id, coords: [1, 1], isLocked: false }))
-              )
-            }
+            onClick={() => pushElements(cards)}
           >
             <Icon
               className="text-[--sage-11] m-auto"

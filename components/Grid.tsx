@@ -1,13 +1,11 @@
 "use client";
 
 import { GridContext } from "@/lib/state";
-import { createMutable } from "@/lib/utils";
 import "@radix-ui/themes/styles.css";
 import { motion, useAnimate, useAnimation } from "framer-motion";
 import {
   ComponentProps,
   ComponentType,
-  PropsWithChildren,
   useContext,
   useEffect,
   useState,
@@ -41,38 +39,19 @@ const cardMap: Record<
   Status: StatusCard,
 };
 
-const Grid = (props: PropsWithChildren) => {
-  const { children } = props;
+const Grid = () => {
   const context = useContext(GridContext)!;
   const [ref, animate] = useAnimate();
   const animation = useAnimation();
   const { elements, grid: gridInfo } = useStore(context);
   const [gridElements, setGridElements] = useState<
     Map<CARD_TYPES, GridElement>
-  >(
-    elements.reduce((map, cardElem) => {
-      const Card = cardMap[cardElem.id];
-      const node = (
-        <Card id={cardElem.id} key={cardElem.id} initCoords={cardElem.coords} />
-      );
-      map.set(cardElem.id, {
-        ...cardElem,
-        coords: [
-          cardElem.coords[0] * gridInfo.gridCellWidth,
-          cardElem.coords[1] * gridInfo.gridCellHeight,
-        ],
-        node,
-        width: 0,
-        height: 0,
-      });
-
-      return map;
-    }, new Map<CARD_TYPES, GridElement>())
-  );
+  >(new Map<CARD_TYPES, GridElement>());
 
   useEffect(() => {
     setGridElements((prev) => {
-      const { gridCellHeight, gridCellWidth } = gridInfo;
+      const { gridCellHeight, gridCellWidth, gridUnitHeight, gridUnitWidth } =
+        gridInfo;
       const newElements = elements.filter(
         (v) => ![...prev.keys()].includes(v.id)
       );
@@ -80,12 +59,16 @@ const Grid = (props: PropsWithChildren) => {
       newElements.forEach((cardElem) => {
         const Card = cardMap[cardElem.id];
         const x = cardElem.coords[0] * gridCellWidth,
-          y = cardElem.coords[1] * gridCellHeight;
+          y = cardElem.coords[1] * gridCellHeight,
+          width = cardElem.width * gridUnitWidth,
+          height = cardElem.height * gridUnitHeight;
         const node = (
           <Card
             id={cardElem.id}
             key={cardElem.id}
             initCoords={cardElem.coords ?? [1, 1]}
+            width={width}
+            height={height}
             style={{
               x,
               y,
@@ -97,9 +80,10 @@ const Grid = (props: PropsWithChildren) => {
           ...cardElem,
           coords: [x, y],
           node,
-          width: 0,
-          height: 0,
+          width,
+          height,
         });
+        console.log(cardElem, gridInfo);
       });
       const oldElements = [...newMap.keys()].filter(
         (v) => !elements.map((e) => e.id).includes(v)
@@ -138,35 +122,31 @@ const Grid = (props: PropsWithChildren) => {
     const { oldVals, gridCellHeight, gridCellWidth } = gridInfo;
     const oldGridCellHeight = oldVals?.gridCellHeight ?? gridCellHeight,
       oldGridCellWidth = oldVals?.gridCellWidth ?? gridCellWidth;
-    setGridElements((prevGridElems) => {
-      prevGridElems.forEach((prevElement) => {
-        const elem = document.querySelector(`#${prevElement.id}`);
-        const rect = createMutable<DOMRect>(
-          elem!.getBoundingClientRect().toJSON()
-        );
-        if (
-          gridCellHeight !== oldGridCellHeight ||
-          gridCellWidth !== oldGridCellWidth
-        ) {
+    if (
+      gridCellHeight !== oldGridCellHeight ||
+      gridCellWidth !== oldGridCellWidth
+    ) {
+      setGridElements((prevGridElems) => {
+        prevGridElems.forEach((prevElement) => {
           prevElement.coords[0] *= gridCellWidth / oldGridCellWidth;
           prevElement.coords[1] *= gridCellHeight / oldGridCellHeight;
-        }
-        prevGridElems.set(prevElement.id, {
-          ...prevElement,
-          width: rect.width,
-          height: rect.height,
+          prevElement.width *= gridCellWidth / oldGridCellWidth;
+          prevElement.height *= gridCellHeight / oldGridCellHeight;
+
+          prevGridElems.set(prevElement.id, prevElement);
+          animate(
+            `#${prevElement.id}`,
+            {
+              x: prevElement.coords[0],
+              y: prevElement.coords[1],
+            },
+            { duration: 0.01 }
+          );
         });
-        animate(
-          `#${prevElement.id}`,
-          {
-            x: prevElement.coords[0],
-            y: prevElement.coords[1],
-          },
-          { duration: 0.01 }
-        );
+
+        return prevGridElems;
       });
-      return prevGridElems;
-    });
+    }
   }, [gridInfo, animate]);
 
   useEffect(() => {
@@ -193,6 +173,7 @@ const Grid = (props: PropsWithChildren) => {
       }
       setTimeout(() => {
         gridElements.forEach((e) => {
+          console.log(e);
           animate(
             `#${e.id}`,
             {
@@ -200,26 +181,26 @@ const Grid = (props: PropsWithChildren) => {
               y: e.coords[1],
             },
             { duration: e.hasPositioned ? 0.233 : 0 }
-          )
-            .then(() => {
-              animation.start("open");
-            })
-            .then(() => {
-              gridElements.set(e.id, {
-                ...e,
-                hasPositioned: true,
-              });
-              if (newRects.length) {
-                setGridElements(new Map(gridElements));
-              }
+          ).then(() => {
+            gridElements.set(e.id, {
+              ...e,
+              hasPositioned: true,
             });
+            if (newRects.length) {
+              setGridElements(new Map(gridElements));
+            }
+          });
         });
       }, 10);
     }
   }, [gridElements, animate, animation, gridInfo]);
 
   return (
-    <motion.div ref={ref} className="h-screen w-screen" animate={animation}>
+    <motion.div
+      ref={ref}
+      className="min-h-screen w-screen flex flex-wrap"
+      animate={animation}
+    >
       {[...gridElements.values()].map(({ node }) => node)}
     </motion.div>
   );

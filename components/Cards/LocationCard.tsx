@@ -3,26 +3,29 @@
 import { TitleCard } from "@/components/Card";
 import { cn } from "@/lib/utils";
 import "@radix-ui/themes/styles.css";
-import { motion, useAnimate } from "framer-motion";
-import { ComponentProps } from "react";
-import Map from "react-map-gl";
+import { motion } from "framer-motion";
+import { ComponentProps, useRef } from "react";
+import Map, { MapRef } from "react-map-gl";
 import { CARD_TYPES } from "./types";
 
 export default function LocationCard(props: ComponentProps<typeof motion.div>) {
   const { className, ...rest } = props;
-  const [projectsRef] = useAnimate();
+  const projectsRef = useRef(null);
+  const mapRef = useRef<MapRef>(null);
   return (
     <TitleCard
       {...rest}
-      containerClassName={className}
-      className={cn("flex relative w-g-x-4-4/8 h-g-y-3 gap-4")}
+      containerClassName={cn(className)}
+      className={cn("flex relative gap-4 h-full w-full")}
       title={CARD_TYPES.Location}
       ref={projectsRef}
       initial="initial"
       id={CARD_TYPES.Location}
+      onAnimationComplete={() => mapRef.current?.resize()}
       key={"location"}
     >
       <Map
+        ref={mapRef}
         mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_KEY ?? ""}
         initialViewState={{
           longitude: -122.4,

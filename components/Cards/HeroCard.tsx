@@ -94,7 +94,7 @@ export default function HeroCard(props: ComponentProps<typeof TitleCard>) {
   return (
     <TitleCard
       containerClassName={cn(
-        "flex-col w-g-x-6 3xl:w-g-x-4 h-g-y-4-4/8",
+        "flex-col w-g-x-6 3xl:w-g-x-4 max-h-g-y-4-4/8",
         className
       )}
       className={cn(

@@ -139,10 +139,8 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
   return (
     <TitleCard
       {...rest}
-      containerClassName={className}
-      className={cn(
-        "flex-col flex relative w-g-x-5 h-g-y-6-2/8 p-4 py-g-y-2/8"
-      )}
+      containerClassName={cn(className)}
+      className={cn("flex-col flex relative p-4 py-g-y-2/8")}
       title={CARD_TYPES.Projects}
       // animate={controls}
       ref={projectsRef}
