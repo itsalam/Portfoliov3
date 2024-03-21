@@ -23,8 +23,8 @@ const Overlay: React.FC = () => {
   }, [dimensions]);
 
   return (
-    <nav className="w-screen h-screen fixed">
-      <div className="absolute  top-g-y-2/8  right-g-x-2/8 font-favorit w-g-x-1">
+    <nav className="w-screen h-screen fixed left-0 z-0">
+      <div className="absolute  top-g-y-2/8  right-g-x-2/8 font-favorit">
         <Text className="w-full text-right block" size={{ xl: "5", md: "2" }}>
           {currentDate}
         </Text>
@@ -32,33 +32,13 @@ const Overlay: React.FC = () => {
           <Clock />
         </Text>
       </div>
-      {/* <div className="w-48 h-12 rounded-full absolute right-g-x-2/8 pb-g-x-1 bottom-0 -translate-y-g-y-2/8 -translate-x-g-x-1/8 rotate-90 flex items-center justify-center">
-        <Text
-          className="font-favorit whitespace-nowrap"
-          size={{ xl: "5", md: "2" }}
-        >
-          Scroll Down
-        </Text>
-        <svg
-          className="h-4 w-12"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <line x1="0" y1="12" x2="48" y2="12" />
-          <line x1="36" y1="5" x2="48" y2="12" />
-        </svg>
-      </div> */}
       <Text
-        className="absolute text-right right-g-x-2/8 w-g-x-1 bottom-g-y-2/8 font-favorit"
+        className="absolute text-right right-g-x-2/8 bottom-g-y-2/8 font-favorit"
         size={{ xl: "5", md: "2" }}
       >
         {screenString}
       </Text>
+      {/* <div className="container backdrop w-screen h-screen overflow-hidden pointer-events-none -z-50"></div> */}
     </nav>
   );
 };

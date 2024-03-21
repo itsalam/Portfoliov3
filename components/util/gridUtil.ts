@@ -1,5 +1,4 @@
-import { Grid } from "@/lib/state";
-import { ReactNode } from "react";
+import { GridInfo } from "@/lib/state";
 import { CARD_TYPES } from "../Cards/types";
 
 export type GridElement = {
@@ -8,16 +7,16 @@ export type GridElement = {
   hasPositioned?: boolean;
   width: number;
   height: number;
-  node: ReactNode;
   isLocked?: boolean;
 };
 
 export const checkIntersect = (
   rectA: GridElement,
   rectB: GridElement,
-  gridInfo: Grid
+  gridInfo: GridInfo
 ) => {
   const { gridCellHeight, gridCellWidth } = gridInfo;
+
   return !(
     (
       rectA.coords[0] >= rectB.coords[0] + rectB.width + gridCellWidth || // rectA is right of rectB (with padding)
@@ -31,20 +30,21 @@ export const checkIntersect = (
 export const placeUnpositionedRect = (
   e: GridElement,
   gridElements: Map<CARD_TYPES, GridElement>,
-  gridInfo: Grid
+  gridInfo: GridInfo
 ): GridElement => {
   const lockedElemArrs = Array.from(gridElements.values()).filter(
     (lockedElem) => lockedElem.isLocked && lockedElem.id !== e.id
   );
 
-  const getConflictingRect = () =>
+  const getConflictingRect = (e: GridElement) =>
     lockedElemArrs.find((lockedElem) =>
       checkIntersect(e, lockedElem, gridInfo)
     );
-  let lockedConflictingRect = getConflictingRect();
+
+  let lockedConflictingRect = getConflictingRect(e);
   while (lockedConflictingRect) {
     e = placeElement(e, lockedConflictingRect, gridElements, gridInfo);
-    lockedConflictingRect = getConflictingRect();
+    lockedConflictingRect = getConflictingRect(e);
   }
   return e;
 };
@@ -52,7 +52,7 @@ export const placeUnpositionedRect = (
 export const moveDisplacedRects = (
   elem: GridElement,
   gridElements: Map<CARD_TYPES, GridElement>,
-  gridInfo: Grid
+  gridInfo: GridInfo
 ): GridElement[] => {
   const elemArrs = Array.from(gridElements.values());
   const positionedElems: GridElement[] = elemArrs.filter(
@@ -80,7 +80,7 @@ const placeElement = (
   element: GridElement,
   displacingElem: GridElement,
   gridElements: Map<CARD_TYPES, GridElement>,
-  gridInfo: Grid
+  gridInfo: GridInfo
 ) => {
   const { gridCellHeight, gridCellWidth, bounds } = gridInfo;
 
@@ -88,13 +88,10 @@ const placeElement = (
     (e) => e.id !== element.id
   );
   const wrapElement =
-    displacingElem.width +
-      displacingElem.coords[0] +
-      gridCellWidth +
-      element.width >
-    bounds.x[1];
+    displacingElem.width + displacingElem.coords[0] + element.width >
+    bounds.right;
   element.coords[0] = wrapElement
-    ? bounds.x[0]
+    ? bounds.left + gridCellWidth
     : displacingElem.coords[0] + displacingElem.width + gridCellWidth;
 
   if (wrapElement) {
@@ -105,10 +102,7 @@ const placeElement = (
     );
     if (vertConflicting.length) {
       const tallestElem = vertConflicting.reduce((smallest, current) => {
-        if (
-          current.coords[1] + current.height <=
-          smallest.coords[1] + smallest.height
-        ) {
+        if (current.coords[1] <= smallest.coords[1]) {
           return current;
         }
         return smallest;
@@ -118,4 +112,14 @@ const placeElement = (
     }
   }
   return element;
+};
+
+export const elementInBounds = (gridElem: GridElement, gridInfo: GridInfo) => {
+  const { bounds } = gridInfo;
+  return (
+    gridElem.coords[0] >= bounds.left &&
+    gridElem.coords[0] + gridElem.width <= bounds.right &&
+    gridElem.coords[1] >= bounds.top &&
+    gridElem.coords[1] + gridElem.height <= bounds.bottom
+  );
 };

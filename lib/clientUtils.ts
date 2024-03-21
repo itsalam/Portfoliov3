@@ -1,10 +1,11 @@
 "use client";
 
-import { AnimationControls } from "framer-motion";
+import { useLoading } from "@/app/providers";
+import { AnimationControls, useMotionValue } from "framer-motion";
 import { debounce } from "lodash";
-import { RefObject, useContext, useEffect } from "react";
-import { useStore } from "zustand";
-import { GridContext } from "./state";
+import { RefObject, useEffect, useState } from "react";
+import { StoreApi, useStore } from "zustand";
+import { Dimensions, GridStore } from "./state";
 
 export const useResizeCallBack = (
   ref: RefObject<HTMLElement>,
@@ -27,32 +28,52 @@ export const useResizeCallBack = (
   }, [cb, ref]);
 };
 
-function getWindowDimensions() {
-  if (typeof window !== "undefined") {
-    const { innerWidth: width, innerHeight: height } = window;
-    return {
-      width,
-      height,
-    };
-  }
-  // Default values when window is not available (e.g., during SSR)
-  return { width: 0, height: 0 };
-}
+export function useResizeGridUpdate(store: StoreApi<GridStore>) {
+  const initialLoad = useMotionValue(true);
+  const [, setLoadingPromises] = useLoading();
+  const updateDimensions = () => {
+    const mainGrid = document
+      ?.querySelector("#main")
+      ?.getBoundingClientRect() as DOMRect;
 
-export function useWindowDimensions() {
-  const store = useContext(GridContext)!;
+    const dimensions = (
+      mainGrid
+        ? { width: mainGrid.width, height: mainGrid.height }
+        : {
+            width: typeof window !== "undefined" ? window.innerWidth : 0,
+            height: typeof window !== "undefined" ? window.innerHeight : 0,
+          }
+    ) as Dimensions;
+    return dimensions;
+  };
   const setDimensions = useStore(store).setDimensions;
   const handleResize = debounce(
-    () => setDimensions(getWindowDimensions()),
-    200,
-    { trailing: true }
+    () => {
+      setDimensions(updateDimensions());
+      if (initialLoad) {
+        initialLoad.set(false);
+        return;
+      }
+    },
+    50,
+    {
+      trailing: true,
+    }
   );
 
   useEffect(() => {
-    handleResize();
+    const loadPromise = new Promise<void>((resolve) => {
+      initialLoad.on("change", (initialLoad) => {
+        !initialLoad.valueOf() && resolve();
+      });
+    });
+    if (initialLoad.get()) {
+      setLoadingPromises((curr) => curr.concat([loadPromise]));
+      handleResize();
+    }
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, [handleResize]);
+  }, [handleResize, initialLoad, setLoadingPromises]);
 }
 
 export const animateTransition = {
@@ -91,3 +112,21 @@ export const maskScrollArea = (
   const middleSteps = `rgb(0, 0, 0) ${percentage * threshold}%, rgb(0, 0, 0) ${percentage * threshold + 100 - threshold}%`;
   element.style.maskImage = `linear-gradient(to ${direction}, ${maskImageStep1}${middleSteps}${maskImageStep2})`;
 };
+
+export function useDebounce<T>(value: T, delay: number) {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    // Set debouncedValue to value (passed in) after the specified delay
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    // Cancel the timeout if value changes (also on component unmount), which is the debounce behavior
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}

@@ -1,25 +1,23 @@
 "use client";
 
 import { motion } from "framer-motion";
-import ParticlesCanvas from "../Canvases/ParticlesCanvas";
 
-import Effect from "./Effect";
-import Grid from "./GridEffect";
+import { GridInfo } from "@/lib/state";
+import { FC } from "react";
+import GridMask from "./GridMask";
 
-const Backdrop = () => {
+const GridBackdrop: FC<{ gridInfo: GridInfo }> = () => {
   return (
     <motion.div
       whileInView={"view"}
       animate="view"
       initial="initial"
       viewport={{ once: true }}
-      className="-z-50 absolute h-screen w-screen "
+      className="-z-50 absolute h-full w-full left-0"
     >
-      <ParticlesCanvas></ParticlesCanvas>
-      <Effect />
-      <Grid />
+      <GridMask />
     </motion.div>
   );
 };
 
-export default Backdrop;
+export default GridBackdrop;

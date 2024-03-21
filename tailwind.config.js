@@ -41,7 +41,6 @@ module.exports = {
   theme: {
     container: {
       center: true,
-      padding: "2rem",
       screens: {
         "2xl": "1400px",
       },
@@ -124,15 +123,7 @@ module.exports = {
       fontSize: {
         grid: ["var(--grid-height)", "var(--grid-height)"],
       },
-      ...propertyUtilities([
-        "padding",
-        "margin",
-        "height",
-        "width",
-        "spacing",
-        "maxWidth",
-        "maxHeight",
-      ]),
+      ...propertyUtilities(["padding", "margin", "height", "width", "spacing"]),
     },
   },
   plugins: [require("tailwindcss-animate")],

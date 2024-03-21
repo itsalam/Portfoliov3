@@ -19,7 +19,9 @@ import {
   MouseEvent,
   ReactNode,
   useContext,
+  useLayoutEffect,
   useRef,
+  useState,
 } from "react";
 import { useStore } from "zustand";
 import Card from "../Card";
@@ -37,17 +39,20 @@ const Item = (props: {
 }) => {
   const { children, text, x, y, onClick, minSize, maxSize, size } = props;
   const ref = useRef<HTMLButtonElement>(null);
+  const [domRect, setDomRect] = useState<DOMRect>();
   const dist = useTransform(() => {
-    if (!ref.current) return 0;
-    const { width, left, top, height } = (
-      ref.current as HTMLElement
-    ).getBoundingClientRect();
+    if (!domRect) return size * maxSize;
+    const { left, top, width, height } = domRect;
     const centerX = left + width / 2;
     const centerY = top + height / 2;
     return Math.sqrt(
       Math.pow(x.get() - centerX, 2) + Math.pow(y.get() - centerY, 2)
     );
   });
+
+  useLayoutEffect(() => {
+    setDomRect((ref.current as HTMLElement).getBoundingClientRect());
+  }, []);
 
   const width = useTransform(
     dist,
@@ -79,7 +84,7 @@ const Item = (props: {
         style={{
           width: springWidth,
         }}
-        className="aspect-square flex items-end justify-end w-g-x-1 relative rounded-full bg-[--sage-5] transition-all brightness-100 hover:brightness-75 z-10"
+        className="aspect-square flex items-end justify-end w-g-x-1 relative rounded-full bg-[--sage-5] transition-all brightness-100 hover:bg-[--sage-2] z-[1000]"
         variants={{
           leave: {
             width: [null, size * minSize],
@@ -100,7 +105,7 @@ export default function MenuCard(props: ComponentProps<typeof Card>) {
   const { className, ...rest } = props;
   const store = useContext(GridContext)!;
   const pushElements = useStore(store).pushElements;
-  const { gridUnitWidth } = useStore(store).grid;
+  const { gridUnitWidth, gridUnitHeight } = useStore(store).gridInfo;
   const [ref] = useAnimate();
   const controls = useAnimationControls();
   const x = useMotionValue(0),
@@ -124,7 +129,7 @@ export default function MenuCard(props: ComponentProps<typeof Card>) {
   return (
     <Card
       {...rest}
-      className={cn("absolute overflow-visible group", className)}
+      className={cn("absolute overflow-visible group z-50", className)}
       ref={ref}
       initial="initial"
       id={CARD_TYPES.Menu}
@@ -135,14 +140,17 @@ export default function MenuCard(props: ComponentProps<typeof Card>) {
         x.set(0);
         y.set(0);
       }}
+      width={3 * gridUnitWidth}
+      height={1 * gridUnitHeight}
+      isLocked
     >
       <motion.div
         animate={controls}
-        className="flex absolute gap-4 items-end overflow-visible p-2 bottom-0 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 "
+        className="flex absolute gap-4 items-end overflow-visible p-2 bottom-0 top-1/3 left-1/2 -translate-x-1/2 z-[1000] group-hover:bg-[--sage-3] bg-[--sage-4] rounded-full"
       >
-        {Object.entries(items).map(([key, { icon: Icon, cards }], i) => (
+        {Object.entries(items).map(([key, { icon: Icon, cards }]) => (
           <Item
-            key={i}
+            key={key}
             text={key}
             {...{ x, y }}
             minSize={0.6}
@@ -158,7 +166,6 @@ export default function MenuCard(props: ComponentProps<typeof Card>) {
             />
           </Item>
         ))}
-        <div className="absolute transition-all h-full bottom-0 rounded-full group-hover:bg-[--sage-a2] bg-[--sage-a3] mix-blend-color-burn w-full left-0 -z-10" />
       </motion.div>
     </Card>
   );

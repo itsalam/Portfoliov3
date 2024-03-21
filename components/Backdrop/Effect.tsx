@@ -1,12 +1,36 @@
-import { motion } from "framer-motion";
+import { motion, useMotionValue } from "framer-motion";
+import { useEffect } from "react";
 
 const Effect = () => {
+  const x = useMotionValue(-100);
+  const y = useMotionValue(-100);
+
+  useEffect(() => {
+    const followMouse = (e: MouseEvent) => {
+      x.set(e.clientX);
+      y.set(e.clientY);
+      const follower = document.getElementById("cursor");
+      const canvas = document.getElementById("mask");
+      // Dynamically update the mask on the canvas
+      // Note: For simplicity, this example uses a simple circle mask centered on the follower.
+      // For more complex shapes, you might need an SVG mask or more complex calculations.
+      if (canvas) {
+        canvas.style.maskImage = `radial-gradient(circle ${follower?.clientWidth}px at ${e.clientX}px ${e.clientY}px, white, transparent)`;
+      }
+      // canvas.style.webkitMaskPosition = `${e.client}px ${e.client}px`;
+      // canvas.style.maskPosition = `${e.client}px ${e.client}px`;
+    };
+    // window.addEventListener("mousemove", followMouse);
+    return () => {
+      window.removeEventListener("mousemove", followMouse);
+    };
+  });
   return (
-    <motion.div className="absolute w-screen h-screen top-0 opacity-50">
-      <motion.div className="absolute backdrop w-screen h-screen overflow-hidden bg-[--jade-2]">
-        <motion.div className="mouse-effect rounded-full w-g-x-3 aspect-square absolute top-0 left-0 " />
-      </motion.div>
-    </motion.div>
+    <motion.div
+      style={{ x, y }}
+      id="cursor"
+      className="mouse-effect rounded-full w-g-x-4/8 aspect-square absolute top-0 left-0 backdrop-invert backdrop-grayscale z-[50] pointer-events-none"
+    />
   );
 };
 

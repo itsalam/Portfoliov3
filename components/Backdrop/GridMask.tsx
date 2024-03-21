@@ -7,19 +7,24 @@ import { useStore } from "zustand";
 import Vertex from "./Vertex";
 
 export type GridProps = {
-  numCols?: number;
-  numRows?: number;
   vertexSize?: number;
   gapRatio?: number;
   dotsPerGrid?: number;
 };
 
 const GridEffect: React.FC<GridProps> = (props) => {
-  const { numCols = 48, numRows = 36, ...svgProps } = props;
+  const { ...svgProps } = props;
+
   const store = useContext(GridContext)!;
-  const { height, width } = useStore(store).dimensions;
-  const { gridCellHeight, gridCellWidth, vertexSize, gapSize } =
-    useStore(store).grid;
+  const { height, width } = useStore(store, (store) => store.dimensions);
+  const {
+    numRows,
+    numCols,
+    gridCellHeight,
+    gridCellWidth,
+    vertexSize,
+    gapSize,
+  } = useStore(store).gridInfo;
   const ref = useRef<SVGSVGElement>(null);
   const strokeDasharray = useCallback(
     (dimension: number, factor: number) => {
@@ -29,17 +34,22 @@ const GridEffect: React.FC<GridProps> = (props) => {
   );
 
   const VerticalLines = useCallback(() => {
-    return Array.from({ length: numCols + 1 }).map((_, i) => (
+    const length = numCols / 4 + 1;
+    return Array.from({ length }).map((_, i) => (
       <line
-        x1={i * gridCellWidth}
-        x2={i * gridCellWidth}
+        x1={i * gridCellWidth * 4 + (i === 0 ? 1 : i === length - 1 ? -1 : 0)}
+        x2={i * gridCellWidth * 4 + (i === 0 ? 1 : i === length - 1 ? -1 : 0)}
         y1={gapSize / 2}
         y2={height}
         key={i}
         strokeWidth={0.5}
-        strokeDasharray={strokeDasharray(gridCellHeight, i % 2 ? 1 : 2)}
+        strokeDasharray={
+          i !== 0 && i !== length
+            ? strokeDasharray(gridCellHeight, i % 2 ? 4 : 4)
+            : 0
+        }
         strokeDashoffset={0}
-        stroke={i % 4 === 0 ? "#CCCCCC" : i % 2 === 0 ? "#777777" : "#222222"}
+        stroke={i % 4 === 0 ? "#777777" : i % 2 === 0 ? "#444444" : "#222222"}
       />
     ));
   }, [
@@ -52,39 +62,39 @@ const GridEffect: React.FC<GridProps> = (props) => {
   ]);
 
   const HorizontalLines = useCallback(() => {
-    return Array.from({ length: numRows + 1 }).map((_, i) => (
+    return Array.from({ length: numRows / 4 + 1 }).map((_, i) => (
       <line
-        y1={i * gridCellHeight}
-        y2={i * gridCellHeight}
+        y1={i * gridCellHeight * 4 + 1}
+        y2={i * gridCellHeight * 4 + 1}
         x1={gapSize / 2}
         x2={width}
         key={i}
         strokeWidth={0.5}
-        strokeDasharray={strokeDasharray(gridCellWidth, i % 2 ? 1 : 2)}
+        strokeDasharray={strokeDasharray(gridCellWidth, i % 2 ? 4 : 4)}
         strokeDashoffset={0}
         stroke={i % 4 === 0 ? "#777777" : i % 2 === 0 ? "#444444" : "#222222"}
       />
     ));
   }, [numRows, gridCellHeight, gapSize, width, strokeDasharray, gridCellWidth]);
 
-  const Vertexs = useCallback(() => {
-    return Array.from({ length: numCols }).map((_, i) =>
-      Array.from({ length: numRows }).map((_, j) => (
+  const Vertexs = () => {
+    return Array.from({ length: numCols / 4 }).map((_, i) =>
+      Array.from({ length: numRows / 4 }).map((_, j) => (
         <Vertex
           key={`${i}-${j}`}
-          position={[i * gridCellWidth, j * gridCellHeight]}
+          position={[(i + 1) * gridCellWidth * 4, (j + 1) * gridCellHeight * 4]}
           size={vertexSize}
           fill={
-            i % 4 === 0 && j % 4 === 0
+            (i + 1) % 4 === 0 && (j + 1) % 4 === 0
               ? "#ffffff"
-              : i % 2 === 0 && j % 2 === 0
+              : (i + 1) % 2 === 0 && (j + 1) % 2 === 0
                 ? "#666666"
-                : "#23232300"
+                : "#232323"
           }
         />
       ))
     );
-  }, [numCols, numRows, gridCellWidth, gridCellHeight, vertexSize]);
+  };
 
   // const Sections = useCallback(() => {
   //   const sectionGap = gapSize;
@@ -103,30 +113,19 @@ const GridEffect: React.FC<GridProps> = (props) => {
 
   return (
     <motion.svg
-      layout
+      id={"mask"}
       {...svgProps}
       ref={ref}
-      className={"absolute w-screen h-screen z-50 top-0 opacity-5"}
+      className={"absolute w-full h-full z-50 left-0 top-0 opacity-100"}
     >
       {/* <Sections /> */}
-      <motion.mask id="clipping">
-        {/* <Lines orientation="horizontal" />
+      {/* <motion.mask id="clipping"> */}
+      {/* <Lines orientation="horizontal" />
         <Lines orientation="vertical" /> */}
-        <VerticalLines />
-        <HorizontalLines />
-        <Vertexs />
-      </motion.mask>
-      {/* <Text asChild>
-        <text
-          x={gridCellWidth}
-          y={gridCellHeight * (numRows - 1)}
-          color="white"
-          fill="white"
-          className="font-favorit"
-        >
-          {`${dimensions.width} x ${dimensions.height}`}
-        </text>
-      </Text> */}
+      <VerticalLines />
+      <HorizontalLines />
+      <Vertexs />
+      {/* </motion.mask> */}
     </motion.svg>
   );
 };

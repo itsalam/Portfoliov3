@@ -42,7 +42,10 @@ export default function HeroCard(props: ComponentProps<typeof TitleCard>) {
   const MText = motion(Text);
 
   const TextRotateBody = () => (
-    <motion.div className="relative" key="intro">
+    <motion.div
+      className="relative"
+      key="intro"
+    >
       <MText size={"7"} className="relative flex pb-4 top-1">
         <AnimateText
           size={"4"}
@@ -97,9 +100,7 @@ export default function HeroCard(props: ComponentProps<typeof TitleCard>) {
         "flex-col w-g-x-6 3xl:w-g-x-4 max-h-g-y-4-4/8",
         className
       )}
-      className={cn(
-        "flex-col flex relative px-g-x-2/8 py-g-y-3/8 justify-end my-auto"
-      )}
+      className={cn("flex-col flex relative mx-g-x-2/8 my-auto justify-end")}
       title={CARD_TYPES.Home}
       animate={controls}
       ref={heroRef}

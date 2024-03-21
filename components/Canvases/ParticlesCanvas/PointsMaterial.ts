@@ -7,7 +7,6 @@ class DofPointsMaterial extends ShaderMaterial {
       vertexShader: `uniform sampler2D positions;
       uniform float uTime;
       uniform float uFocus;
-      uniform float uFov;
       uniform float uBlur;
       uniform float uParticleLength;
       uniform vec2 uFboSize;
@@ -21,11 +20,9 @@ class DofPointsMaterial extends ShaderMaterial {
         vec4 mvPosition = modelViewMatrix * vec4(pos.xyz, 1.0);
         gl_Position = projectionMatrix * mvPosition;
         gl_Position.xy /= ratio;
-        vDistance = abs(uFocus - -mvPosition.z);  
-        vPointSize = min((step(0.1, position.x)) * vDistance * uBlur, 50.0) + 2.0;
+        vDistance = abs((uFocus + sin(uTime * 0.2) * 1.0) - -mvPosition.z);  
+        vPointSize = min((step(0.1, position.x)) * vDistance * uBlur, 75.0) + 3.0;
         gl_PointSize = vPointSize;
-        
-        // gl_PointSize = 5.0;
       }`,
       fragmentShader: `uniform float uOpacity;
       varying float vDistance;
@@ -34,17 +31,14 @@ class DofPointsMaterial extends ShaderMaterial {
         vec2 cxy = 2.0 * gl_PointCoord - 1.0;
         float dist = dot(cxy, cxy);
         if (dist > 1.0) discard;
-        // color(display-p3 0.69 0.709 0.682)
-        float alpha = (0.5 - clamp(vDistance, 0.0 , 0.4));
-        if (vPointSize > 2.0) alpha *= (1.0-dist) * 0.4; 
-        if (vPointSize < 0.5) alpha = 1.0;
+        float alpha = mix(0.3 - clamp(vDistance, 0.0 , 0.3), 1.0, 0.1);
+        alpha *= (1.0-dist) * 0.4; 
         gl_FragColor = vec4(vec3(0.69, 0.709, 0.682), alpha);
       }`,
       uniforms: {
         positions: { value: null },
         uTime: { value: 0 },
-        uFocus: { value: 5.1 },
-        uFov: { value: 94 },
+        uFocus: { value: 4.9 },
         uBlur: { value: 10 },
         uParticleLength: { value: particleLength },
         uFboSize: { value: fboSize },

@@ -21,7 +21,9 @@ export default function LocationCard(props: ComponentProps<typeof motion.div>) {
       ref={projectsRef}
       initial="initial"
       id={CARD_TYPES.Location}
-      onAnimationComplete={() => mapRef.current?.resize()}
+      onAnimationComplete={() =>
+        setTimeout(() => mapRef.current?.resize(), 200)
+      }
       key={"location"}
     >
       <Map

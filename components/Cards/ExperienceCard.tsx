@@ -59,7 +59,7 @@ export default function ExperienceCard(
   return (
     <TitleCard
       {...rest}
-      containerClassName={cn("w-g-x-5 max-h-g-y-6-2/8", className)}
+      containerClassName={cn(className)}
       className={cn("flex-col flex relative p-4 h-full")}
       title={CARD_TYPES.Experience}
       ref={cardRef}

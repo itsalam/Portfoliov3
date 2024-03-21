@@ -73,7 +73,6 @@ export default class Advection extends BasePass<UpdateProps> {
       "position",
       new BufferAttribute(vertices_boundary, 3)
     );
-    console.log(this.material.uniforms);
     const boundaryM = new RawShaderMaterial({
       vertexShader: line_vert,
       fragmentShader: advection_frag,

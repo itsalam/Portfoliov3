@@ -3,6 +3,8 @@ uniform sampler2D particles;
 uniform sampler2D velocity;
 varying vec2 vUv;
 uniform float time;
+varying mat4 vModelViewMatrix; 
+varying mat4 vProjectionMatrix; 
 
 const float PI = 3.14159265359;
 const float EPI = 0.05;
@@ -246,9 +248,13 @@ void main() {
     vec3 flow = computeFlow(pos.x, pos.y, pos.z, t) * snoise3(vec3(pos.x, pos.y, t*10.0));
     vec3 curl = computeCurl(pos.x, pos.y, pos.z, t)  * snoise3(vec3(pos.z, pos.z, t));
     
-    flow.x += 0.15;
-    vec3 forces = (flow + curl*2.0)/1000.0;
-    pos.xyz += texture2D(velocity, (pos.xy + 1.0)/2.0).xyz * 0.01; // basic simulation: moves the particles.
+    curl.x += 0.075;
+    vec3 forces = (flow * 1.0 + curl*3.5)/1200.0;
+    vec4 vCameraSpacePosition = vModelViewMatrix * pos;
+    vec4 clipSpacePosition = vProjectionMatrix * vCameraSpacePosition;
+    vec2 vProjectedTexCoord = (clipSpacePosition.xy / clipSpacePosition.w) * 0.5 + 0.5;
+
+    pos.xyz += texture2D(velocity, vProjectedTexCoord).xyz * 0.003; // basic simulation: moves the particles.
     gl_FragColor = vec4(pos.xyz + forces, pos.w);
 }
          

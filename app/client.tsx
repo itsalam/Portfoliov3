@@ -7,11 +7,7 @@ import { ReactNode } from "react";
 export default function Client({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   return (
-    <AnimatePresence
-      mode="wait"
-      initial={false}
-      onExitComplete={() => console.log("ho")}
-    >
+    <AnimatePresence mode="wait" initial={false}>
       <motion.div
         key={pathname}
         initial={{ y: "-20%", opacity: 0 }}

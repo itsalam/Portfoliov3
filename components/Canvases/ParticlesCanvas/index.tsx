@@ -2,22 +2,30 @@
 
 import { Stats } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
+// import { GUI } from "dat.gui";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import {
   DataTexture,
+  DoubleSide,
   FloatType,
   HalfFloatType,
   MathUtils,
+  Mesh,
+  MeshBasicMaterial,
   NearestFilter,
+  PerspectiveCamera,
+  PlaneGeometry,
   RGBAFormat,
   RepeatWrapping,
   Scene,
+  Texture,
   Vector2,
   Vector4,
   WebGLRenderTarget,
   WebGLRenderer,
 } from "three";
 import "./PointsMaterial";
+import DofPointsMaterial from "./PointsMaterial";
 import Advection from "./stages/Advection";
 import Divergence from "./stages/Divergence";
 import ExternalForce from "./stages/ExternalForce";
@@ -60,9 +68,10 @@ function getSphere(count: number, size: number, p = new Vector4()) {
 
 const ParticleScene = () => {
   const coords = useRef({ x: 0, y: 0 });
-  const particleLength = 150;
-  const { gl, size } = useThree();
-  const renderRef = useRef(null!);
+  const particleLength = 100;
+  const { gl, size, camera } = useThree();
+  const renderRef = useRef<DofPointsMaterial>(null!);
+  const sceneRef = useRef<Scene>(null);
   const particles = useMemo(() => {
     const length = particleLength * particleLength;
     const particles = new Float32Array(length * 3);
@@ -76,16 +85,16 @@ const ParticleScene = () => {
 
   // SHADER CONFIGURATION
   const options = useRef({
-    dt: 0.014,
-    cursorSize: 0.02,
-    mouseForce: 110,
-    resolution: 0.25,
-    viscous: 120,
-    iterations: 2,
+    dt: 0.001,
+    cursorSize: 0.03,
+    mouseForce: 50,
+    resolution: 0.75,
+    viscous: 200,
+    iterations: 3,
     isViscous: true,
-    aperture: 33.33,
+    aperture: 40.0,
     fov: 3.5,
-    focus: 4.7,
+    focus: 4.2,
   });
   const type = /(iPad|iPhone|iPod)/g.test(navigator.userAgent)
     ? HalfFloatType
@@ -94,7 +103,6 @@ const ParticleScene = () => {
   const height = useRef(Math.round(size.height * options.current.resolution));
   const cellScale = useRef(new Vector2(1 / width.current, 1 / height.current));
   const fboSize = useRef(new Vector2(width.current, height.current));
-  const sceneRef = useRef<Scene>();
 
   const fluidFbos = useRef<FBOs>({
     vel_0: createRenderTarget(),
@@ -110,6 +118,19 @@ const ParticleScene = () => {
     position_0: createRenderTarget({ size: particleLength, gl }),
     position_1: createRenderTarget({ size: particleLength, gl }),
   });
+
+  // useEffect(() => {
+  //   const optionsCur = options.current;
+  //   const gui = new GUI();
+  //   gui.add(optionsCur, "dt", 0, 0.3);
+  //   gui.add(optionsCur, "cursorSize", 0, 0.3);
+  //   gui.add(optionsCur, "focus", 0, 40);
+  //   gui.add(optionsCur, "aperture", 0, 40);
+  //   gui.add(optionsCur, "fov", 0, 0);
+  //   return () => {
+  //     gui.destroy();
+  //   };
+  // });
 
   function createRenderTarget(options?: { size: number; gl: WebGLRenderer }) {
     const { size, gl } = options ?? {};
@@ -211,8 +232,8 @@ const ParticleScene = () => {
   useEffect(() => {
     const handleMouse = (ev: MouseEvent) => {
       coords.current = {
-        x: ((ev.clientX / window.innerWidth) * 2 - 1) * 0.8,
-        y: (-(ev.clientY / window.innerHeight) * 2 + 1) * 0.8,
+        x: (ev.clientX / window.innerWidth) * 2 - 1,
+        y: -(ev.clientY / window.innerHeight) * 2 + 1,
       };
     };
     window.addEventListener("mousemove", handleMouse, { passive: true });
@@ -262,11 +283,6 @@ const ParticleScene = () => {
         options.current.focus,
         0.1
       );
-      render.uniforms.uFov.value = MathUtils.lerp(
-        render.uniforms.uFov.value,
-        options.current.fov,
-        0.1
-      );
       render.uniforms.uBlur.value = MathUtils.lerp(
         render.uniforms.uBlur.value,
         options.current.aperture,
@@ -274,22 +290,6 @@ const ParticleScene = () => {
       );
     }
   });
-
-  // useEffect(() => {
-  //   const gui = new GUI();
-  //   gui.add(options.current, "dt", 1 / 200, 1 / 30);
-  //   gui.add(options.current, "cursorSize", 0.01, 1);
-  //   gui.add(options.current, "mouseForce", 10, 200);
-  //   gui.add(options.current, "viscous", 0, 500);
-  //   gui.add(options.current, "iterations", 1, 128);
-  //   gui.add(options.current, "aperture", 0.1, 200.0);
-  //   gui.add(options.current, "fov", 1, 128);
-  //   gui.add(options.current, "focus", 0.1, 10.0);
-
-  //   return () => {
-  //     gui.destroy();
-  //   };
-  // }, []);
 
   useEffect(() => {
     gl.autoClear = false;
@@ -325,31 +325,51 @@ const ParticleScene = () => {
             />
           </bufferGeometry>
         </points>
+        <DebugView
+          texture={fluidFbos.current.vel_0.texture}
+          camera={camera as PerspectiveCamera}
+        />
       </scene>
     </>
   );
 };
 
-// const DebugView = ({ texture }: { texture: Texture }) => {
-//   texture.needsUpdate = true;
-//   const material = new MeshBasicMaterial({
-//     map: texture,
-//     side: DoubleSide,
-//   });
+const DebugView = ({
+  texture,
+  camera,
+}: {
+  texture: Texture;
+  camera: PerspectiveCamera;
+}) => {
+  texture.needsUpdate = true;
+  const material = new MeshBasicMaterial({
+    map: texture,
+    side: DoubleSide,
+    opacity: 0.066,
+    transparent: true,
+  });
 
-//   const geometry = new PlaneGeometry(2, 2); // Full viewport quad
+  function calculateVisibleDimensions(camera: PerspectiveCamera) {
+    const height =
+      2 * Math.tan(MathUtils.degToRad(camera.fov) / 2) * camera.position.z;
+    const width = height * camera.aspect;
+    return { width, height };
+  }
+  const { width, height } = calculateVisibleDimensions(camera);
+  const geometry = new PlaneGeometry(width, height); // Full viewport quad
 
-//   return <primitive object={new Mesh(geometry, material)} />;
-// };
+  return <primitive object={new Mesh(geometry, material)} />;
+};
 
 const ParticleCanvas = () => {
   return (
     <Canvas
       id="particle-canvas"
-      className="z-0 opacity-80"
+      style={{ position: "absolute" }}
+      className="z-0 opacity-80 left-0"
       gl={{ antialias: true, alpha: true, autoClear: false }}
       camera={{
-        position: [0, 0, 4],
+        position: [0, 0, 5],
         fov: 8,
       }}
     >

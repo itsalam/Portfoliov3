@@ -15,7 +15,6 @@ const Vertex: React.FC<VertexProps> = (props) => {
     fill = "#ffffff",
     ...otherProps
   } = props;
-
   return (
     <svg x={position[0] - size / 2} y={position[1] - size / 2} {...otherProps}>
       <rect

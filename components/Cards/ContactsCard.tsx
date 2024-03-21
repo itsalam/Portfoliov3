@@ -122,7 +122,7 @@ export default function ContactCard(props: ComponentProps<typeof motion.div>) {
   return (
     <TitleCard
       {...rest}
-      containerClassName={cn("w-g-x-3 max-h-g-y-3 ", className)}
+      containerClassName={cn(className)}
       className={cn("flex relative p-3 gap-3")}
       title={CARD_TYPES.Contacts}
       ref={projectsRef}

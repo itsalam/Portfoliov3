@@ -10,11 +10,11 @@ const Clock: React.FC = () => {
       const date = new Date();
       const hours = date.getHours();
       const minutes = date.getMinutes();
-      const seconds = date.getSeconds();
+      // const seconds = date.getSeconds();
       const ampm = hours >= 12 ? "PM" : "AM";
       const formattedHours = hours % 12 || 12;
       const formattedMinutes = minutes.toString().padStart(2, "0");
-      const formattedSeconds = seconds.toString().padStart(2, "0");
+      // const formattedSeconds = seconds.toString().padStart(2, "0");
       setCurrentTime(`${formattedHours}:${formattedMinutes} ${ampm}`);
     }, 1000);
 
