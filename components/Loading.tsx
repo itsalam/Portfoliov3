@@ -39,7 +39,6 @@ const Loading = forwardRef<
   };
 
   useEffect(() => {
-    console.log(completedAnimations);
     if (completedAnimations >= DIGITS) {
       // All digit animations have completed
       setLoading(false); // Or any other action you need to perform

@@ -26,13 +26,15 @@ const NUM_COLS = 48;
 const NUM_ROWS = 48;
 const UNIT_SIZE = 4;
 
-const cards: Record<CARD_TYPES, GridElement> = {
+export const DEFAULT_COORDS: [number, number] = [1, 1];
+
+export const DEFAULT_GRID_ELEMENTS: Record<CARD_TYPES, GridElement> = {
   Home: {
     id: CARD_TYPES.Home,
-    coords: [1, 1],
+    coords: DEFAULT_COORDS,
     isLocked: false,
-    width: 6,
-    height: 4.5,
+    width: 5,
+    height: 4,
   },
   Menu: {
     id: CARD_TYPES.Menu,
@@ -43,35 +45,35 @@ const cards: Record<CARD_TYPES, GridElement> = {
   },
   Projects: {
     id: CARD_TYPES.Projects,
-    coords: [1, 1],
+    coords: DEFAULT_COORDS,
     isLocked: false,
     width: 5,
     height: 6.25,
   },
   Experience: {
     id: CARD_TYPES.Experience,
-    coords: [1, 1],
+    coords: DEFAULT_COORDS,
     isLocked: false,
-    width: 6,
+    width: 5,
     height: 8.25,
   },
   Contacts: {
     id: CARD_TYPES.Contacts,
-    coords: [1, 1],
+    coords: DEFAULT_COORDS,
     isLocked: false,
-    width: 3.5,
-    height: 3.5,
+    width: 2.5,
+    height: 4,
   },
   Location: {
     id: CARD_TYPES.Location,
-    coords: [1, 1],
+    coords: DEFAULT_COORDS,
     isLocked: false,
-    width: 4.5,
-    height: 3.5,
+    width: 3.5,
+    height: 4,
   },
   Status: {
     id: CARD_TYPES.Status,
-    coords: [1, 1],
+    coords: DEFAULT_COORDS,
     isLocked: false,
     width: 3.5,
     height: 3.5,
@@ -80,9 +82,10 @@ const cards: Record<CARD_TYPES, GridElement> = {
 
 const getGridProps = (dimensions: Dimensions): Omit<GridInfo, "oldVals"> => {
   const { width, height } = dimensions;
-  const gridCellWidth = width / NUM_COLS;
-  const gridCellHeight = height / NUM_ROWS;
-  const gridUnitWidth = gridCellWidth * UNIT_SIZE;
+  const gridCellWidth = Math.round(width / NUM_COLS);
+  const gridCellHeight = Math.round(height / NUM_ROWS);
+  const gridUnitWidth = Math.round(gridCellWidth * UNIT_SIZE);
+  const gridUnitHeight = Math.round(gridCellHeight * UNIT_SIZE);
 
   return {
     numCols: NUM_COLS,
@@ -90,7 +93,7 @@ const getGridProps = (dimensions: Dimensions): Omit<GridInfo, "oldVals"> => {
     gridCellWidth,
     gridCellHeight,
     gridUnitWidth,
-    gridUnitHeight: gridCellHeight * UNIT_SIZE,
+    gridUnitHeight,
     vertexSize: 9,
     gapRatio: 0.8,
     gapSize: (1 + 0.8) * 9, //fix this later
@@ -103,13 +106,16 @@ const getGridProps = (dimensions: Dimensions): Omit<GridInfo, "oldVals"> => {
   };
 };
 
-type GridElementListener = Dispatch<
-  SetStateAction<Map<CARD_TYPES, GridElement>>
->;
+type GridElementListener = {
+  dispatch: Dispatch<SetStateAction<Map<CARD_TYPES, GridElement>>>;
+  pushElements: (ids: CARD_TYPES[]) => void;
+  lockElements: (ids: CARD_TYPES[]) => void;
+  closeElements: (ids: CARD_TYPES[]) => void;
+};
 
 export type GridStore = {
   dimensions: Dimensions;
-  listeners: GridElementListener[];
+  listener: GridElementListener | null;
   addListener: (dispatch: GridElementListener) => () => void;
   gridInfo: GridInfo;
   initElements: GridElement[];
@@ -132,67 +138,28 @@ export const useGridStore = createStore<GridStore>()((set, get) => {
   };
   const dimensions = updateDimensions();
   return {
-    listeners: [],
-    addListener: (dispatch: GridElementListener) => {
-      const listeners = get().listeners;
-      listeners.push(dispatch);
-
-      set({ listeners });
-      return () =>
+    listener: null,
+    addListener: (listener: GridElementListener) => {
+      set({ listener });
+      return () => {
         set((state) => ({
-          listeners: state.listeners.filter((sub) => sub !== dispatch),
+          ...state,
+          listeners: null,
         })); // Return unsubscribe function
+      };
     },
     dimensions,
     gridInfo: getGridProps(dimensions),
-    initElements: [CARD_TYPES.Home].map((id) => cards[id]),
+    initElements: [CARD_TYPES.Home].map((id) => DEFAULT_GRID_ELEMENTS[id]),
     pushElements: (ids: CARD_TYPES[]) => {
-      const { listeners, gridInfo } = get();
-      const { gridCellHeight, gridCellWidth, gridUnitHeight, gridUnitWidth } =
-        gridInfo;
-      listeners.forEach((dispatch) => {
-        dispatch((map) => {
-          ids.forEach((id) => {
-            const initElem = cards[id];
-            const elem = map.get(id) ?? initElem;
-
-            map.set(id, {
-              ...elem,
-              coords: [
-                initElem.coords[0] * gridCellWidth,
-                initElem.coords[1] * gridCellHeight,
-              ],
-              width: elem.width * gridUnitWidth,
-              height: elem.height * gridUnitHeight,
-              hasPositioned: false,
-            });
-          });
-          return new Map(map);
-        });
-      });
+      const { listener } = get();
+      listener?.pushElements(ids);
     },
     lockElements: (ids: CARD_TYPES[]) => {
-      get().listeners.forEach((dispatch) => {
-        dispatch((map) => {
-          ids.forEach((id) => {
-            const elem = map.get(id);
-            if (elem) {
-              map.set(id, { ...elem, isLocked: !elem.isLocked });
-            }
-          });
-          return new Map(map);
-        });
-      });
+      get().listener?.lockElements(ids);
     },
     closeElements: (ids: CARD_TYPES[]) => {
-      get().listeners.forEach((dispatch) => {
-        dispatch((map) => {
-          ids.forEach((id) => {
-            map.delete(id);
-          });
-          return new Map(map);
-        });
-      });
+      get().listener?.closeElements(ids);
     },
     updateDimensions: () => {
       get().setDimensions(updateDimensions());

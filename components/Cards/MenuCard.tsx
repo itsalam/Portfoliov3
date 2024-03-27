@@ -104,7 +104,7 @@ const Item = (props: {
 export default function MenuCard(props: ComponentProps<typeof Card>) {
   const { className, ...rest } = props;
   const store = useContext(GridContext)!;
-  const pushElements = useStore(store).pushElements;
+  const pushElements = store.getInitialState().pushElements;
   const { gridUnitWidth, gridUnitHeight } = useStore(store).gridInfo;
   const [ref] = useAnimate();
   const controls = useAnimationControls();
@@ -122,7 +122,7 @@ export default function MenuCard(props: ComponentProps<typeof Card>) {
     Work: { icon: Briefcase, cards: [CARD_TYPES.Experience] },
     Info: {
       icon: Users,
-      cards: [CARD_TYPES.Contacts, CARD_TYPES.Status, CARD_TYPES.Location],
+      cards: [CARD_TYPES.Contacts, CARD_TYPES.Location],
     },
   };
 
@@ -146,7 +146,7 @@ export default function MenuCard(props: ComponentProps<typeof Card>) {
     >
       <motion.div
         animate={controls}
-        className="flex absolute gap-4 items-end overflow-visible p-2 bottom-0 top-1/3 left-1/2 -translate-x-1/2 z-[1000] group-hover:bg-[--sage-3] bg-[--sage-4] rounded-full"
+        className="flex absolute gap-4 items-end overflow-visible p-2 bottom-0 top-1/3 left-1/2 -translate-x-1/2 z-[1000] group-hover:bg-[--sage-a3] bg-[--sage-a4] rounded-full"
       >
         {Object.entries(items).map(([key, { icon: Icon, cards }]) => (
           <Item

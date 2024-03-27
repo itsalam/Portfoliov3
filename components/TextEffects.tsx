@@ -1,10 +1,18 @@
-import { cn } from "@/lib/utils";
-import { Text } from "@radix-ui/themes";
-import "@radix-ui/themes/styles.css";
-import { Variants, motion } from "framer-motion";
-import React from "react";
+"use client";
 
-const MText = motion(Text);
+import { cn } from "@/lib/utils";
+import { Text as RadixText } from "@radix-ui/themes";
+import "@radix-ui/themes/styles.css";
+import { AnimatePresence, Variants, motion } from "framer-motion";
+import React, {
+  ComponentProps,
+  ComponentType,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
+
+const MText = motion(RadixText);
 
 type AnimateTextProps = {
   text: string;
@@ -12,7 +20,7 @@ type AnimateTextProps = {
   containerVariants?: Variants;
 };
 
-const RotateText: React.FC<
+export const RotateText: React.FC<
   React.ComponentProps<typeof MText> &
     AnimateTextProps & {
       distance?: number;
@@ -49,11 +57,12 @@ const RotateText: React.FC<
 
   return (
     <AnimateText
+      className="w-min"
+      initial={{
+        y: y[0],
+        opacity: 1,
+      }}
       variants={{
-        initial: {
-          y: `${-distance}%`,
-          opacity: 0,
-        },
         rotate: {
           y: y,
           opacity,
@@ -74,35 +83,99 @@ const RotateText: React.FC<
 export const AnimateText: React.FC<
   React.ComponentProps<typeof MText> & AnimateTextProps
 > = (props) => {
-  const { text, className, variants, containerVariants, ...textProps } = props;
+  const { text, className, variants, ...textProps } = props;
   return (
-    <motion.div
+    <MText
       key={text}
       className={cn(
-        "flex w-min whitespace-nowrap overflow-y-hidden",
+        "relative my-auto flex origin-[50%_50%_4rem] overflow-y-hidden whitespace-nowrap",
         className
       )}
-      variants={{
-        animate: {
-          transition: {
-            staggerChildren: 0.015,
-          },
-        },
-        ...containerVariants,
-      }}
+      variants={variants}
+      {...textProps}
     >
-      {(text as string).split("").map((child, i) => (
-        <MText
-          key={`${i}-${child}`}
-          className="relative origin-[50%_50%_4rem] my-auto whitespace-pre"
-          variants={variants}
-          {...textProps}
-        >
-          {child}
-        </MText>
-      ))}
-    </motion.div>
+      {text}
+    </MText>
   );
 };
 
-export { RotateText };
+export const AnimatedText = (props: {
+  className?: string;
+  text: string;
+  textChild: ComponentType<ComponentProps<typeof RadixText> & { text: string }>;
+  reverse?: boolean;
+}) => {
+  const { className, text, textChild: Text, reverse, ...others } = props;
+  const [prevText, setPrevText] = useState("");
+  const [currText, setCurrText] = useState("");
+
+  useEffect(() => {
+    if (text !== currText) {
+      setPrevText(currText);
+      setCurrText(text);
+    }
+  }, [text]);
+
+  const PresenceText = useCallback(
+    (props: ComponentProps<typeof motion.div>) => (
+      <motion.div
+        className="absolute top-0 h-full"
+        initial={{
+          opacity: 0,
+        }}
+        exit={"exit"}
+        animate={"animate"}
+        variants={{
+          animate: (reverse) =>
+            reverse
+              ? {
+                  y: ["-100%", "0%"],
+                  opacity: [null, 1],
+                }
+              : {
+                  y: ["100%", "0%"],
+                  opacity: [null, 1],
+                },
+          exit: (reverse) =>
+            reverse
+              ? {
+                  y: ["0%", "100%"],
+                  opacity: [null, 0],
+                }
+              : {
+                  y: ["0%", "-100%"],
+                  opacity: [null, 0],
+                },
+        }}
+        transition={{ duration: 0.4 }}
+        {...props}
+      />
+    ),
+    []
+  );
+
+  return (
+    <motion.div
+      className={cn("relative overflow-hidden", className)}
+      {...others}
+    >
+      <AnimatePresence mode="sync" initial={false} custom={reverse}>
+        {currText === text && (
+          <PresenceText key={currText} custom={reverse}>
+            <Text text={currText} />
+          </PresenceText>
+        )}
+        {currText !== text && (
+          <PresenceText key={prevText} custom={reverse}>
+            <Text text={prevText} />
+          </PresenceText>
+        )}
+      </AnimatePresence>
+      <Text
+        className="relative opacity-0"
+        text={currText}
+        style={{ opacity: 0 }}
+      />
+    </motion.div>
+  );
+};

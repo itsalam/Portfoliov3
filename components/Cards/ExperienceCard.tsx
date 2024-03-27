@@ -49,11 +49,11 @@ export default function ExperienceCard(
     const st = h.scrollTop || document.body.scrollTop;
     const sh = h.scrollHeight || document.body.scrollHeight;
     const percent = st / (sh - h.clientHeight);
-    maskScrollArea("bottom", containerRef.current as HTMLElement, percent, 20);
+    maskScrollArea("bottom", containerRef.current as HTMLElement, percent, 10);
   };
 
   useEffect(() => {
-    maskScrollArea("bottom", containerRef.current as HTMLElement, 0, 20);
+    maskScrollArea("bottom", containerRef.current as HTMLElement, 0, 10);
   });
 
   return (

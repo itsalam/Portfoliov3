@@ -1,31 +1,34 @@
 "use client";
 
 import { useLoading } from "@/app/providers";
-import { AnimationControls, useMotionValue } from "framer-motion";
+import { AnimationControls, motion, useMotionValue } from "framer-motion";
 import { debounce } from "lodash";
-import { RefObject, useEffect, useState } from "react";
+import { ComponentProps, RefObject, useEffect, useState } from "react";
 import { StoreApi, useStore } from "zustand";
 import { Dimensions, GridStore } from "./state";
 
 export const useResizeCallBack = (
-  ref: RefObject<HTMLElement>,
-  cb: () => void
+  cb: () => void,
+  ...refs: RefObject<HTMLElement>[]
 ) => {
   useEffect(() => {
-    const element = ref.current;
     window.addEventListener("resize", cb);
-    if (element) {
-      const resizeObserver = new ResizeObserver(() => {
-        cb();
-      });
-      resizeObserver.observe(element);
-      return () => {
-        resizeObserver.unobserve(element);
-        window.removeEventListener("resize", cb);
-      };
-    }
-    return () => window.removeEventListener("resize", cb);
-  }, [cb, ref]);
+    const elements = refs
+      .map((ref) => ref.current)
+      .filter(Boolean) as HTMLElement[];
+    const resizeObserver = new ResizeObserver(cb);
+    elements.forEach((e) => {
+      resizeObserver.observe(e);
+    });
+
+    return () => {
+      elements.length &&
+        elements.forEach((e) => {
+          resizeObserver.unobserve(e);
+        });
+      window.removeEventListener("resize", cb);
+    };
+  }, [cb, refs]);
 };
 
 export function useResizeGridUpdate(store: StoreApi<GridStore>) {
@@ -81,7 +84,7 @@ export const animateTransition = {
     y: "100%",
     opacity: 0.0,
   },
-  animate: {
+  show: {
     y: "0%",
     opacity: 1,
     transition: {
@@ -129,4 +132,16 @@ export function useDebounce<T>(value: T, delay: number) {
   }, [value, delay]);
 
   return debouncedValue;
+}
+
+export function isAnimationControls(
+  animate: ComponentProps<typeof motion.div>["animate"]
+) {
+  const animationControls = animate as AnimationControls;
+
+  return (
+    animationControls !== undefined &&
+    "mount" in animationControls &&
+    "start" in animationControls
+  );
 }

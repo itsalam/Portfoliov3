@@ -38,7 +38,7 @@ export const TrackBar = (
             width: itemWidth * ratio || 0,
             x: i * (itemWidth + gapWidth) * ratio,
           }}
-          className="absolute h-[3px] top-0 left-0 bg-[--sage-5]"
+          className="absolute h-[3px] top-0 left-0 bg-[--sage-10]"
         />
       ))}
       <motion.div
@@ -47,7 +47,7 @@ export const TrackBar = (
             -Math.max(Math.min(trackWidth * ratio, info.offset.x), 0) / ratio
           );
         }}
-        className="z-20 h-[9px] -top-[3px] absolute border border-[--sage-9]"
+        className="z-20 h-[9px] -top-[3px] absolute border border-[--sage-11]"
         style={{ width: containerWidth * ratio, x }}
       />
     </motion.div>

@@ -1,27 +1,31 @@
 import { cn } from "@/lib/utils";
 import { Text as BaseText } from "@radix-ui/themes";
-import { motion } from "framer-motion";
-import { MoveRight as BaseMoveRight, X as BaseX } from "lucide-react";
-import { ComponentProps, FC } from "react";
+import { MotionProps, motion } from "framer-motion";
+import { LucideIcon } from "lucide-react";
+import { ComponentProps, ComponentType, FC } from "react";
 
-const X = motion(BaseX);
-const MoveRight = motion(BaseMoveRight);
 const Text = motion(BaseText);
 
-export const BackButton: FC<ComponentProps<typeof motion.button>> = (props) => {
-  const { className, ...buttonProps } = props;
+export const BaseRolloutButton: FC<
+  ComponentProps<typeof motion.button> & {
+    ComponentA: ComponentType<ComponentProps<LucideIcon> & MotionProps>;
+    ComponentB: ComponentType<ComponentProps<LucideIcon> & MotionProps>;
+    text: string;
+  }
+> = (props) => {
+  const { className, ComponentA, ComponentB, text, ...buttonProps } = props;
 
   return (
     <motion.button
       whileHover="hover"
       className={cn(
-        "absolute z-50 rounded-full border border-[#ffffff16] flex items-center",
+        "flex items-center rounded-full border border-[#ffffff16] bg-[--sage-a5] hover:bg-[--sage-a3]",
         className
       )}
       {...buttonProps}
     >
       <motion.div
-        className="aspect-square m-0.5 relative"
+        className="relative m-0.5 aspect-square"
         variants={{
           initial: {
             rotateZ: "-90deg",
@@ -31,7 +35,7 @@ export const BackButton: FC<ComponentProps<typeof motion.button>> = (props) => {
           },
         }}
       >
-        <X
+        <ComponentA
           variants={{
             initial: {
               opacity: 1,
@@ -42,8 +46,8 @@ export const BackButton: FC<ComponentProps<typeof motion.button>> = (props) => {
           }}
           className="relative p-1"
         />
-        <MoveRight
-          className="absolute top-0 left-0 opacity-0 p-1"
+        <ComponentB
+          className="absolute left-0 top-0 p-1 opacity-0"
           variants={{
             initial: {
               opacity: 0,
@@ -57,7 +61,7 @@ export const BackButton: FC<ComponentProps<typeof motion.button>> = (props) => {
 
       <Text
         size={"2"}
-        className="overflow-hidden whitespace-nowrap relative w-0"
+        className="relative w-0 overflow-hidden whitespace-nowrap"
         variants={{
           initial: {
             width: "0%",
@@ -73,7 +77,7 @@ export const BackButton: FC<ComponentProps<typeof motion.button>> = (props) => {
           },
         }}
       >
-        Back
+        {text}
       </Text>
     </motion.button>
   );

@@ -143,10 +143,17 @@ body {
 
 .track {
   --x-Pos: 50%;
+  --mask-height: -0.1;
+  mask-image: linear-gradient(to top, rgba(0, 0, 0, 0) calc(var(--mask-height) * 100%), rgba(0, 0, 0) calc((var(--mask-height) + 0.15) * 100%), rgba(0, 0, 0) 100%);
 }
 
 .track-img {
   object-position: var(--x-Pos) center;
+}
+
+.track-card {
+  --card-width: 3.0;
+  width: calc(var(--grid-width) * var(--card-width))
 }
 
 .mapboxgl-ctrl-logo {

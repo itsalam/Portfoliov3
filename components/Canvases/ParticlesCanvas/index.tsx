@@ -345,7 +345,7 @@ const DebugView = ({
   const material = new MeshBasicMaterial({
     map: texture,
     side: DoubleSide,
-    opacity: 0.066,
+    opacity: 0.03,
     transparent: true,
   });
 

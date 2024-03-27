@@ -1,5 +1,6 @@
 "use client";
 
+import { isAnimationControls } from "@/lib/clientUtils";
 import { GridContext } from "@/lib/state";
 import { cn } from "@/lib/utils";
 import { Separator, Text } from "@radix-ui/themes";
@@ -7,6 +8,8 @@ import "@radix-ui/themes/styles.css";
 import {
   AnimationControls,
   PanInfo,
+  TargetAndTransition,
+  VariantLabels,
   motion,
   useAnimationControls,
   useDragControls,
@@ -14,6 +17,7 @@ import {
 import { Lock, LockOpen, X } from "lucide-react";
 import {
   CSSProperties,
+  ComponentProps,
   ComponentPropsWithoutRef,
   ElementRef,
   PointerEvent,
@@ -34,26 +38,29 @@ const Card = forwardRef<
     isLocked?: boolean;
   }
 >((props, ref) => {
-  const {
-    animate,
-    className,
-    children,
-    id,
-    width,
-    height,
-    isLocked: propsIsLocked,
-    ...rest
-  } = props;
-
+  const { animate, className, children, id, width, height, isLocked, ...rest } =
+    props;
+  const [initialLoad, setInitialLoad] = useState(true);
   const defaultAnimationControls = useAnimationControls();
-  const animationControls = useRef(
-    (animate as AnimationControls) || defaultAnimationControls
+  const animationControls = useRef<AnimationControls>(
+    isAnimationControls(animate)
+      ? (animate as AnimationControls)
+      : defaultAnimationControls
   );
-  const isLocked = propsIsLocked;
 
   useEffect(() => {
-    animationControls.current.start("open");
-  }, []);
+    if (!isAnimationControls(animate)) {
+      if (animate) {
+        animationControls.current.start(
+          animate as VariantLabels | TargetAndTransition
+        );
+      }
+    }
+    if (initialLoad) {
+      animationControls.current.start("open");
+      setInitialLoad(false);
+    }
+  }, [initialLoad, animate]);
 
   return (
     <motion.div
@@ -76,11 +83,7 @@ const Card = forwardRef<
         },
       }}
       drag={!isLocked}
-      dragTransition={{
-        power: 0.02,
-        timeConstant: 50,
-      }}
-      className={cn("card origin-top-left absolute transition-all", className)}
+      className={cn("card absolute origin-top-left transition-all", className)}
       animate={animationControls.current}
       ref={ref}
       id={id}
@@ -96,9 +99,11 @@ export const TitleCard = forwardRef<
   ElementRef<typeof Card>,
   ComponentPropsWithoutRef<typeof Card> & {
     containerClassName?: string;
+    containerAnimation?: ComponentProps<typeof motion.div>["animate"];
   }
 >((props, ref) => {
   const {
+    containerAnimation,
     containerClassName,
     className,
     id,
@@ -148,7 +153,7 @@ export const TitleCard = forwardRef<
         }}
         className={cn(
           className,
-          "rounded-full transition-all border-[1px] border-[--sage-a7] hover:border-[--sage-a10] aspect-square flex justify-center items-center z-50"
+          "z-50 flex aspect-square items-center justify-center rounded-full border-[1px] border-[--sage-a7] transition-all hover:border-[--sage-a10]"
         )}
         {...props}
       />
@@ -159,8 +164,8 @@ export const TitleCard = forwardRef<
   return (
     <Card
       className={cn(
-        "w-0 h-0",
-        "flex flex-col group border-[1px] border-[--sage-a3] hover:border-[--sage-10] backdrop-blur-sm bg-[--black-a6] hover:bg-[--black-a4] overflow-hidden",
+        "h-0 w-0",
+        "group flex flex-col overflow-hidden border-[1px] border-[--sage-a3] bg-[--sage-a2] backdrop-blur-sm hover:border-[--sage-10] hover:bg-[--sage-a4]",
         containerClassName,
         {
           "border-[--sage-12]": isDrag,
@@ -178,9 +183,9 @@ export const TitleCard = forwardRef<
         onPointerDown={startDrag}
         draggable={false}
         className={cn(
-          "z-10 flex opacity-50 group-hover:opacity-100 transition-opacity flex-col px-3 py-1 h-6 relative bg-[--gray-a3] justify-center",
+          "relative z-10 flex h-6 flex-col justify-center bg-[--gray-a3] px-3 py-1 opacity-100 transition-opacity",
           {
-            "opacity-100": isDrag,
+            "opacity-50": isDrag,
           }
         )}
         variants={{
@@ -194,14 +199,14 @@ export const TitleCard = forwardRef<
         >
           {title?.toUpperCase()}
         </Text>
-        <div className="absolute left-0 bottom-0 w-full">
+        <div className="absolute bottom-0 left-0 w-full">
           <Separator size="4" />
         </div>
-        <div className="absolute right-1 h-3/4 flex gap-1 z-50">
+        <div className="absolute right-1 z-50 flex h-3/4 gap-1">
           <Button
             className={cn(
               { "opacity-50": !isLocked },
-              "hover:opacity-100 transition-opacity"
+              "transition-opacity hover:opacity-100"
             )}
             onClick={() => id && lockElements([id as CARD_TYPES])}
           >
@@ -212,7 +217,10 @@ export const TitleCard = forwardRef<
           </Button>
         </div>
       </motion.div>
-      <motion.div className={cn(className, "overflow-hidden z-30")}>
+      <motion.div
+        className={cn(className, "z-30 overflow-hidden")}
+        animate={containerAnimation}
+      >
         {children}
       </motion.div>
     </Card>

@@ -67,7 +67,7 @@ export default function Hero() {
             transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
           />
           <Overlay />
-          <Grid />
+          <Grid/>
 
           <ParticlesCanvas></ParticlesCanvas>
           <MenuCard className="bottom-g-y-4/8 left-1/2 -translate-x-1/2 z-50" />

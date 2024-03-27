@@ -49,7 +49,7 @@ const GridEffect: React.FC<GridProps> = (props) => {
             : 0
         }
         strokeDashoffset={0}
-        stroke={i % 4 === 0 ? "#777777" : i % 2 === 0 ? "#444444" : "#222222"}
+        stroke={i % 4 === 0 ? "#aaaaaa" : i % 2 === 0 ? "#777777" : "#555555"}
       />
     ));
   }, [
@@ -72,7 +72,7 @@ const GridEffect: React.FC<GridProps> = (props) => {
         strokeWidth={0.5}
         strokeDasharray={strokeDasharray(gridCellWidth, i % 2 ? 4 : 4)}
         strokeDashoffset={0}
-        stroke={i % 4 === 0 ? "#777777" : i % 2 === 0 ? "#444444" : "#222222"}
+        stroke={i % 4 === 0 ? "#aaaaaa" : i % 2 === 0 ? "#777777" : "#555555"}
       />
     ));
   }, [numRows, gridCellHeight, gapSize, width, strokeDasharray, gridCellWidth]);
@@ -88,8 +88,8 @@ const GridEffect: React.FC<GridProps> = (props) => {
             (i + 1) % 4 === 0 && (j + 1) % 4 === 0
               ? "#ffffff"
               : (i + 1) % 2 === 0 && (j + 1) % 2 === 0
-                ? "#666666"
-                : "#232323"
+                ? "#999999"
+                : "#666666"
           }
         />
       ))
@@ -116,7 +116,7 @@ const GridEffect: React.FC<GridProps> = (props) => {
       id={"mask"}
       {...svgProps}
       ref={ref}
-      className={"absolute w-full h-full z-50 left-0 top-0 opacity-100"}
+      className={"absolute w-full h-full z-40 left-0 top-0 opacity-100"}
     >
       {/* <Sections /> */}
       {/* <motion.mask id="clipping"> */}

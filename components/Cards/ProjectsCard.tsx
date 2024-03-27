@@ -1,16 +1,27 @@
 "use client";
 
 import { TitleCard } from "@/components/Card";
+import { AnimateText, AnimatedText } from "@/components/TextEffects";
 import { cn } from "@/lib/utils";
-import { Text } from "@radix-ui/themes";
-import "@radix-ui/themes/styles.css";
-import { LayoutGroup, motion, useAnimationControls } from "framer-motion";
+import { Badge } from "@radix-ui/themes";
+import { AnimatePresence, motion, useAnimationControls } from "framer-motion";
 import { debounce } from "lodash";
 import { LoremIpsum } from "lorem-ipsum";
 import Image from "next/image";
-import { ComponentProps, useRef, useState } from "react";
-import { BackButton } from "../BackButton";
+import {
+  ComponentProps,
+  FC,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { BackButton } from "../Buttons/BackButton";
+import { LinkButton } from "../Buttons/LinkButton";
 import Track from "../Track";
+import { CARD_TYPES } from "./types";
+
+const MotionBadge = motion(Badge);
 
 const lorem = new LoremIpsum();
 type Project = {
@@ -23,173 +34,223 @@ type Project = {
 
 const PROJECTS: Project[] = Array.from({ length: 4 }).map((_, i) => ({
   name: `Project ${i + 1}`,
-  description: lorem.generateSentences(3),
+  description: lorem.generateSentences(2),
   image: `https://picsum.photos/seed/${Math.floor((i + 1) * 100)}/1000/800`,
   url: `https://example.com/project${i + 1}`,
-  tags: ["React", "TypeScript", "CSS"],
+  tags: Array.from(
+    { length: Math.floor(Math.random() * 5) + 1 },
+    (_, i) => `Technology ${Math.floor(Math.random() * 6)}`
+  ),
 }));
-
-import { AnimateText } from "@/components/TextEffects";
-import { animateTransition } from "@/lib/clientUtils";
-import { FC } from "react";
-import { CARD_TYPES } from "./types";
-
-export const ProjectTitle = (props: { className?: string; title: string }) => {
-  const { className, title } = props;
-  const Title: FC<{ className: string }> = ({ className }) => (
-    <AnimateText
-      size={"7"}
-      className={cn("font-bold", className)}
-      text={title}
-      variants={animateTransition}
-    />
-  );
-
-  return (
-    <>
-      <Title className={cn("mix-blend-color-dodge", className)} />
-      <Title className="absolute blur-sm mix-blend-lighten text-[--gray-4]" />
-    </>
-  );
-};
 
 export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
   const { className, ...rest } = props;
   const projectsRef = useRef(null);
-  const controls = useAnimationControls();
+  const textBodyControls = useAnimationControls();
+  const trackControls = useAnimationControls();
+  const prevFocusedProject = useRef<Project>();
   const [focusedProject, setFocusedProject] = useState<Project>();
   const [selectedProject, setSelectedProject] = useState<Project>();
-  const clickedProject = useRef<Project>();
+  const clickedProject = useRef<number>(-1);
   const dragRef = useRef(false);
   const DEFAULT_TEXT = "Scroll or drag to navigate.";
 
-  const cardTransition = {
-    selected: (i: number) => ({
-      opacity: PROJECTS[i].name === clickedProject.current?.name ? 1 : 0.5,
-      transition: {
-        stagger: 0.033 * i,
-      },
-    }),
-    deselected: (i: number) => ({
-      opacity: 1,
-      transition: {
-        stagger: 0.033 * i,
-      },
-    }),
-  };
+  const ProjectTitle = useCallback(
+    (props: Omit<ComponentProps<typeof AnimatedText>, "textChild">) => {
+      const Title: FC<{ className?: string; text: string }> = ({
+        className,
+        text,
+      }) => (
+        <AnimateText
+          size={"8"}
+          className={cn("w-min text-7xl font-bold", className)}
+          text={text}
+        />
+      );
 
-  const changeFocusTitle = debounce((project?: Project) => {
-    if (
-      focusedProject &&
-      selectedProject &&
-      focusedProject.name == selectedProject.name
-    )
-      return;
-    controls
-      .start("exit")
-      .then(() => setFocusedProject(project))
-      .then(() => setTimeout(() => controls.start("animate"), 166));
-  }, 350);
-
-  const changeSelectedProject = (project?: Project) => {
-    clickedProject.current = project || selectedProject;
-    const variant = project ? "selected" : "deselected";
-    if (project) {
-      setSelectedProject(project);
-      controls.start(variant);
-    } else {
-      setSelectedProject(project);
-      controls.start(variant).then(() => (clickedProject.current = undefined));
-      changeFocusTitle();
-    }
-  };
-
-  const TextBody = (props: { className?: string }) => (
-    <motion.div
-      layoutId="arrow"
-      className={cn(
-        "flex flex-col z-10 absolute mix-blend-lighten w-g-x-3",
-        props.className
-      )}
-    >
-      <BackButton
-        onClick={() => changeSelectedProject()}
-        className={cn(
-          "top-0 -translate-y-full absolute left-0 opacity-0 bg-[--sage-a5] hover:bg-[--sage-a3]",
-          {
-            "opacity-100 ": selectedProject,
-          }
-        )}
-      />
-      <ProjectTitle
-        title={focusedProject?.name || selectedProject?.name || "Projects."}
-      />
-      <Text
-        size={"2"}
-        className={cn("z-10", {
-          "w-full": selectedProject,
-          "w-g-x-2": !selectedProject,
-        })}
-      >
-        {DEFAULT_TEXT}
-      </Text>
-    </motion.div>
+      return <AnimatedText {...props} textChild={Title} />;
+    },
+    []
   );
+
+  const ProjectDescription = useCallback(
+    (props: Omit<ComponentProps<typeof AnimatedText>, "textChild">) => {
+      const Text: FC<{ className?: string; text: string }> = ({
+        className,
+        text,
+      }) => (
+        <AnimateText
+          className={cn("w-inherit whitespace-normal", className)}
+          size={"3"}
+          text={text}
+        />
+      );
+      return <AnimatedText {...props} textChild={Text} />;
+    },
+    []
+  );
+
+  const changeFocusTitle = debounce(
+    (project?: Project) => {
+      setFocusedProject((prevProj) => {
+        prevFocusedProject.current = prevProj;
+        return project;
+      });
+    },
+    600,
+    { trailing: true }
+  );
+
+  useEffect(() => {
+    if (!selectedProject) {
+      trackControls.start("deselected");
+      textBodyControls.start("deselected");
+      setFocusedProject(undefined);
+    } else {
+      trackControls.start("selected");
+      textBodyControls.start("selected");
+    }
+  }, [selectedProject, textBodyControls, trackControls]);
+
+  const changeSelectedProject = useCallback((project?: Project) => {
+    clickedProject.current = PROJECTS.findIndex(
+      (p) => p.name === project?.name
+    );
+    setSelectedProject(project);
+  }, []);
+
+  const handleProjectHover = (project: Project) => () => {
+    if (focusedProject && focusedProject !== selectedProject)
+      changeFocusTitle(project);
+    if (!(selectedProject && project === selectedProject))
+      changeFocusTitle(project);
+  };
 
   return (
     <TitleCard
       {...rest}
       containerClassName={cn(className)}
-      className={cn("flex-col flex relative p-4 py-g-y-2/8")}
+      className={cn("relative flex flex-1 flex-col justify-start gap-2 p-4")}
       title={CARD_TYPES.Projects}
-      // animate={controls}
       ref={projectsRef}
-      initial="initial"
       id={CARD_TYPES.Projects}
       key={CARD_TYPES.Projects}
+      onHoverEnd={() => changeFocusTitle(selectedProject)}
     >
-      <LayoutGroup>
-        <Track
-          className={cn("gap-g-x-2/8", {
-            "w-auto": selectedProject,
-          })}
-          dragRef={dragRef}
-          onHoverEnd={() => changeFocusTitle()}
-        >
-          {PROJECTS.map((project, index) => (
-            <motion.div
-              layout
-              key={index}
-              custom={index}
+      <Track
+        className={cn("h-4/5 gap-g-x-2/8")}
+        dragRef={dragRef}
+        animate={trackControls}
+        clickedIndex={clickedProject}
+        variants={{
+          selected: {
+            height: [null, "90%"],
+          },
+          deselected: {
+            height: [null, "66%"],
+          },
+        }}
+      >
+        {PROJECTS.map((project, index) => (
+          <motion.div
+            key={index}
+            custom={index}
+            className={cn(
+              "track-card group relative h-full cursor-pointer overflow-hidden rounded-sm p-0 duration-300"
+            )}
+            onHoverStart={handleProjectHover(project)}
+            onClick={() => !dragRef.current && changeSelectedProject(project)}
+          >
+            <Image
               className={cn(
-                "relative p-0 h-g-y-2-2/8 w-g-x-2-6/8 overflow-hidden group cursor-pointer duration-300 rounded-sm"
+                "track-img h-full w-full object-cover",
+                "opacity-50 blur-sm brightness-75 contrast-75 saturate-150 transition-all duration-300 hover:opacity-100 group-hover:blur-none",
+                {
+                  "brightness-90": project.name == selectedProject?.name,
+                  "opacity-100 blur-none":
+                    project.name == focusedProject?.name ||
+                    project.name == selectedProject?.name,
+                }
               )}
-              onHoverStart={() => changeFocusTitle(project)}
-              onClick={() => !dragRef.current && changeSelectedProject(project)}
-              variants={{
-                ...cardTransition,
-              }}
-            >
-              <Image
-                className={cn(
-                  "track-img object-cover h-full w-full",
-                  "transition-all duration-500 brightness-50 group-hover:blur-none group-hover:brightness-75",
-                  {
-                    "brightness-90":
-                      selectedProject && project.name == selectedProject.name,
-                  }
-                )}
-                src={project.image}
-                draggable={false}
-                alt="project image"
-                width={500}
-                height={400}
-              />
-            </motion.div>
-          ))}
-        </Track>
-        <TextBody className="bottom-g-y-6/8 left-g-x-2/8" />
-      </LayoutGroup>
+              src={project.image}
+              draggable={false}
+              alt="project image"
+              width={500}
+              height={400}
+            />
+          </motion.div>
+        ))}
+      </Track>
+      <motion.div
+        key={"body"}
+        animate={textBodyControls}
+        className={cn(
+          "absolute left-0 top-1/2 flex h-1/2 flex-col px-12 mix-blend-lighten",
+          props.className
+        )}
+      >
+        <motion.div className="flex justify-between gap-2 pb-4 pr-4">
+          <ProjectTitle
+            text={focusedProject?.name || selectedProject?.name || "Projects."}
+            reverse={!focusedProject}
+          />
+          <AnimatePresence>
+            {selectedProject && (
+              <div className="flex items-center gap-4">
+                <LinkButton
+                  animate={{
+                    opacity: 1,
+                  }}
+                  exit={{
+                    opacity: 0,
+                  }}
+                  onClick={() => changeSelectedProject()}
+                />
+                <BackButton
+                  animate={{
+                    opacity: 1,
+                  }}
+                  exit={{
+                    opacity: 0,
+                  }}
+                  onClick={() => changeSelectedProject()}
+                />
+              </div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+        <ProjectDescription
+          text={selectedProject?.description ?? DEFAULT_TEXT}
+          reverse={!selectedProject}
+        />
+        <div className="flex gap-2 p-4">
+          <AnimatePresence mode="wait">
+            {selectedProject &&
+              selectedProject.tags.map((tag) => {
+                return (
+                  <MotionBadge
+                    variant="surface"
+                    key={tag}
+                    color="gray"
+                    animate={{
+                      opacity: [0, 1],
+                      y: [20, 0],
+                      transition: {
+                        delay: 0.3,
+                      },
+                    }}
+                    exit={{
+                      opacity: 0,
+                      y: 20,
+                    }}
+                  >
+                    {tag}
+                  </MotionBadge>
+                );
+              })}
+          </AnimatePresence>
+        </div>
+      </motion.div>
     </TitleCard>
   );
 }
