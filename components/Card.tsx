@@ -165,7 +165,10 @@ export const TitleCard = forwardRef<
     <Card
       className={cn(
         "h-0 w-0",
-        "group flex flex-col overflow-hidden border-[1px] border-[--sage-a3] bg-[--sage-a2] backdrop-blur-sm hover:border-[--sage-10] hover:bg-[--sage-a4]",
+        "group flex flex-col overflow-hidden",
+        "border-[1px] border-[--sage-a3] bg-[--sage-a2]",
+        "backdrop-blur-sm backdrop-brightness-50",
+        "hover:border-[--sage-10] hover:bg-[--sage-a4] hover:backdrop-brightness-75",
         containerClassName,
         {
           "border-[--sage-12]": isDrag,
@@ -183,7 +186,7 @@ export const TitleCard = forwardRef<
         onPointerDown={startDrag}
         draggable={false}
         className={cn(
-          "relative z-10 flex h-6 flex-col justify-center bg-[--gray-a3] px-3 py-1 opacity-100 transition-opacity",
+          "group relative z-10 flex h-6 flex-col justify-center bg-[--gray-a3] px-3 py-1 opacity-100 transition-opacity",
           {
             "opacity-50": isDrag,
           }
@@ -199,7 +202,7 @@ export const TitleCard = forwardRef<
         >
           {title?.toUpperCase()}
         </Text>
-        <div className="absolute bottom-0 left-0 w-full">
+        <div className="absolute bottom-0 left-0 w-full bg-[--sage-a1] transition-all group-hover:bg-[--sage-a10]">
           <Separator size="4" />
         </div>
         <div className="absolute right-1 z-50 flex h-3/4 gap-1">

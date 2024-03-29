@@ -2,14 +2,21 @@
 
 import { TitleCard } from "@/components/Card";
 import { cn } from "@/lib/utils";
-import EmailSvg from "@/public/email.svg";
-import GithubSvg from "@/public/github.svg";
-import LinkedinSvg from "@/public/linkedin.svg";
-import ResumeSvg from "@/public/resume.svg";
 import { Separator as BaseSeparator, Text as BaseText } from "@radix-ui/themes";
-import { AnimatePresence, motion, useAnimate } from "framer-motion";
-import { ArrowUpRight as ArrowUpRightBase } from "lucide-react";
-import BaseImage from "next/image";
+import {
+  AnimatePresence,
+  CustomDomComponent,
+  motion,
+  useAnimate,
+} from "framer-motion";
+import {
+  ArrowUpRight as ArrowUpRightBase,
+  Mail as EmailIcon,
+  Github as GithubIcon,
+  Linkedin as LinkedinIcon,
+  LucideProps,
+  MessageCircleQuestion as MessageCircleQuestionIcon,
+} from "lucide-react";
 import {
   ComponentProps,
   ComponentPropsWithoutRef,
@@ -19,20 +26,25 @@ import {
 } from "react";
 import { CARD_TYPES } from "./types";
 
-const Image = motion(BaseImage);
 const Text = motion(BaseText);
 const Separator = motion(BaseSeparator);
 const ArrowUpRight = motion(ArrowUpRightBase);
+const Email = motion(EmailIcon);
+const Github = motion(GithubIcon);
+const Linkedin = motion(LinkedinIcon);
+const MessageCircleQuestion = motion(MessageCircleQuestionIcon);
 
 //Add a contact form, linkedin, github, resume, and email/phone section
-const CONTACTS: Record<string, { value: string; iconSrc: string }> = {
+const CONTACTS: Record<
+  string,
+  { value: string; Icon: CustomDomComponent<LucideProps> }
+> = {
   LinkedIn: {
     value: "https://www.linkedin.com/in/vincent-lam-1a2b3c4d/",
-    iconSrc: LinkedinSvg,
+    Icon: Linkedin,
   },
-  GitHub: { value: "github.com/vincentlam", iconSrc: GithubSvg },
-  Resume: { value: "vincentlam.github.io/resume", iconSrc: ResumeSvg },
-  Email: { value: "vincentthanhlam@gmail.com", iconSrc: EmailSvg },
+  GitHub: { value: "github.com/vincentlam", Icon: Github },
+  Email: { value: "vincentthanhlam@gmail.com", Icon: Email },
 };
 
 const Link = forwardRef<
@@ -64,7 +76,7 @@ const Link = forwardRef<
         <Text
           size="2"
           className={cn(
-            "flex items-center text-[--sage-11] hover:text-[--sage-12] transition-colors duration-300 overflow-hidden"
+            "flex items-center overflow-hidden text-[--sage-11] transition-colors duration-300 hover:text-[--sage-12]"
           )}
         >
           {text}
@@ -118,49 +130,43 @@ export default function ContactCard(props: ComponentProps<typeof motion.div>) {
   const { className, ...rest } = props;
   const [projectsRef] = useAnimate();
   const [hoveredLink, setHoveredLink] = useState<string>();
+  const Icon = hoveredLink
+    ? CONTACTS[hoveredLink]?.Icon
+    : motion(MessageCircleQuestion);
 
   return (
     <TitleCard
       {...rest}
       containerClassName={cn(className)}
-      className={cn("flex relative p-3 gap-3")}
+      className={cn("relative flex flex-1 items-center gap-3 p-3")}
       title={CARD_TYPES.Contacts}
       ref={projectsRef}
       initial="initial"
       id={CARD_TYPES.Contacts}
       key={CARD_TYPES.Contacts}
     >
-      <motion.div className="flex-1 rounded-full my-auto p-5">
+      <motion.div className="my-auto flex-1 rounded-full px-4">
         <motion.div
-          className="aspect-square relative rounded-full bg-[--gray-a5] bg-blur-xl overflow-hidden"
+          className="bg-blur-xl relative aspect-square overflow-hidden rounded-full bg-[--gray-a5]"
           variants={{}}
         >
           <AnimatePresence>
             {hoveredLink && (
-              <Image
-                className="absolute top-0 left-0 w-full h-full p-4"
-                src={CONTACTS[hoveredLink]?.iconSrc}
-                alt="Follow us on Twitter"
+              <Icon
+                className="absolute left-0 top-0 h-full w-full p-4 text-[--gray-10]"
                 key={hoveredLink}
-                priority
                 initial={{
                   opacity: 1,
                 }}
                 animate={{
-                  x: [-45, 0],
+                  y: [-45, 0],
                   rotate: [-30, 0],
                   opacity: [0, 1],
-                  transition: {
-                    duration: 0.366,
-                  },
                 }}
                 exit={{
-                  x: [0, 45],
+                  y: [0, 45],
                   rotate: [0, 30],
                   opacity: [0.5, 0],
-                  transition: {
-                    duration: 0.366,
-                  },
                 }}
               />
             )}
@@ -168,7 +174,7 @@ export default function ContactCard(props: ComponentProps<typeof motion.div>) {
         </motion.div>
       </motion.div>
 
-      <div className="flex flex-1 flex-col relative justify-center gap-2">
+      <div className="relative flex flex-1 flex-col justify-center gap-2">
         {Object.entries(CONTACTS).map(([key, { value }], i) => (
           <Link
             key={i}

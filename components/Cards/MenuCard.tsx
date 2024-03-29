@@ -84,7 +84,7 @@ const Item = (props: {
         style={{
           width: springWidth,
         }}
-        className="aspect-square flex items-end justify-end w-g-x-1 relative rounded-full bg-[--sage-5] transition-all brightness-100 hover:bg-[--sage-2] z-[1000]"
+        className="relative z-[1000] flex aspect-square w-g-x-5/8 items-end justify-end rounded-full bg-[--sage-5] brightness-100 transition-all hover:bg-[--sage-2]"
         variants={{
           leave: {
             width: [null, size * minSize],
@@ -129,7 +129,7 @@ export default function MenuCard(props: ComponentProps<typeof Card>) {
   return (
     <Card
       {...rest}
-      className={cn("absolute overflow-visible group z-50", className)}
+      className={cn("group absolute z-50 overflow-visible", className)}
       ref={ref}
       initial="initial"
       id={CARD_TYPES.Menu}
@@ -146,7 +146,7 @@ export default function MenuCard(props: ComponentProps<typeof Card>) {
     >
       <motion.div
         animate={controls}
-        className="flex absolute gap-4 items-end overflow-visible p-2 bottom-0 top-1/3 left-1/2 -translate-x-1/2 z-[1000] group-hover:bg-[--sage-a3] bg-[--sage-a4] rounded-full"
+        className="absolute bottom-0 left-1/2 top-1/3 z-[1000] flex -translate-x-1/2 items-end gap-4 overflow-visible rounded-full bg-[--sage-a4] p-2 group-hover:bg-[--sage-a3]"
       >
         {Object.entries(items).map(([key, { icon: Icon, cards }]) => (
           <Item
@@ -155,14 +155,14 @@ export default function MenuCard(props: ComponentProps<typeof Card>) {
             {...{ x, y }}
             minSize={0.6}
             maxSize={0.85}
-            size={gridUnitWidth}
+            size={(gridUnitWidth * 3) / 4}
             onClick={() => pushElements(cards)}
           >
             <Icon
-              className="text-[--sage-11] m-auto"
-              size={"28"}
+              className="m-auto text-[--sage-11]"
+              size={"20"}
               absoluteStrokeWidth
-              strokeWidth={3}
+              strokeWidth={2}
             />
           </Item>
         ))}

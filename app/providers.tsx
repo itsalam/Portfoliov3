@@ -1,6 +1,11 @@
 "use client";
 
-import { GridContext, useGridStore } from "@/lib/state";
+import {
+  CMSContext,
+  GridContext,
+  useCMSStore,
+  useGridStore,
+} from "@/lib/state";
 import { ThemeProvider } from "next-themes";
 import {
   Dispatch,
@@ -20,12 +25,10 @@ type LoadingContextType = [
 const LoadingContext = createContext<LoadingContextType>([[], () => {}]);
 
 export function Providers(props: { children: ReactNode }) {
-  const store = useRef(useGridStore);
-
   const [loadingProg, setLoading] = useState<Promise<void>[]>(
     Array.from({ length: 5 }, (_, i) => {
       return new Promise<void>((resolve) => {
-        const randomDelay = Math.floor(Math.random() * (i * 50)) + 50;
+        const randomDelay = Math.floor(Math.random() * (i * 1000)) + 50;
         setTimeout(() => {
           resolve();
         }, randomDelay);
@@ -33,12 +36,18 @@ export function Providers(props: { children: ReactNode }) {
     })
   );
 
+  const gridStore = useRef(useGridStore);
+  const cmsStore = useCMSStore(setLoading);
+  const cmsRef = useRef(cmsStore);
+
   return (
     <ThemeProvider attribute="class">
       <LoadingContext.Provider value={[loadingProg, setLoading]}>
-        <GridContext.Provider value={store.current}>
-          {props.children}
-        </GridContext.Provider>
+        <CMSContext.Provider value={cmsRef.current}>
+          <GridContext.Provider value={gridStore.current}>
+            {props.children}
+          </GridContext.Provider>
+        </CMSContext.Provider>
       </LoadingContext.Provider>
     </ThemeProvider>
   );

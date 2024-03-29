@@ -2,6 +2,7 @@ import { CARD_TYPES } from "@/components/Cards/types";
 import { GridElement } from "@/components/util/gridUtil";
 import { Dispatch, SetStateAction, createContext } from "react";
 import { createStore } from "zustand";
+import { SchemaStores, createCMSSlices } from "./fetchData";
 
 export type Dimensions = {
   width: number;
@@ -61,8 +62,8 @@ export const DEFAULT_GRID_ELEMENTS: Record<CARD_TYPES, GridElement> = {
     id: CARD_TYPES.Contacts,
     coords: DEFAULT_COORDS,
     isLocked: false,
-    width: 2.5,
-    height: 4,
+    width: 2,
+    height: 2.75,
   },
   Location: {
     id: CARD_TYPES.Location,
@@ -127,6 +128,22 @@ export type GridStore = {
 };
 
 export const GridContext = createContext<typeof useGridStore | null>(null);
+export const CMSContext = createContext<ReturnType<typeof useCMSStore> | null>(
+  null
+);
+
+export const useCMSStore = (
+  setLoading: Dispatch<SetStateAction<Promise<void>[]>>
+) =>
+  createStore<Partial<SchemaStores>>()((set, get) => {
+    return {
+      initialize: () => {
+        const slices = createCMSSlices(set);
+        const allCMSLoaded = Promise.all<void>(slices).then(() => {});
+        setLoading((curr) => curr.concat([allCMSLoaded, ...slices]));
+      },
+    };
+  });
 
 export const useGridStore = createStore<GridStore>()((set, get) => {
   const updateDimensions = () => {

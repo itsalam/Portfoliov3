@@ -140,10 +140,6 @@ const Grid = () => {
     };
 
   useEffect(() => {
-    console.log("Grid");
-  });
-
-  useEffect(() => {
     const removeListener = addListener({
       dispatch: setGridElements,
       pushElements: pushElements(gridInfo, gridElements),

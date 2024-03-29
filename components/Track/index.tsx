@@ -124,7 +124,7 @@ const Track = (
   return (
     <>
       <TrackBar
-        dist={dist}
+        dist={springDist}
         trackRef={trackRef}
         itemWidth={itemWidth}
         containerWidth={

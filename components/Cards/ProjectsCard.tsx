@@ -2,46 +2,30 @@
 
 import { TitleCard } from "@/components/Card";
 import { AnimateText, AnimatedText } from "@/components/TextEffects";
+import { Project } from "@/lib/fetchData";
+import { CMSContext } from "@/lib/state";
 import { cn } from "@/lib/utils";
+import { urlForImage } from "@/sanity/lib/image";
 import { Badge } from "@radix-ui/themes";
 import { AnimatePresence, motion, useAnimationControls } from "framer-motion";
 import { debounce } from "lodash";
-import { LoremIpsum } from "lorem-ipsum";
 import Image from "next/image";
 import {
   ComponentProps,
   FC,
   useCallback,
+  useContext,
   useEffect,
   useRef,
   useState,
 } from "react";
+import { useStore } from "zustand";
 import { BackButton } from "../Buttons/BackButton";
 import { LinkButton } from "../Buttons/LinkButton";
 import Track from "../Track";
 import { CARD_TYPES } from "./types";
 
 const MotionBadge = motion(Badge);
-
-const lorem = new LoremIpsum();
-type Project = {
-  name: string;
-  description: string;
-  image: string;
-  url: string;
-  tags: string[];
-};
-
-const PROJECTS: Project[] = Array.from({ length: 4 }).map((_, i) => ({
-  name: `Project ${i + 1}`,
-  description: lorem.generateSentences(2),
-  image: `https://picsum.photos/seed/${Math.floor((i + 1) * 100)}/1000/800`,
-  url: `https://example.com/project${i + 1}`,
-  tags: Array.from(
-    { length: Math.floor(Math.random() * 5) + 1 },
-    (_, i) => `Technology ${Math.floor(Math.random() * 6)}`
-  ),
-}));
 
 export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
   const { className, ...rest } = props;
@@ -53,7 +37,12 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
   const [selectedProject, setSelectedProject] = useState<Project>();
   const clickedProject = useRef<number>(-1);
   const dragRef = useRef(false);
+  const cms = useContext(CMSContext)!;
+  const projects = useStore(cms).projects ?? [];
+
   const DEFAULT_TEXT = "Scroll or drag to navigate.";
+
+  console.log(projects);
 
   const ProjectTitle = useCallback(
     (props: Omit<ComponentProps<typeof AnimatedText>, "textChild">) => {
@@ -112,12 +101,15 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
     }
   }, [selectedProject, textBodyControls, trackControls]);
 
-  const changeSelectedProject = useCallback((project?: Project) => {
-    clickedProject.current = PROJECTS.findIndex(
-      (p) => p.name === project?.name
-    );
-    setSelectedProject(project);
-  }, []);
+  const changeSelectedProject = useCallback(
+    (project?: Project) => {
+      clickedProject.current = projects.findIndex(
+        (p) => p.name === project?.name
+      );
+      setSelectedProject(project);
+    },
+    [projects]
+  );
 
   const handleProjectHover = (project: Project) => () => {
     if (focusedProject && focusedProject !== selectedProject)
@@ -151,7 +143,7 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
           },
         }}
       >
-        {PROJECTS.map((project, index) => (
+        {projects.map((project, index) => (
           <motion.div
             key={index}
             custom={index}
@@ -172,7 +164,7 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
                     project.name == selectedProject?.name,
                 }
               )}
-              src={project.image}
+              src={urlForImage(project.thumbnails[0])}
               draggable={false}
               alt="project image"
               width={500}
@@ -226,11 +218,11 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
         <div className="flex gap-2 p-4">
           <AnimatePresence mode="wait">
             {selectedProject &&
-              selectedProject.tags.map((tag) => {
+              selectedProject.stack.map((tech) => {
                 return (
                   <MotionBadge
                     variant="surface"
-                    key={tag}
+                    key={tech.name}
                     color="gray"
                     animate={{
                       opacity: [0, 1],
@@ -244,7 +236,7 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
                       y: 20,
                     }}
                   >
-                    {tag}
+                    {tech.name}
                   </MotionBadge>
                 );
               })}

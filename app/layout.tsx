@@ -17,7 +17,7 @@ export default function RootLayout({
           <Theme>
             <main
               id="main"
-              className="flex flex-col container h-screen overflow-hidden"
+              className="container flex h-screen flex-col overflow-hidden"
             >
               {children}
             </main>

@@ -29,7 +29,7 @@ export const TrackBar = (
     <motion.div
       {...restProps}
       ref={barRef}
-      className={cn("h-[5px] w-full relative", className)}
+      className={cn("relative h-[5px] w-full", className)}
     >
       {Array.from({ length: numItems }, (_, i) => (
         <motion.div
@@ -38,7 +38,7 @@ export const TrackBar = (
             width: itemWidth * ratio || 0,
             x: i * (itemWidth + gapWidth) * ratio,
           }}
-          className="absolute h-[3px] top-0 left-0 bg-[--sage-10]"
+          className="absolute left-0 top-0 h-[3px] bg-[--sage-a6]"
         />
       ))}
       <motion.div
@@ -47,7 +47,7 @@ export const TrackBar = (
             -Math.max(Math.min(trackWidth * ratio, info.offset.x), 0) / ratio
           );
         }}
-        className="z-20 h-[9px] -top-[3px] absolute border border-[--sage-11]"
+        className="absolute -top-[3px] z-20 h-[9px] border border-[--sage-a9]"
         style={{ width: containerWidth * ratio, x }}
       />
     </motion.div>

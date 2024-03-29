@@ -8,6 +8,12 @@ const nextConfig = {
         port: "",
         pathname: "/seed/**",
       },
+      {
+        protocol: "https",
+        hostname: "cdn.sanity.io",
+        port: "",
+        pathname: "/images/**",
+      },
     ],
   },
   webpack: (config) => {

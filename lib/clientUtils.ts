@@ -5,6 +5,7 @@ import { AnimationControls, motion, useMotionValue } from "framer-motion";
 import { debounce } from "lodash";
 import { ComponentProps, RefObject, useEffect, useState } from "react";
 import { StoreApi, useStore } from "zustand";
+import { SchemaStores } from "./fetchData";
 import { Dimensions, GridStore } from "./state";
 
 export const useResizeCallBack = (
@@ -29,6 +30,21 @@ export const useResizeCallBack = (
       window.removeEventListener("resize", cb);
     };
   }, [cb, refs]);
+};
+
+export const useCMSStoreInitializer = (
+  store: StoreApi<Partial<SchemaStores>>
+) => {
+  const initialLoad = useMotionValue(true);
+
+  const initialize = store.getInitialState().initialize;
+  useEffect(() => {
+    console.log(initialLoad.get());
+    if (initialLoad.get()) {
+      initialize();
+      initialLoad.set(false);
+    }
+  }, [initialLoad, initialize]);
 };
 
 export function useResizeGridUpdate(store: StoreApi<GridStore>) {

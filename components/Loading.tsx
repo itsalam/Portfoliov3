@@ -22,7 +22,7 @@ const Loading = forwardRef<
   }
 >((props, ref) => {
   const { prog, setLoading, ...motionProps } = props;
-  const debounceProg = useDebounce<number>(prog, 400);
+  const debounceProg = useDebounce<number>(prog, 1000);
   // todo: make HOC control the animation, digit component should have digits based on digit size (1s get 100 numbers)
   const [completedAnimations, setCompletedAnimations] = useState(0);
 
@@ -48,7 +48,7 @@ const Loading = forwardRef<
   return (
     <motion.div
       ref={ref}
-      className="absolute right-10 bottom-4 flex font-favorit gap-1 text-8xl items-start justify-center bg-[#121212] h-36 overflow-hidden"
+      className="absolute bottom-4 right-10 flex h-36 items-start justify-center gap-1 overflow-hidden bg-[#121212] font-favorit text-8xl"
       {...motionProps}
     >
       {Array.from({ length: DIGITS })
