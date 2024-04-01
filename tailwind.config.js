@@ -2,20 +2,15 @@ const generateGridUtils = () => ({
   ...(() => {
     let newPaddingUtilities = {};
     for (let i = 1; i <= 12; i++) {
-      newPaddingUtilities[`g-x-${i}`] = `calc(var(--grid-width) * ${i})`;
-      newPaddingUtilities[`g-y-${i}`] = `calc(var(--grid-height) * ${i})`;
+      newPaddingUtilities[`g-${i}`] = `calc(var(--cell-size) * ${i})`;
       for (let j = 1; j < 8; j++) {
-        newPaddingUtilities[`g-x-${i}-${j}/8`] =
-          `calc(var(--grid-width) * ${(i + j / 8).toFixed(3)})`;
-        newPaddingUtilities[`g-y-${i}-${j}/8`] =
-          `calc(var(--grid-height) * ${(i + j / 8).toFixed(3)})`;
+        newPaddingUtilities[`g-${i}-${j}/8`] =
+          `calc(var(--cell-size) * ${(i + j / 8).toFixed(3)})`;
       }
     }
     for (let j = 1; j < 8; j++) {
-      newPaddingUtilities[`g-x-${j}/8`] =
-        `calc(var(--grid-width) * ${(j / 8).toFixed(3)})`;
-      newPaddingUtilities[`g-y-${j}/8`] =
-        `calc(var(--grid-height) * ${(j / 8).toFixed(3)})`;
+      newPaddingUtilities[`g-${j}/8`] =
+        `calc(var(--cell-size) * ${(j / 8).toFixed(3)})`;
     }
     return newPaddingUtilities;
   })(),

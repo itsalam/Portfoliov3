@@ -16,15 +16,10 @@ const GridEffect: React.FC<GridProps> = (props) => {
   const { ...svgProps } = props;
 
   const store = useContext(GridContext)!;
+  const { unitSize, vertexSize, gapSize } = store.getInitialState().gridInfo;
   const { height, width } = useStore(store, (store) => store.dimensions);
-  const {
-    numRows,
-    numCols,
-    gridCellHeight,
-    gridCellWidth,
-    vertexSize,
-    gapSize,
-  } = useStore(store).gridInfo;
+  const { ratio, numRows, numCols, gridCellSize, gridUnitSize } =
+    useStore(store).gridInfo;
   const ref = useRef<SVGSVGElement>(null);
   const strokeDasharray = useCallback(
     (dimension: number, factor: number) => {
@@ -34,58 +29,77 @@ const GridEffect: React.FC<GridProps> = (props) => {
   );
 
   const VerticalLines = useCallback(() => {
-    const length = numCols / 4 + 1;
+    const length = numCols / unitSize + 1;
     return Array.from({ length }).map((_, i) => (
       <line
-        x1={i * gridCellWidth * 4 + (i === 0 ? 1 : i === length - 1 ? -1 : 0)}
-        x2={i * gridCellWidth * 4 + (i === 0 ? 1 : i === length - 1 ? -1 : 0)}
+        x1={i * gridCellSize + (i === 0 ? 1 : i === length - 1 ? -1 : 0)}
+        x2={i * gridCellSize + (i === 0 ? 1 : i === length - 1 ? -1 : 0)}
         y1={gapSize / 2}
         y2={height}
         key={i}
         strokeWidth={0.5}
         strokeDasharray={
           i !== 0 && i !== length
-            ? strokeDasharray(gridCellHeight, i % 2 ? 4 : 4)
+            ? strokeDasharray(gridUnitSize, i % 2 ? unitSize : unitSize)
             : 0
         }
         strokeDashoffset={0}
-        stroke={i % 4 === 0 ? "#aaaaaa" : i % 2 === 0 ? "#777777" : "#555555"}
+        stroke={
+          i % unitSize === 0 ? "#aaaaaa" : i % 2 === 0 ? "#777777" : "#555555"
+        }
       />
     ));
   }, [
     numCols,
-    gridCellWidth,
+    unitSize,
+    gridCellSize,
     gapSize,
     height,
     strokeDasharray,
-    gridCellHeight,
+    gridUnitSize,
   ]);
 
   const HorizontalLines = useCallback(() => {
-    return Array.from({ length: numRows / 4 + 1 }).map((_, i) => (
-      <line
-        y1={i * gridCellHeight * 4 + 1}
-        y2={i * gridCellHeight * 4 + 1}
-        x1={gapSize / 2}
-        x2={width}
-        key={i}
-        strokeWidth={0.5}
-        strokeDasharray={strokeDasharray(gridCellWidth, i % 2 ? 4 : 4)}
-        strokeDashoffset={0}
-        stroke={i % 4 === 0 ? "#aaaaaa" : i % 2 === 0 ? "#777777" : "#555555"}
-      />
-    ));
-  }, [numRows, gridCellHeight, gapSize, width, strokeDasharray, gridCellWidth]);
+    return Array.from({ length: (numRows * ratio) / unitSize + 1 }).map(
+      (_, i) => (
+        <line
+          y1={(i * gridCellSize) / ratio + 1}
+          y2={(i * gridCellSize) / ratio + 1}
+          x1={gapSize / 2}
+          x2={width}
+          key={i}
+          strokeWidth={0.5}
+          strokeDasharray={strokeDasharray(
+            gridUnitSize,
+            i % 2 ? unitSize : unitSize
+          )}
+          strokeDashoffset={0}
+          stroke={
+            i % unitSize === 0 ? "#aaaaaa" : i % 2 === 0 ? "#777777" : "#555555"
+          }
+        />
+      )
+    );
+  }, [
+    numRows,
+    ratio,
+    unitSize,
+    gridCellSize,
+    gapSize,
+    width,
+    strokeDasharray,
+    gridUnitSize,
+  ]);
 
   const Vertexs = () => {
-    return Array.from({ length: numCols / 4 }).map((_, i) =>
-      Array.from({ length: numRows / 4 }).map((_, j) => (
+    return Array.from({ length: numCols / unitSize }).map((_, i) =>
+      Array.from({ length: (numRows * ratio) / unitSize }).map((_, j) => (
         <Vertex
           key={`${i}-${j}`}
-          position={[(i + 1) * gridCellWidth * 4, (j + 1) * gridCellHeight * 4]}
+          position={[(i + 1) * gridCellSize, ((j + 1) * gridCellSize) / ratio]}
           size={vertexSize}
           fill={
-            (i + 1) % 4 === 0 && (j + 1) % 4 === 0
+            (i + 1) % unitSize === 0 && (j + 1) % unitSize === 0
               ? "#ffffff"
               : (i + 1) % 2 === 0 && (j + 1) % 2 === 0
                 ? "#999999"
@@ -116,12 +130,8 @@ const GridEffect: React.FC<GridProps> = (props) => {
       id={"mask"}
       {...svgProps}
       ref={ref}
-      className={"absolute w-full h-full z-40 left-0 top-0 opacity-100"}
+      className={"z-unitSize0 absolute left-0 top-0 h-full w-full opacity-100"}
     >
-      {/* <Sections /> */}
-      {/* <motion.mask id="clipping"> */}
-      {/* <Lines orientation="horizontal" />
-        <Lines orientation="vertical" /> */}
       <VerticalLines />
       <HorizontalLines />
       <Vertexs />

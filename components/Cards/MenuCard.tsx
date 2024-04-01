@@ -84,7 +84,7 @@ const Item = (props: {
         style={{
           width: springWidth,
         }}
-        className="relative z-[1000] flex aspect-square w-g-x-5/8 items-end justify-end rounded-full bg-[--sage-5] brightness-100 transition-all hover:bg-[--sage-2]"
+        className="w-g-5/8 relative z-[1000] flex aspect-square items-end justify-end rounded-full bg-[--sage-5] brightness-100 transition-all hover:bg-[--sage-2]"
         variants={{
           leave: {
             width: [null, size * minSize],
@@ -105,7 +105,7 @@ export default function MenuCard(props: ComponentProps<typeof Card>) {
   const { className, ...rest } = props;
   const store = useContext(GridContext)!;
   const pushElements = store.getInitialState().pushElements;
-  const { gridUnitWidth, gridUnitHeight } = useStore(store).gridInfo;
+  const { gridCellSize } = useStore(store).gridInfo;
   const [ref] = useAnimate();
   const controls = useAnimationControls();
   const x = useMotionValue(0),
@@ -122,7 +122,7 @@ export default function MenuCard(props: ComponentProps<typeof Card>) {
     Work: { icon: Briefcase, cards: [CARD_TYPES.Experience] },
     Info: {
       icon: Users,
-      cards: [CARD_TYPES.Contacts, CARD_TYPES.Location],
+      cards: [CARD_TYPES.Contacts, CARD_TYPES.Location, CARD_TYPES.Resume],
     },
   };
 
@@ -140,8 +140,8 @@ export default function MenuCard(props: ComponentProps<typeof Card>) {
         x.set(0);
         y.set(0);
       }}
-      width={3 * gridUnitWidth}
-      height={1 * gridUnitHeight}
+      width={gridCellSize * 3}
+      height={gridCellSize * 0.5}
       isLocked
     >
       <motion.div
@@ -155,7 +155,7 @@ export default function MenuCard(props: ComponentProps<typeof Card>) {
             {...{ x, y }}
             minSize={0.6}
             maxSize={0.85}
-            size={(gridUnitWidth * 3) / 4}
+            size={(gridCellSize * 3) / 4}
             onClick={() => pushElements(cards)}
           >
             <Icon

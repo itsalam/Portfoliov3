@@ -13,6 +13,7 @@ import {
   useAnimate,
   useAnimation,
 } from "framer-motion";
+import dynamic from "next/dynamic";
 import {
   ComponentProps,
   ComponentType,
@@ -24,13 +25,6 @@ import {
 import { useStore } from "zustand";
 import GridBackdrop from "./Backdrop";
 import Card from "./Card";
-import ContactCard from "./Cards/ContactsCard";
-import ExperienceCard from "./Cards/ExperienceCard";
-import HeroCard from "./Cards/HeroCard";
-import LocationCard from "./Cards/LocationCard";
-import MenuCard from "./Cards/MenuCard";
-import ProjectsCard from "./Cards/ProjectsCard";
-import StatusCard from "./Cards/StatusCard";
 import { CARD_TYPES } from "./Cards/types";
 import {
   GridElement,
@@ -43,13 +37,14 @@ const cardMap: Record<
   CARD_TYPES,
   ComponentType<ComponentProps<typeof Card>>
 > = {
-  Home: HeroCard,
-  Menu: MenuCard,
-  Projects: ProjectsCard,
-  Experience: ExperienceCard,
-  Contacts: ContactCard,
-  Location: LocationCard,
-  Status: StatusCard,
+  Home: dynamic(() => import("./Cards/HeroCard")),
+  Menu: dynamic(() => import("./Cards/MenuCard")),
+  Projects: dynamic(() => import("./Cards/ProjectsCard")),
+  Experience: dynamic(() => import("./Cards/ExperienceCard")),
+  Contacts: dynamic(() => import("./Cards/ContactsCard")),
+  Location: dynamic(() => import("./Cards/LocationCard")),
+  Status: dynamic(() => import("./Cards/StatusCard")),
+  Resume: dynamic(() => import("./Cards/ResumeCard")),
 };
 
 const Grid = () => {
@@ -63,12 +58,11 @@ const Grid = () => {
   >(
     new Map<CARD_TYPES, GridElement>(
       initElements.map((e) => {
-        const { gridCellHeight, gridCellWidth, gridUnitHeight, gridUnitWidth } =
-          gridInfo;
-        const x = e.coords[0] * gridCellWidth,
-          y = e.coords[1] * gridCellHeight,
-          width = e.width * gridUnitWidth,
-          height = e.height * gridUnitHeight;
+        const { gridUnitSize, gridCellSize } = gridInfo;
+        const x = e.coords[0] * gridUnitSize,
+          y = e.coords[1] * gridUnitSize,
+          width = e.width * gridCellSize,
+          height = e.height * gridCellSize;
         return [
           e.id,
           {
@@ -86,15 +80,14 @@ const Grid = () => {
   const pushElements =
     (gridInfo: GridInfo, gridElements: Map<CARD_TYPES, GridElement>) =>
     (ids: CARD_TYPES[]) => {
-      const { gridCellHeight, gridCellWidth, gridUnitWidth, gridUnitHeight } =
-        gridInfo;
+      const { gridUnitSize, gridCellSize } = gridInfo;
       ids.forEach((id) => {
         let elem = gridElements.get(id);
         if (elem) {
           if (!elem.isLocked) {
             elem.coords = [
-              DEFAULT_COORDS[0] * gridCellWidth,
-              DEFAULT_COORDS[1] * gridCellHeight,
+              DEFAULT_COORDS[0] * gridUnitSize,
+              DEFAULT_COORDS[1] * gridUnitSize,
             ];
           }
           elem = placeNewRect(elem, gridElements, gridInfo);
@@ -106,11 +99,11 @@ const Grid = () => {
           gridElements.set(id, {
             ...initElem,
             coords: [
-              initElem.coords[0] * gridCellWidth,
-              initElem.coords[1] * gridCellHeight,
+              initElem.coords[0] * gridUnitSize,
+              initElem.coords[1] * gridUnitSize,
             ],
-            width: initElem.width * gridUnitWidth,
-            height: initElem.height * gridUnitHeight,
+            width: initElem.width * gridCellSize,
+            height: initElem.height * gridCellSize,
           });
         }
         setGridElements(new Map(gridElements));
@@ -199,24 +192,15 @@ const Grid = () => {
   const GCard = useCallback(
     (props: { gridElement: GridElement; gridInfo: GridInfo }) => {
       const { id, coords, width, height, isLocked } = props.gridElement;
-      const { gridUnitHeight, gridUnitWidth, bounds } = props.gridInfo;
+      const { gridCellSize, bounds } = props.gridInfo;
       const MappedCard = cardMap[id];
       const dragTransition = {
         power: 0.08,
         min: 0,
         max: 100,
         restDelta: 5,
-        modifyTarget: (v: number) => {
-          const diagonal = Math.sqrt(gridUnitHeight ** 2 + gridUnitWidth ** 2);
-          const roundedHeight = Math.round(v / gridUnitHeight) * gridUnitHeight;
-          const roundedWidth = Math.round(v / gridUnitWidth) * gridUnitWidth;
-          const roundedDiagonal = Math.round(v / diagonal) * diagonal;
-          const distances = [roundedHeight, roundedWidth, roundedDiagonal];
-          const closestDistance = distances.reduce((prev, curr) => {
-            return Math.abs(curr - v) < Math.abs(prev - v) ? curr : prev;
-          });
-          return closestDistance;
-        },
+        modifyTarget: (target: number) =>
+          Math.round(target / gridCellSize) * gridCellSize,
       };
 
       return (

@@ -6,4 +6,5 @@ export enum CARD_TYPES {
   Status = "Status",
   Contacts = "Contacts",
   Experience = "Experience",
+  Resume = "Resume",
 }

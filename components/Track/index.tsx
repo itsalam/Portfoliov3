@@ -174,7 +174,7 @@ const Track = (
               x: springDist,
             } as MotionStyle
           }
-          className={cn("track relative flex items-start gap-g-x-2/8", {})}
+          className={cn("track relative flex items-start gap-g-2/8", {})}
           suppressHydrationWarning
           id="track"
           variants={{

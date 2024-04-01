@@ -69,7 +69,7 @@ export default function Hero() {
           <Overlay />
           <Grid />
           <ParticlesCanvas />
-          <MenuCard className="bottom-g-y-4/8 left-1/2 z-50 -translate-x-1/2" />
+          <MenuCard className="bottom-g-4/8 left-1/2 z-50 -translate-x-1/2" />
           <Effect />
         </>
       )}

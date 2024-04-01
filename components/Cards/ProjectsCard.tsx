@@ -38,7 +38,7 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
   const clickedProject = useRef<number>(-1);
   const dragRef = useRef(false);
   const cms = useContext(CMSContext)!;
-  const projects = useStore(cms).projects ?? [];
+  const projects = useStore(cms, (cms) => cms.projects ?? []);
 
   const DEFAULT_TEXT = "Scroll or drag to navigate.";
 
@@ -130,7 +130,7 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
       onHoverEnd={() => changeFocusTitle(selectedProject)}
     >
       <Track
-        className={cn("h-4/5 gap-g-x-2/8")}
+        className={cn("gap-g-2/8 h-4/5")}
         dragRef={dragRef}
         animate={trackControls}
         clickedIndex={clickedProject}
@@ -148,7 +148,7 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
             key={index}
             custom={index}
             className={cn(
-              "track-card group relative h-full cursor-pointer overflow-hidden rounded-sm p-0 duration-300"
+              "track-card w-g-3 group relative h-full cursor-pointer overflow-hidden rounded-sm p-0 duration-300"
             )}
             onHoverStart={handleProjectHover(project)}
             onClick={() => !dragRef.current && changeSelectedProject(project)}

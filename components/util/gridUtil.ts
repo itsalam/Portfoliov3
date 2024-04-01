@@ -16,7 +16,7 @@ export const isIntersecting = (
   gridInfo: GridInfo,
   threshold = 0
 ) => {
-  const { gridCellHeight, gridCellWidth } = gridInfo;
+  const { gridUnitSize } = gridInfo;
 
   // Calculate horizontal and vertical distances between the edges of the rectangles
   const horizontalDistance = Math.max(
@@ -33,8 +33,8 @@ export const isIntersecting = (
 
   // Check if either horizontal or vertical distance is within the threshold
   return (
-    horizontalDistance < threshold + gridCellWidth &&
-    verticalDistance < threshold + gridCellHeight
+    horizontalDistance < threshold + gridUnitSize &&
+    verticalDistance < threshold + gridUnitSize
   );
 };
 
@@ -82,7 +82,14 @@ export const resolveIntersections = (
           );
           gridElements.set(displacedRect.id, displacedRect);
           hasIntersections = true;
+          console.log(
+            elem.id,
+            displacedRect.id,
+            swap,
+            JSON.parse(JSON.stringify([...elems.values()]))
+          );
           resolveIntersections(displacedRect, gridElements, gridInfo, swap);
+
           return displacedRect;
         }
         return null;
@@ -98,7 +105,7 @@ const placeNewPosition = (
   gridElements: Map<CARD_TYPES, GridElement>,
   gridInfo: GridInfo
 ) => {
-  const { gridCellHeight, gridCellWidth, bounds } = gridInfo;
+  const { gridUnitSize, bounds } = gridInfo;
 
   const elemArrs = Array.from(gridElements.values()).filter(
     (e) => e.id !== element.id
@@ -107,8 +114,8 @@ const placeNewPosition = (
     displacingElem.width + displacingElem.coords[0] + element.width >
     bounds.right;
   element.coords[0] = wrapElement
-    ? bounds.left + gridCellWidth
-    : displacingElem.coords[0] + displacingElem.width + gridCellWidth;
+    ? bounds.left + gridUnitSize
+    : displacingElem.coords[0] + displacingElem.width + gridUnitSize;
 
   if (wrapElement) {
     const vertConflicting = elemArrs.filter(
@@ -124,7 +131,7 @@ const placeNewPosition = (
         return smallest;
       }, vertConflicting[0]);
       element.coords[1] =
-        tallestElem.coords[1] + tallestElem.height + gridCellHeight;
+        tallestElem.coords[1] + tallestElem.height + gridUnitSize;
     }
   }
   return element;

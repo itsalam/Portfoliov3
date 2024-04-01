@@ -10,12 +10,12 @@ export type Dimensions = {
 };
 
 export type GridInfo = {
+  unitSize: number;
+  ratio: number;
   numCols: number;
   numRows: number;
-  gridCellWidth: number;
-  gridCellHeight: number;
-  gridUnitWidth: number;
-  gridUnitHeight: number;
+  gridCellSize: number;
+  gridUnitSize: number;
   vertexSize: number;
   gapRatio: number;
   gapSize: number;
@@ -24,8 +24,7 @@ export type GridInfo = {
 };
 
 const NUM_COLS = 48;
-const NUM_ROWS = 48;
-const UNIT_SIZE = 4;
+export const CELL_SIZE = 4;
 
 export const DEFAULT_COORDS: [number, number] = [1, 1];
 
@@ -35,42 +34,42 @@ export const DEFAULT_GRID_ELEMENTS: Record<CARD_TYPES, GridElement> = {
     coords: DEFAULT_COORDS,
     isLocked: false,
     width: 5,
-    height: 4,
+    height: 2,
   },
   Menu: {
     id: CARD_TYPES.Menu,
     coords: [42, 42],
     isLocked: true,
     width: 3,
-    height: 1,
+    height: 3,
   },
   Projects: {
     id: CARD_TYPES.Projects,
     coords: DEFAULT_COORDS,
     isLocked: false,
     width: 5,
-    height: 6.25,
+    height: 3,
   },
   Experience: {
     id: CARD_TYPES.Experience,
     coords: DEFAULT_COORDS,
     isLocked: false,
     width: 5,
-    height: 8.25,
+    height: 4,
   },
   Contacts: {
     id: CARD_TYPES.Contacts,
     coords: DEFAULT_COORDS,
     isLocked: false,
     width: 2,
-    height: 2.75,
+    height: 1.25,
   },
   Location: {
     id: CARD_TYPES.Location,
     coords: DEFAULT_COORDS,
     isLocked: false,
-    width: 3.5,
-    height: 4,
+    width: 3,
+    height: 2,
   },
   Status: {
     id: CARD_TYPES.Status,
@@ -79,29 +78,38 @@ export const DEFAULT_GRID_ELEMENTS: Record<CARD_TYPES, GridElement> = {
     width: 3.5,
     height: 3.5,
   },
+  Resume: {
+    id: CARD_TYPES.Resume,
+    coords: DEFAULT_COORDS,
+    isLocked: false,
+    width: 5,
+    height: 5,
+  },
 };
 
 const getGridProps = (dimensions: Dimensions): Omit<GridInfo, "oldVals"> => {
   const { width, height } = dimensions;
-  const gridCellWidth = Math.round(width / NUM_COLS);
-  const gridCellHeight = Math.round(height / NUM_ROWS);
-  const gridUnitWidth = Math.round(gridCellWidth * UNIT_SIZE);
-  const gridUnitHeight = Math.round(gridCellHeight * UNIT_SIZE);
+  const ratio = width / height || 2;
+  console.log(ratio);
+  const gridUnitSize = Math.round(width / NUM_COLS);
+  // const gridCellHeight = Math.round(height / NUM_ROWS);
+  const gridCellSize = Math.round(gridUnitSize * CELL_SIZE);
+  // const gridUnitHeight = Math.round(gridCellHeight * UNIT_SIZE);
 
   return {
+    unitSize: CELL_SIZE,
+    ratio,
     numCols: NUM_COLS,
-    numRows: NUM_ROWS,
-    gridCellWidth,
-    gridCellHeight,
-    gridUnitWidth,
-    gridUnitHeight,
+    numRows: Math.floor(height / gridUnitSize),
+    gridCellSize,
+    gridUnitSize,
     vertexSize: 9,
     gapRatio: 0.8,
     gapSize: (1 + 0.8) * 9, //fix this later
     bounds: {
       left: 0,
       right: width,
-      top: gridCellHeight,
+      top: gridUnitSize,
       bottom: height,
     },
   };
@@ -154,6 +162,7 @@ export const useGridStore = createStore<GridStore>()((set, get) => {
     return dimensions;
   };
   const dimensions = updateDimensions();
+  console.log(getGridProps(dimensions));
   return {
     listener: null,
     addListener: (listener: GridElementListener) => {
@@ -186,10 +195,8 @@ export const useGridStore = createStore<GridStore>()((set, get) => {
       const newVals = getGridProps(dimensions);
       const oldVals = getGridProps(oldDimensions);
       const root = document.documentElement;
-      root.style.setProperty("--grid-width", `${newVals.gridUnitWidth}px`);
-      root.style.setProperty("--grid-height", `${newVals.gridUnitHeight}px`);
-      root.style.setProperty("--x-padding", `${newVals.gapSize / 4}px`);
-      root.style.setProperty("--y-padding", `${newVals.gapSize / 4}px`);
+      root.style.setProperty("--cell-size", `${newVals.gridCellSize}px`);
+      root.style.setProperty("--cell-padding", `${newVals.gapSize / 4}px`);
       set(() => ({ dimensions, gridInfo: { ...newVals, oldVals } }));
     },
   };

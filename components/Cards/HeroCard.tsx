@@ -45,10 +45,10 @@ export default function HeroCard(props: ComponentProps<typeof TitleCard>) {
   const TextRotateBody = useCallback(
     () => (
       <motion.div className="relative flex flex-col gap-1" key="intro">
-        <MText size={"7"} className="relative flex mb-4 top-1 overflow-hidden">
+        <MText size={"7"} className="relative top-1 mb-4 flex overflow-hidden">
           <AnimateText
             size={"4"}
-            className="whitespace-nowrap w-min"
+            className="w-min whitespace-nowrap"
             text="Hi there, I&lsquo;m"
             variants={animateTransition}
           />
@@ -60,37 +60,37 @@ export default function HeroCard(props: ComponentProps<typeof TitleCard>) {
             text="(a)"
           />
         </MText>
-        <div className="flex flex-col gap-0 relative h-g-y-1-1/8 my-gap-y pr-0 font-bold overflow-hidden">
-          <div className="absolute h-full top-0 flex flex-row gap-0">
+        <div className="my-gap-y h-g-5/8 relative flex flex-col gap-0 overflow-hidden pr-0 font-bold">
+          <div className="absolute top-0 flex h-full flex-row gap-0">
             <RotateText
               size={"9"}
-              className="absolute flex items-center h-full"
+              className="absolute flex h-full items-center"
               range={[2, 0]}
               text="Vincent Lam"
               variants={animateTransition}
             />
             <RotateText
               size={"9"}
-              className="relative top-0 left-0 h-full flex items-center"
+              className="relative left-0 top-0 flex h-full items-center"
               range={[0, 1]}
               text="Full-Stack"
             />
             <RotateText
               size={"9"}
-              className="absolute top-0 left-0 h-full flex items-center"
+              className="absolute left-0 top-0 flex h-full items-center"
               range={[1, 2]}
               text="Front-End"
             />
             <span className="relative w-4"> </span>
             <RotateText
               size={"9"}
-              className="relative font-bold flex items-center"
+              className="relative flex items-center font-bold"
               range={[0, 2]}
               text="Dev"
             />
           </div>
         </div>
-        <Text asChild key="body" size={"3"} className="z-30 min-w-g-x-3 py-0">
+        <Text asChild key="body" size={"3"} className="min-w-g-3 z-30 py-0">
           <span>
             I build services for businesses professionally and enjoy creating
             web projects in my free time. I&apos;m keen on JavaScript, web
@@ -104,11 +104,8 @@ export default function HeroCard(props: ComponentProps<typeof TitleCard>) {
 
   return (
     <TitleCard
-      containerClassName={cn(
-        "flex-col w-g-x-6 3xl:w-g-x-4 max-h-g-y-4-4/8",
-        className
-      )}
-      className={cn("flex-col flex relative mx-g-x-2/8 my-auto justify-end")}
+      containerClassName={cn("flex-col", className)}
+      className={cn("mx-g-2/8 relative my-auto flex flex-col justify-end")}
       title={CARD_TYPES.Home}
       containerAnimation={controls}
       ref={heroRef}

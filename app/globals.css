@@ -147,7 +147,7 @@ body {
 
 .track-card {
   --card-width: 3.0;
-  width: calc(var(--grid-width) * var(--card-width))
+  width: calc(var(--cell-size) * var(--card-width))
 }
 
 .mapboxgl-ctrl-logo {
