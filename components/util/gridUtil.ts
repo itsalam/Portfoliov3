@@ -14,7 +14,7 @@ export const isIntersecting = (
   rectA: GridElement,
   rectB: GridElement,
   gridInfo: GridInfo,
-  threshold = 0
+  threshold = 0.9
 ) => {
   const { gridUnitSize } = gridInfo;
 
@@ -33,8 +33,8 @@ export const isIntersecting = (
 
   // Check if either horizontal or vertical distance is within the threshold
   return (
-    horizontalDistance < threshold + gridUnitSize &&
-    verticalDistance < threshold + gridUnitSize
+    horizontalDistance < threshold * gridUnitSize &&
+    verticalDistance < threshold * gridUnitSize
   );
 };
 
@@ -57,6 +57,7 @@ export const placeNewRect = (
     e = placeNewPosition(e, lockedConflictingRect, gridElements, gridInfo);
     lockedConflictingRect = getConflictingRect(e);
   }
+
   return e;
 };
 
@@ -74,14 +75,22 @@ export const resolveIntersections = (
     elems
       .map((displacedRect) => {
         if (isIntersecting(elem, displacedRect, gridInfo)) {
+          console.log(
+            JSON.parse(JSON.stringify({ displacedRect, elem, swap }))
+          );
           displacedRect = placeNewPosition(
             swap ? displacedRect : elem,
             swap ? elem : displacedRect,
             gridElements,
             gridInfo
           );
+          console.log(
+            JSON.parse(JSON.stringify({ displacedRect, elem, swap }))
+          );
           gridElements.set(displacedRect.id, displacedRect);
           hasIntersections = true;
+
+          console.log(JSON.parse(JSON.stringify([...gridElements.values()])));
           resolveIntersections(displacedRect, gridElements, gridInfo, swap);
 
           return displacedRect;
@@ -110,22 +119,23 @@ const placeNewPosition = (
   element.coords[0] = wrapElement
     ? bounds.left + gridUnitSize
     : displacingElem.coords[0] + displacingElem.width + gridUnitSize + 1;
-
+  console.log({ element, wrapElement });
   if (wrapElement) {
-    const vertConflicting = elemArrs.filter(
-      (conflictingRect) =>
-        conflictingRect.coords[1] <= element.coords[1] &&
-        isIntersecting(element, conflictingRect, gridInfo)
+    const vertConflicting = elemArrs.filter((conflictingRect) =>
+      isIntersecting(element, conflictingRect, gridInfo)
     );
     if (vertConflicting.length) {
-      const tallestElem = vertConflicting.reduce((smallest, current) => {
-        if (current.coords[1] <= smallest.coords[1]) {
+      const lowest = vertConflicting.reduce((lowest, current) => {
+        if (
+          current.coords[1] + current.height >
+          lowest.coords[1] + lowest.height
+        ) {
           return current;
         }
-        return smallest;
+        return lowest;
       }, vertConflicting[0]);
-      element.coords[1] =
-        tallestElem.coords[1] + tallestElem.height + gridUnitSize;
+      console.log({ tallestElem: lowest, vertConflicting });
+      element.coords[1] = lowest.coords[1] + lowest.height + gridUnitSize;
     }
   }
   return element;
