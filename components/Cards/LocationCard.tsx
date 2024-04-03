@@ -1,41 +1,50 @@
 "use client";
 
-import { TitleCard } from "@/components/Card";
 import { cn } from "@/lib/utils";
-import "@radix-ui/themes/styles.css";
-import { motion } from "framer-motion";
+import { animate, motion } from "framer-motion";
+import { debounce } from "lodash";
 import { ComponentProps, useRef } from "react";
 import Map, { MapRef } from "react-map-gl";
-import { CARD_TYPES } from "./types";
 
 export default function LocationCard(props: ComponentProps<typeof motion.div>) {
   const { className, ...rest } = props;
-  const projectsRef = useRef(null);
+  const locationRef = useRef(null);
   const mapRef = useRef<MapRef>(null);
+  const resizeMap = debounce(
+    () =>
+      new Promise<void>((res) => {
+        mapRef.current?.once("resize", () => res()).resize();
+      }).then(() => {
+        animate(locationRef.current, { opacity: 1 });
+      }),
+    350,
+    {
+      trailing: true,
+    }
+  );
+
   return (
-    <TitleCard
+    <motion.div
+      className={cn("relative flex h-full w-full gap-4", className)}
+      ref={locationRef}
+      onAnimationComplete={resizeMap}
+      variants={{
+        animate: {
+          opacity: [0, 0],
+        },
+      }}
       {...rest}
-      containerClassName={cn(className)}
-      className={cn("flex relative gap-4 h-full w-full")}
-      title={CARD_TYPES.Location}
-      ref={projectsRef}
-      initial="initial"
-      id={CARD_TYPES.Location}
-      onAnimationComplete={() =>
-        setTimeout(() => mapRef.current?.resize(), 200)
-      }
-      key={"location"}
     >
       <Map
         ref={mapRef}
         mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_KEY ?? ""}
         initialViewState={{
-          longitude: -122.4,
-          latitude: 37.8,
-          zoom: 14,
+          longitude: -123.12,
+          latitude: 49.28,
+          zoom: 3,
         }}
         mapStyle="mapbox://styles/mapbox/dark-v11"
       />
-    </TitleCard>
+    </motion.div>
   );
 }

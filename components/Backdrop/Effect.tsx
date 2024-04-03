@@ -21,7 +21,7 @@ const Effect = () => {
       // canvas.style.webkitMaskPosition = `${e.client}px ${e.client}px`;
       // canvas.style.maskPosition = `${e.client}px ${e.client}px`;
     };
-    window.addEventListener("mousemove", followMouse);
+    // window.addEventListener("mousemove", followMouse);
     return () => {
       window.removeEventListener("mousemove", followMouse);
     };

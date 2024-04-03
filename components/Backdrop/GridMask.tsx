@@ -17,86 +17,84 @@ const GridEffect: React.FC<GridProps> = (props) => {
 
   const store = useContext(GridContext)!;
   const { unitSize, vertexSize, gapSize } = store.getInitialState().gridInfo;
-  const { height, width } = useStore(store, (store) => store.dimensions);
+  const { containerHeight, width } = useStore(
+    store,
+    (store) => store.dimensions
+  );
   const { ratio, numRows, numCols, gridCellSize, gridUnitSize } =
     useStore(store).gridInfo;
   const ref = useRef<SVGSVGElement>(null);
   const strokeDasharray = useCallback(
-    (dimension: number, factor: number) => {
-      return `${(dimension * factor - gapSize).toFixed(2)} ${gapSize}`;
+    (dimension: number) => {
+      return `${dimension - gapSize} ${gapSize}`;
     },
     [gapSize]
   );
+  // numRows & gridCellsize is based on width, and ratio is the cloest
+  const gridCols = numCols / unitSize;
+  const gridRows = (numRows * ratio) / unitSize;
+  const cellHeight = gridCellSize / ratio;
 
   const VerticalLines = useCallback(() => {
-    const length = numCols / unitSize + 1;
-    return Array.from({ length }).map((_, i) => (
+    return Array.from({ length: gridCols + 1 }).map((_, i) => (
       <line
-        x1={i * gridCellSize + (i === 0 ? 1 : i === length - 1 ? -1 : 0)}
-        x2={i * gridCellSize + (i === 0 ? 1 : i === length - 1 ? -1 : 0)}
-        y1={gapSize / 2}
-        y2={height}
+        x1={i * gridCellSize}
+        x2={i * gridCellSize}
+        y1={0}
+        y2={containerHeight}
         key={i}
-        strokeWidth={0.5}
         strokeDasharray={
-          i !== 0 && i !== length
-            ? strokeDasharray(gridUnitSize, i % 2 ? unitSize : unitSize)
-            : 0
+          i !== 0 && i !== gridCols ? strokeDasharray(cellHeight) : 0
         }
-        strokeDashoffset={0}
+        strokeDashoffset={-gapSize / 2}
         stroke={
           i % unitSize === 0 ? "#aaaaaa" : i % 2 === 0 ? "#777777" : "#555555"
         }
       />
     ));
   }, [
-    numCols,
-    unitSize,
+    gridCols,
     gridCellSize,
-    gapSize,
-    height,
+    containerHeight,
     strokeDasharray,
-    gridUnitSize,
+    cellHeight,
+    gapSize,
+    unitSize,
   ]);
 
   const HorizontalLines = useCallback(() => {
-    return Array.from({ length: (numRows * ratio) / unitSize + 1 }).map(
-      (_, i) => (
-        <line
-          y1={(i * gridCellSize) / ratio + 1}
-          y2={(i * gridCellSize) / ratio + 1}
-          x1={gapSize / 2}
-          x2={width}
-          key={i}
-          strokeWidth={0.5}
-          strokeDasharray={strokeDasharray(
-            gridUnitSize,
-            i % 2 ? unitSize : unitSize
-          )}
-          strokeDashoffset={0}
-          stroke={
-            i % unitSize === 0 ? "#aaaaaa" : i % 2 === 0 ? "#777777" : "#555555"
-          }
-        />
-      )
-    );
+    return Array.from({ length: gridRows + 1 }).map((_, i) => (
+      <line
+        y1={i * cellHeight}
+        y2={i * cellHeight}
+        x1={0}
+        x2={width}
+        key={i}
+        strokeDashoffset={-gapSize / 2}
+        strokeDasharray={
+          i !== 0 && i !== gridRows ? strokeDasharray(gridCellSize) : 0
+        }
+        stroke={
+          i % unitSize === 0 ? "#aaaaaa" : i % 2 === 0 ? "#777777" : "#555555"
+        }
+      />
+    ));
   }, [
-    numRows,
-    ratio,
-    unitSize,
-    gridCellSize,
-    gapSize,
+    gridRows,
+    cellHeight,
     width,
+    gapSize,
     strokeDasharray,
-    gridUnitSize,
+    gridCellSize,
+    unitSize,
   ]);
 
   const Vertexs = () => {
-    return Array.from({ length: numCols / unitSize }).map((_, i) =>
-      Array.from({ length: (numRows * ratio) / unitSize }).map((_, j) => (
+    return Array.from({ length: gridCols - 1 }).map((_, i) =>
+      Array.from({ length: gridRows }).map((_, j) => (
         <Vertex
           key={`${i}-${j}`}
-          position={[(i + 1) * gridCellSize, ((j + 1) * gridCellSize) / ratio]}
+          position={[(i + 1) * gridCellSize, (j + 1) * cellHeight]}
           size={vertexSize}
           fill={
             (i + 1) % unitSize === 0 && (j + 1) % unitSize === 0

@@ -39,8 +39,7 @@ export const useCMSStoreInitializer = (
 
   const initialize = store.getInitialState().initialize;
   useEffect(() => {
-    console.log(initialLoad.get());
-    if (initialLoad.get()) {
+    if (initialLoad.get() && initialize) {
       initialize();
       initialLoad.set(false);
     }
@@ -156,6 +155,7 @@ export function isAnimationControls(
   const animationControls = animate as AnimationControls;
 
   return (
+    typeof animationControls !== "string" &&
     animationControls !== undefined &&
     "mount" in animationControls &&
     "start" in animationControls

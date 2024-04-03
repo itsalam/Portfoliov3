@@ -3,7 +3,6 @@
 import { GridContext } from "@/lib/state";
 import { cn } from "@/lib/utils";
 import { Text, Tooltip } from "@radix-ui/themes";
-import "@radix-ui/themes/styles.css";
 import {
   MotionValue,
   motion,
@@ -122,7 +121,7 @@ export default function MenuCard(props: ComponentProps<typeof Card>) {
     Work: { icon: Briefcase, cards: [CARD_TYPES.Experience] },
     Info: {
       icon: Users,
-      cards: [CARD_TYPES.Contacts, CARD_TYPES.Location, CARD_TYPES.Resume],
+      cards: [CARD_TYPES.Resume, CARD_TYPES.Location, CARD_TYPES.Contacts],
     },
   };
 

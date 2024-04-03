@@ -7,6 +7,7 @@ import { SchemaStores, createCMSSlices } from "./fetchData";
 export type Dimensions = {
   width: number;
   height: number;
+  containerHeight: number;
 };
 
 export type GridInfo = {
@@ -17,7 +18,6 @@ export type GridInfo = {
   gridCellSize: number;
   gridUnitSize: number;
   vertexSize: number;
-  gapRatio: number;
   gapSize: number;
   oldVals?: Omit<GridInfo, "oldVals"> | null;
   bounds: { left: number; right: number; top: number; bottom: number };
@@ -25,6 +25,7 @@ export type GridInfo = {
 
 const NUM_COLS = 48;
 export const CELL_SIZE = 4;
+const VERTEX_SIZE = 9;
 
 export const DEFAULT_COORDS: [number, number] = [1, 1];
 
@@ -68,7 +69,7 @@ export const DEFAULT_GRID_ELEMENTS: Record<CARD_TYPES, GridElement> = {
     id: CARD_TYPES.Location,
     coords: DEFAULT_COORDS,
     isLocked: false,
-    width: 3,
+    width: 2.75,
     height: 2,
   },
   Status: {
@@ -82,30 +83,28 @@ export const DEFAULT_GRID_ELEMENTS: Record<CARD_TYPES, GridElement> = {
     id: CARD_TYPES.Resume,
     coords: DEFAULT_COORDS,
     isLocked: false,
-    width: 5,
-    height: 5,
+    width: 4.0,
+    height: 5.0,
   },
 };
 
 const getGridProps = (dimensions: Dimensions): Omit<GridInfo, "oldVals"> => {
-  const { width, height } = dimensions;
-  const ratio = width / height || 2;
-  console.log(ratio);
-  const gridUnitSize = Math.round(width / NUM_COLS);
+  const { width, containerHeight, height } = dimensions;
+  const ratio = Math.floor((width / height) * CELL_SIZE) / CELL_SIZE;
+  const gridUnitSize = width / NUM_COLS;
   // const gridCellHeight = Math.round(height / NUM_ROWS);
-  const gridCellSize = Math.round(gridUnitSize * CELL_SIZE);
+  const gridCellSize = gridUnitSize * CELL_SIZE;
   // const gridUnitHeight = Math.round(gridCellHeight * UNIT_SIZE);
 
   return {
     unitSize: CELL_SIZE,
     ratio,
     numCols: NUM_COLS,
-    numRows: Math.floor(height / gridUnitSize),
+    numRows: Math.floor(containerHeight / gridUnitSize),
     gridCellSize,
     gridUnitSize,
-    vertexSize: 9,
-    gapRatio: 0.8,
-    gapSize: (1 + 0.8) * 9, //fix this later
+    vertexSize: VERTEX_SIZE,
+    gapSize: 2 * VERTEX_SIZE, //fix this later
     bounds: {
       left: 0,
       right: width,
@@ -130,7 +129,7 @@ export type GridStore = {
   initElements: GridElement[];
   pushElements: (ids: CARD_TYPES[]) => void;
   lockElements: (ids: CARD_TYPES[]) => void;
-  setDimensions: (update: Dimensions) => void;
+  setDimensions: (update: Partial<Dimensions>) => void;
   closeElements: (ids: CARD_TYPES[]) => void;
   updateDimensions: () => void;
 };
@@ -158,11 +157,11 @@ export const useGridStore = createStore<GridStore>()((set, get) => {
     const dimensions = {
       width: typeof window !== "undefined" ? window.innerWidth : 0,
       height: typeof window !== "undefined" ? window.innerHeight : 0,
+      containerHeight: typeof window !== "undefined" ? window.innerHeight : 0,
     } as Dimensions;
     return dimensions;
   };
   const dimensions = updateDimensions();
-  console.log(getGridProps(dimensions));
   return {
     listener: null,
     addListener: (listener: GridElementListener) => {
@@ -190,14 +189,18 @@ export const useGridStore = createStore<GridStore>()((set, get) => {
     updateDimensions: () => {
       get().setDimensions(updateDimensions());
     },
-    setDimensions: (dimensions: Dimensions) => {
+    setDimensions: (dimensions: Partial<Dimensions>) => {
       const oldDimensions = get().dimensions;
-      const newVals = getGridProps(dimensions);
+      const fullDimensions = { ...oldDimensions, ...dimensions } as Dimensions;
+      const newVals = getGridProps(fullDimensions);
       const oldVals = getGridProps(oldDimensions);
       const root = document.documentElement;
       root.style.setProperty("--cell-size", `${newVals.gridCellSize}px`);
       root.style.setProperty("--cell-padding", `${newVals.gapSize / 4}px`);
-      set(() => ({ dimensions, gridInfo: { ...newVals, oldVals } }));
+      set(() => ({
+        dimensions: fullDimensions,
+        gridInfo: { ...newVals, oldVals },
+      }));
     },
   };
 });

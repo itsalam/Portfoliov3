@@ -21,6 +21,7 @@ const nextConfig = {
       test: /\.glsl$/,
       loader: "raw-loader",
     });
+    config.resolve.alias.canvas = false;
 
     // Important: return the modified config
     return config;

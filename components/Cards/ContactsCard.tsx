@@ -1,6 +1,5 @@
 "use client";
 
-import { TitleCard } from "@/components/Card";
 import { cn } from "@/lib/utils";
 import { Separator as BaseSeparator, Text as BaseText } from "@radix-ui/themes";
 import {
@@ -24,7 +23,6 @@ import {
   forwardRef,
   useState,
 } from "react";
-import { CARD_TYPES } from "./types";
 
 const Text = motion(BaseText);
 const Separator = motion(BaseSeparator);
@@ -135,15 +133,10 @@ export default function ContactCard(props: ComponentProps<typeof motion.div>) {
     : motion(MessageCircleQuestion);
 
   return (
-    <TitleCard
+    <motion.div
       {...rest}
-      containerClassName={cn(className)}
-      className={cn("relative flex flex-1 items-center gap-3 p-3")}
-      title={CARD_TYPES.Contacts}
+      className={cn("relative flex flex-1 items-center gap-3 p-3", className)}
       ref={projectsRef}
-      initial="initial"
-      id={CARD_TYPES.Contacts}
-      key={CARD_TYPES.Contacts}
     >
       <motion.div className="my-auto flex-1 rounded-full px-4">
         <motion.div
@@ -177,7 +170,7 @@ export default function ContactCard(props: ComponentProps<typeof motion.div>) {
       <div className="relative flex flex-1 flex-col justify-center gap-2">
         {Object.entries(CONTACTS).map(([key, { value }], i) => (
           <Link
-            key={i}
+            key={key}
             text={key}
             value={value}
             onHoverStart={() => {
@@ -186,6 +179,6 @@ export default function ContactCard(props: ComponentProps<typeof motion.div>) {
           />
         ))}
       </div>
-    </TitleCard>
+    </motion.div>
   );
 }

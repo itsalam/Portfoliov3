@@ -13,27 +13,22 @@ const Overlay: React.FC = () => {
   const dimensions = useStore(store!).dimensions;
 
   useEffect(() => {
-    const handleWindowSizeChange = () => {
-      const { width, height } = dimensions;
-      setScreenString(`${width} x ${height}`);
-    };
-    handleWindowSizeChange();
-    window.addEventListener("resize", handleWindowSizeChange);
-    return () => window.removeEventListener("resize", handleWindowSizeChange);
+    const { width, containerHeight } = dimensions;
+    setScreenString(`${width.toFixed()} x ${containerHeight.toFixed()}`);
   }, [dimensions]);
 
   return (
-    <nav className="w-screen h-screen fixed left-0 z-0">
-      <div className="absolute  top-g-2/8  right-g-2/8 font-favorit">
-        <Text className="w-full text-right block" size={{ xl: "5", md: "2" }}>
+    <nav className="fixed left-0 z-0 h-screen w-screen">
+      <div className="top-g-2/8  right-g-2/8  absolute font-favorit">
+        <Text className="block w-full text-right" size={{ xl: "5", md: "2" }}>
           {currentDate}
         </Text>
-        <Text className="w-full text-right block" size={{ xl: "5", md: "2" }}>
+        <Text className="block w-full text-right" size={{ xl: "5", md: "2" }}>
           <Clock />
         </Text>
       </div>
       <Text
-        className="absolute text-right right-g-2/8 bottom-g-2/8 font-favorit"
+        className="right-g-2/8 bottom-g-2/8 absolute text-right font-favorit"
         size={{ xl: "5", md: "2" }}
       >
         {screenString}

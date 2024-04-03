@@ -1,11 +1,9 @@
 "use client";
 
-import { TitleCard } from "@/components/Card";
 import { maskScrollArea } from "@/lib/clientUtils";
 import { CMSContext } from "@/lib/state";
 import { cn, formatDate } from "@/lib/utils";
 import { ScrollArea, Separator, Text } from "@radix-ui/themes";
-import "@radix-ui/themes/styles.css";
 import { motion, useAnimate } from "framer-motion";
 import {
   ComponentProps,
@@ -16,12 +14,11 @@ import {
   useRef,
 } from "react";
 import { useStore } from "zustand";
-import { CARD_TYPES } from "./types";
 
 export default function ExperienceCard(
   props: ComponentProps<typeof motion.div>
 ) {
-  const { className, ...rest } = props;
+  const { ...rest } = props;
   const [cardRef] = useAnimate();
   const containerRef = useRef<HTMLDivElement>(null);
   const cms = useContext(CMSContext)!;
@@ -40,15 +37,11 @@ export default function ExperienceCard(
   });
 
   return (
-    <TitleCard
+    <motion.div
       {...rest}
-      containerClassName={cn(className)}
       className={cn("relative flex h-full flex-col")}
-      title={CARD_TYPES.Experience}
       ref={cardRef}
       initial="initial"
-      id={CARD_TYPES.Experience}
-      key={CARD_TYPES.Experience}
     >
       <ScrollArea
         onScroll={handleScroll}
@@ -101,6 +94,6 @@ export default function ExperienceCard(
           </div>
         ))}
       </ScrollArea>
-    </TitleCard>
+    </motion.div>
   );
 }

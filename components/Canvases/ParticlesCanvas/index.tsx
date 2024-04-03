@@ -1,6 +1,5 @@
 "use client";
 
-import { Stats } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 // import { GUI } from "dat.gui";
 import { useCallback, useEffect, useMemo, useRef } from "react";
@@ -366,7 +365,7 @@ const ParticleCanvas = () => {
     <Canvas
       id="particle-canvas"
       style={{ position: "absolute" }}
-      className="z-0 opacity-80 left-0"
+      className="left-0 z-0 opacity-80"
       gl={{ antialias: true, alpha: true, autoClear: false }}
       camera={{
         position: [0, 0, 5],
@@ -374,7 +373,7 @@ const ParticleCanvas = () => {
       }}
     >
       <ParticleScene />
-      <Stats />
+      {/* <Stats /> */}
     </Canvas>
   );
 };

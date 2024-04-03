@@ -94,7 +94,6 @@ const Track = (
       const track = trackRef.current;
       const elem = track?.children[index];
       const container = containerRef.current;
-      console.log({ elem, track, container, dragRef });
       if (elem && track && container && !dragRef.current) {
         setTrackDist(
           track.getBoundingClientRect().x -
@@ -151,10 +150,7 @@ const Track = (
           startDrag.current = e.clientX;
         }}
         onMouseLeave={() => {
-          console.log(!startDrag.current, clickedIndex.current);
           if (!startDrag.current && clickedIndex.current !== -1) {
-            console.log(!startDrag.current, clickedIndex.current);
-
             panToElement(clickedIndex.current)();
           }
         }}
@@ -174,7 +170,7 @@ const Track = (
               x: springDist,
             } as MotionStyle
           }
-          className={cn("track relative flex items-start gap-g-2/8", {})}
+          className={cn("track gap-g-2/8 relative flex items-start", {})}
           suppressHydrationWarning
           id="track"
           variants={{

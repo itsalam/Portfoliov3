@@ -1,6 +1,5 @@
 "use client";
 
-import { TitleCard } from "@/components/Card";
 import { AnimateText, AnimatedText } from "@/components/TextEffects";
 import { Project } from "@/lib/fetchData";
 import { CMSContext } from "@/lib/state";
@@ -23,12 +22,11 @@ import { useStore } from "zustand";
 import { BackButton } from "../Buttons/BackButton";
 import { LinkButton } from "../Buttons/LinkButton";
 import Track from "../Track";
-import { CARD_TYPES } from "./types";
 
 const MotionBadge = motion(Badge);
 
 export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
-  const { className, ...rest } = props;
+  const { ...rest } = props;
   const projectsRef = useRef(null);
   const textBodyControls = useAnimationControls();
   const trackControls = useAnimationControls();
@@ -41,9 +39,6 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
   const projects = useStore(cms, (cms) => cms.projects ?? []);
 
   const DEFAULT_TEXT = "Scroll or drag to navigate.";
-
-  console.log(projects);
-
   const ProjectTitle = useCallback(
     (props: Omit<ComponentProps<typeof AnimatedText>, "textChild">) => {
       const Title: FC<{ className?: string; text: string }> = ({
@@ -119,14 +114,12 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
   };
 
   return (
-    <TitleCard
+    <motion.div
       {...rest}
-      containerClassName={cn(className)}
-      className={cn("relative flex flex-1 flex-col justify-start gap-2 p-4")}
-      title={CARD_TYPES.Projects}
+      className={cn(
+        "relative flex h-full flex-1 flex-col justify-start gap-2 p-4"
+      )}
       ref={projectsRef}
-      id={CARD_TYPES.Projects}
-      key={CARD_TYPES.Projects}
       onHoverEnd={() => changeFocusTitle(selectedProject)}
     >
       <Track
@@ -148,7 +141,7 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
             key={index}
             custom={index}
             className={cn(
-              "track-card w-g-3 group relative h-full cursor-pointer overflow-hidden rounded-sm p-0 duration-300"
+              "track-card group relative h-full cursor-pointer overflow-hidden rounded-sm p-0 duration-300"
             )}
             onHoverStart={handleProjectHover(project)}
             onClick={() => !dragRef.current && changeSelectedProject(project)}
@@ -243,6 +236,6 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
           </AnimatePresence>
         </div>
       </motion.div>
-    </TitleCard>
+    </motion.div>
   );
 }

@@ -1,5 +1,4 @@
 import { Theme } from "@radix-ui/themes";
-import "@radix-ui/themes/styles.css";
 import "mapbox-gl/dist/mapbox-gl.css";
 import React from "react";
 import "./globals.css";

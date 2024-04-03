@@ -2,7 +2,6 @@
 
 import { cn } from "@/lib/utils";
 import { Text as RadixText } from "@radix-ui/themes";
-import "@radix-ui/themes/styles.css";
 import { AnimatePresence, Variants, motion } from "framer-motion";
 import React, {
   ComponentProps,

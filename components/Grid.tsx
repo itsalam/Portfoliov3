@@ -6,7 +6,7 @@ import {
   GridContext,
   GridInfo,
 } from "@/lib/state";
-import "@radix-ui/themes/styles.css";
+import { ScrollArea } from "@radix-ui/themes";
 import {
   AnimatePresence,
   motion,
@@ -20,15 +20,16 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import { useStore } from "zustand";
 import GridBackdrop from "./Backdrop";
-import Card from "./Card";
+import Card, { TitleCard } from "./Card";
+import LoadingCard from "./Cards/LoadingCard";
 import { CARD_TYPES } from "./Cards/types";
 import {
   GridElement,
-  elementInBounds,
   placeNewRect,
   resolveIntersections,
 } from "./util/gridUtil";
@@ -37,22 +38,64 @@ const cardMap: Record<
   CARD_TYPES,
   ComponentType<ComponentProps<typeof Card>>
 > = {
-  Home: dynamic(() => import("./Cards/HeroCard")),
-  Menu: dynamic(() => import("./Cards/MenuCard")),
-  Projects: dynamic(() => import("./Cards/ProjectsCard")),
-  Experience: dynamic(() => import("./Cards/ExperienceCard")),
-  Contacts: dynamic(() => import("./Cards/ContactsCard")),
-  Location: dynamic(() => import("./Cards/LocationCard")),
-  Status: dynamic(() => import("./Cards/StatusCard")),
-  Resume: dynamic(() => import("./Cards/ResumeCard")),
+  Home: dynamic(() => import("./Cards/HeroCard"), {
+    loading: (props) => <LoadingCard {...props} />,
+    ssr: false,
+  }),
+  Menu: dynamic(() => import("./Cards/MenuCard"), {
+    loading: (props) => <LoadingCard {...props} />,
+    ssr: false,
+  }),
+  Projects: dynamic(() => import("./Cards/ProjectsCard"), {
+    loading: (props) => <LoadingCard {...props} />,
+    ssr: false,
+  }),
+  Experience: dynamic(() => import("./Cards/ExperienceCard"), {
+    loading: (props) => <LoadingCard {...props} />,
+    ssr: false,
+  }),
+  Contacts: dynamic(() => import("./Cards/ContactsCard"), {
+    loading: (props) => <LoadingCard {...props} />,
+    ssr: false,
+  }),
+  Location: dynamic(() => import("./Cards/LocationCard"), {
+    loading: (props) => <LoadingCard {...props} />,
+    ssr: false,
+  }),
+  Status: dynamic(() => import("./Cards/StatusCard"), {
+    loading: (props) => <LoadingCard {...props} />,
+    ssr: false,
+  }),
+  Resume: dynamic(() => import("./Cards/ResumeCard"), {
+    loading: (props) => <LoadingCard {...props} />,
+    ssr: false,
+  }),
 };
+
+// const cardMap: Record<
+//   CARD_TYPES,
+//   ComponentType<ComponentProps<typeof Card>>
+// > = {
+//   Home: HeroCard,
+//   Menu: MenuCard,
+//   Projects: ProjectsCard,
+//   Experience: ExperienceCard,
+//   Contacts: ContactCard,
+//   Location: LocationCard,
+//   Status: StatusCard,
+//   Resume: ResumeCard,
+// };
 
 const Grid = () => {
   const context = useContext(GridContext)!;
   const [ref, animate] = useAnimate<HTMLDivElement>();
   const animation = useAnimation();
-  const { initElements, addListener } = context.getInitialState();
-  const { gridInfo } = useStore(context);
+  const { initElements, addListener, setDimensions } =
+    context.getInitialState();
+  const { gridInfo, dimensions } = useStore(context);
+  const gridInfoRef = useRef(gridInfo);
+  const dimensionsRef = useRef(dimensions);
+  const [gridHeight, setGridHeight] = useState<number>(dimensions.height);
   const [gridElements, setGridElements] = useState<
     Map<CARD_TYPES, GridElement>
   >(
@@ -93,7 +136,6 @@ const Grid = () => {
           elem = placeNewRect(elem, gridElements, gridInfo);
           gridElements.set(id, { ...elem, hasPositioned: true });
           resolveIntersections(elem, gridElements, gridInfo, true);
-          setGridElements(new Map(gridElements));
         } else {
           const initElem = DEFAULT_GRID_ELEMENTS[id];
           gridElements.set(id, {
@@ -106,8 +148,8 @@ const Grid = () => {
             height: initElem.height * gridCellSize,
           });
         }
-        setGridElements(new Map(gridElements));
       });
+      setGridElements(new Map(gridElements));
     };
 
   const lockElements =
@@ -133,6 +175,7 @@ const Grid = () => {
     };
 
   useEffect(() => {
+    const gridInfo = gridInfoRef.current;
     const removeListener = addListener({
       dispatch: setGridElements,
       pushElements: pushElements(gridInfo, gridElements),
@@ -140,9 +183,10 @@ const Grid = () => {
       closeElements: closeElements(gridElements),
     });
     return () => removeListener();
-  }, [addListener, gridInfo, gridElements]);
+  }, [addListener, gridElements]);
 
   useEffect(() => {
+    const gridInfo = gridInfoRef.current;
     const elemArrs = Array.from(gridElements.values());
     const unPositionedElements = elemArrs.filter((e) => !e.hasPositioned);
     //check for new rects by checking unPoistionedRects
@@ -175,9 +219,9 @@ const Grid = () => {
         gridElements.set(newGridElem.id, newGridElem);
         return newGridElem;
       });
-      const closingElems = Array.from(gridElements.values())
-        .filter((e) => !elementInBounds(e, gridInfo))
-        .map(({ id }) => id);
+      // const closingElems = Array.from(gridElements.values())
+      //   .filter((e) => !elementInBounds(e, gridInfo))
+      //   .map(({ id }) => id);
 
       if (newRects.length) {
         newRects.forEach((e) =>
@@ -185,30 +229,44 @@ const Grid = () => {
         );
         setGridElements(new Map(gridElements));
       }
-      // });
     }
-  }, [gridElements, animate, animation, gridInfo]);
+    if (elemArrs.length) {
+      const tallestElem = elemArrs.reduce((acc, curr) =>
+        acc.height + acc.coords[1] > curr.height + curr.coords[1] ? acc : curr
+      );
+      setGridHeight(
+        tallestElem.height + tallestElem.coords[1] + gridInfo.gridCellSize
+      );
+    }
+  }, [gridElements, animate, animation]);
+
+  useEffect(() => {
+    console.log(gridHeight);
+    setDimensions({
+      containerHeight: Math.max(dimensionsRef.current.height, gridHeight),
+    });
+  }, [gridHeight, setDimensions]);
 
   const GCard = useCallback(
     (props: { gridElement: GridElement; gridInfo: GridInfo }) => {
       const { id, coords, width, height, isLocked } = props.gridElement;
-      const { gridCellSize, bounds } = props.gridInfo;
-      const MappedCard = cardMap[id];
+      const { gridUnitSize, bounds } = props.gridInfo;
+      const CardContent = cardMap[id];
       const dragTransition = {
         power: 0.08,
         min: 0,
-        max: 100,
-        restDelta: 5,
+        max: 40,
+        restDelta: 20,
         modifyTarget: (target: number) =>
-          Math.round(target / gridCellSize) * gridCellSize,
+          Math.round(target / gridUnitSize) * gridUnitSize,
       };
-
       return (
-        <MappedCard
+        <TitleCard
+          title={id}
           dragConstraints={{
             ...bounds,
-            right: gridInfo.bounds.right - width,
-            bottom: gridInfo.bounds.bottom - height,
+            right: bounds.right - width,
+            bottom: bounds.bottom - height,
           }}
           width={width}
           height={height}
@@ -216,20 +274,12 @@ const Grid = () => {
           key={id}
           id={id}
           dragTransition={dragTransition}
-          animate={{
-            x: [null, coords[0]],
-            y: [null, coords[1]],
-            transition: {
-              duration: 0.1,
-            },
-          }}
+          x={coords[0]}
+          y={coords[1]}
           isLocked={isLocked}
-          exit={{
-            opacity: 0,
-            width: 0,
-            height: 0,
-          }}
-        />
+        >
+          <CardContent />
+        </TitleCard>
       );
     },
     []
@@ -239,23 +289,30 @@ const Grid = () => {
     <motion.div
       ref={ref}
       id="grid"
-      className="relative z-10 h-full w-full overflow-visible"
+      className="relative z-10 h-full w-full overflow-scroll"
       animate={animation}
     >
-      <AnimatePresence>
-        {[...gridElements.values()]
-          .filter((e) => e.hasPositioned)
-          .map((gridElement) => {
-            return (
-              <GCard
-                key={gridElement.id}
-                gridElement={gridElement}
-                gridInfo={gridInfo}
-              />
-            );
-          })}
-      </AnimatePresence>
-      <GridBackdrop gridInfo={gridInfo} />
+      <ScrollArea>
+        <motion.div
+          className="relative h-full w-full"
+          style={{
+            height: dimensions.containerHeight,
+          }}
+        >
+          <AnimatePresence>
+            {[...gridElements.values()].map((gridElement) => {
+              return (
+                <GCard
+                  key={gridElement.id}
+                  gridElement={gridElement}
+                  gridInfo={gridInfo}
+                />
+              );
+            })}
+          </AnimatePresence>
+          <GridBackdrop gridInfo={gridInfo} />
+        </motion.div>
+      </ScrollArea>
     </motion.div>
   );
 };

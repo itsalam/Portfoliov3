@@ -13,7 +13,7 @@ const GridBackdrop: FC<{ gridInfo: GridInfo }> = () => {
       animate="view"
       initial="initial"
       viewport={{ once: true }}
-      className="-z-50 absolute h-full w-full left-0"
+      className="relative left-0 -z-50 h-full w-full"
     >
       <GridMask />
     </motion.div>

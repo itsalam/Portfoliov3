@@ -82,12 +82,6 @@ export const resolveIntersections = (
           );
           gridElements.set(displacedRect.id, displacedRect);
           hasIntersections = true;
-          console.log(
-            elem.id,
-            displacedRect.id,
-            swap,
-            JSON.parse(JSON.stringify([...elems.values()]))
-          );
           resolveIntersections(displacedRect, gridElements, gridInfo, swap);
 
           return displacedRect;
@@ -115,7 +109,7 @@ const placeNewPosition = (
     bounds.right;
   element.coords[0] = wrapElement
     ? bounds.left + gridUnitSize
-    : displacingElem.coords[0] + displacingElem.width + gridUnitSize;
+    : displacingElem.coords[0] + displacingElem.width + gridUnitSize + 1;
 
   if (wrapElement) {
     const vertConflicting = elemArrs.filter(

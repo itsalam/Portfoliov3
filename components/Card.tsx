@@ -4,7 +4,6 @@ import { isAnimationControls } from "@/lib/clientUtils";
 import { GridContext } from "@/lib/state";
 import { cn } from "@/lib/utils";
 import { Separator, Text } from "@radix-ui/themes";
-import "@radix-ui/themes/styles.css";
 import {
   AnimationControls,
   PanInfo,
@@ -17,7 +16,6 @@ import {
 import { Lock, LockOpen, X } from "lucide-react";
 import {
   CSSProperties,
-  ComponentProps,
   ComponentPropsWithoutRef,
   ElementRef,
   PointerEvent,
@@ -34,12 +32,13 @@ const Card = forwardRef<
   ComponentPropsWithoutRef<typeof motion.div> & {
     width?: number;
     height?: number;
+    x?: number;
+    y?: number;
     close?: () => void;
     isLocked?: boolean;
   }
 >((props, ref) => {
-  const { animate, className, children, id, width, height, isLocked, ...rest } =
-    props;
+  const { animate, x, y, className, children, id, isLocked, ...rest } = props;
   const [initialLoad, setInitialLoad] = useState(true);
   const defaultAnimationControls = useAnimationControls();
   const animationControls = useRef<AnimationControls>(
@@ -54,6 +53,8 @@ const Card = forwardRef<
         animationControls.current.start(
           animate as VariantLabels | TargetAndTransition
         );
+      } else {
+        animationControls.current.start("animate");
       }
     }
     if (initialLoad) {
@@ -62,25 +63,23 @@ const Card = forwardRef<
     }
   }, [initialLoad, animate]);
 
+  useEffect(() => {
+    if (x !== undefined && y !== undefined) {
+      animationControls.current.start({
+        x: [null, x],
+        y: [null, y],
+        transition: {
+          duration: 0.1,
+        },
+      });
+    }
+  }, [x, y]);
+
   return (
     <motion.div
       initial={{
         width: 0,
         height: 0,
-      }}
-      variants={{
-        close: {
-          opacity: 0,
-          width: 0,
-        },
-        open: {
-          width: [0, width, width],
-          height: [24, 24, height],
-          opacity: [0, 1, 1],
-          transition: {
-            duration: 0.466,
-          },
-        },
       }}
       drag={!isLocked}
       className={cn("card absolute origin-top-left transition-all", className)}
@@ -97,20 +96,19 @@ Card.displayName = "Card";
 
 export const TitleCard = forwardRef<
   ElementRef<typeof Card>,
-  ComponentPropsWithoutRef<typeof Card> & {
-    containerClassName?: string;
-    containerAnimation?: ComponentProps<typeof motion.div>["animate"];
-  }
+  ComponentPropsWithoutRef<typeof Card>
 >((props, ref) => {
   const {
-    containerAnimation,
-    containerClassName,
     className,
     id,
     children,
     title,
     isLocked,
     onDragEnd,
+    width,
+    height,
+    x,
+    y,
     ...rest
   } = props;
   const dragControls = useDragControls();
@@ -169,7 +167,6 @@ export const TitleCard = forwardRef<
         "border-[1px] border-[--sage-a3] bg-[--sage-a2]",
         "backdrop-blur-sm backdrop-brightness-50",
         "hover:border-[--sage-10] hover:bg-[--sage-a4] hover:backdrop-brightness-75",
-        containerClassName,
         {
           "border-[--sage-12]": isDrag,
         }
@@ -180,6 +177,36 @@ export const TitleCard = forwardRef<
       onDragEnd={endDrag}
       id={id}
       isLocked={isLocked}
+      variants={{
+        animate: {
+          x: [null, x ?? 0],
+          y: [null, y ?? 0],
+          transition: {
+            duration: 0.1,
+          },
+        },
+        close: {
+          opacity: 0,
+          width: 0,
+        },
+        open: {
+          width: [0, width, width],
+          height: [24, 24, height],
+          opacity: [0, 1, 1],
+          transition: {
+            duration: 0.466,
+          },
+        },
+        exit: {
+          opacity: 0,
+          width: 0,
+          height: 0,
+        },
+      }}
+      width={width}
+      height={height}
+      x={x}
+      y={y}
       {...rest}
     >
       <motion.div
@@ -220,10 +247,7 @@ export const TitleCard = forwardRef<
           </Button>
         </div>
       </motion.div>
-      <motion.div
-        className={cn(className, "z-30 overflow-hidden")}
-        animate={containerAnimation}
-      >
+      <motion.div className={cn(className, "z-30 h-[inherit] overflow-hidden")}>
         {children}
       </motion.div>
     </Card>

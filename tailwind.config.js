@@ -116,7 +116,7 @@ module.exports = {
         "accordion-up": "accordion-up 0.2s ease-out",
       },
       fontSize: {
-        grid: ["var(--grid-height)", "var(--grid-height)"],
+        grid: ["var(--cell-size)", "var(--cell-size)"],
       },
       ...propertyUtilities(["padding", "margin", "height", "width", "spacing"]),
     },

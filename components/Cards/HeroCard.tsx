@@ -1,16 +1,13 @@
 "use client";
 
-import { TitleCard } from "@/components/Card";
 import { AnimateText, RotateText } from "@/components/TextEffects";
 import { cn } from "@/lib/utils";
 import { Text } from "@radix-ui/themes";
-import "@radix-ui/themes/styles.css";
 import { motion, useAnimationControls } from "framer-motion";
 import { ComponentProps, useCallback, useEffect, useRef } from "react";
-import { CARD_TYPES } from "./types";
 
-export default function HeroCard(props: ComponentProps<typeof TitleCard>) {
-  const { className, ...rest } = props;
+export default function HeroCard(props: ComponentProps<typeof motion.div>) {
+  const { ...rest } = props;
   const heroRef = useRef<HTMLDivElement>(null);
 
   const controls = useAnimationControls();
@@ -22,7 +19,7 @@ export default function HeroCard(props: ComponentProps<typeof TitleCard>) {
           controls.start("rotate");
         }, 700);
       });
-    }, 2000);
+    }, 200);
     return () => clearTimeout(timeout);
   }, [controls]);
 
@@ -31,7 +28,7 @@ export default function HeroCard(props: ComponentProps<typeof TitleCard>) {
       y: "100%",
       opacity: 0,
     },
-    animate: {
+    show: {
       y: "0%",
       opacity: 1,
       transition: {
@@ -45,7 +42,7 @@ export default function HeroCard(props: ComponentProps<typeof TitleCard>) {
   const TextRotateBody = useCallback(
     () => (
       <motion.div className="relative flex flex-col gap-1" key="intro">
-        <MText size={"7"} className="relative top-1 mb-4 flex overflow-hidden">
+        <MText size={"7"} className="relative top-1 mb-1 flex overflow-hidden">
           <AnimateText
             size={"4"}
             className="w-min whitespace-nowrap"
@@ -103,22 +100,13 @@ export default function HeroCard(props: ComponentProps<typeof TitleCard>) {
   );
 
   return (
-    <TitleCard
-      containerClassName={cn("flex-col", className)}
-      className={cn("mx-g-2/8 relative my-auto flex flex-col justify-end")}
-      title={CARD_TYPES.Home}
-      containerAnimation={controls}
+    <motion.div
+      className={cn("mx-g-2/8 relative flex h-full flex-col justify-center")}
+      animate={controls}
       ref={heroRef}
       initial="initial"
-      id={CARD_TYPES.Home}
-      key={CARD_TYPES.Home}
-      {...rest}
     >
       <TextRotateBody />
-
-      {/* <Text key="techlist" size={"2"} className="font-favorit py-4 z-30">
-        Stuff I use:
-      </Text> */}
-    </TitleCard>
+    </motion.div>
   );
 }
