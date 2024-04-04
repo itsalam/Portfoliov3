@@ -2,11 +2,12 @@
 
 import { motion } from "framer-motion";
 
-import { GridInfo } from "@/lib/state";
-import { FC } from "react";
+import { FC, RefObject } from "react";
 import GridMask from "./GridMask";
 
-const GridBackdrop: FC<{ gridInfo: GridInfo }> = () => {
+const GridBackdrop: FC<{ scrollAreaRef: RefObject<HTMLDivElement> }> = ({
+  scrollAreaRef,
+}) => {
   return (
     <motion.div
       whileInView={"view"}
@@ -15,7 +16,7 @@ const GridBackdrop: FC<{ gridInfo: GridInfo }> = () => {
       viewport={{ once: true }}
       className="relative left-0 -z-50 h-full w-full"
     >
-      <GridMask />
+      <GridMask scrollAreaRef={scrollAreaRef} />
     </motion.div>
   );
 };

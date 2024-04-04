@@ -2,18 +2,17 @@
 
 import { GridContext } from "@/lib/state";
 import { motion } from "framer-motion";
-import React, { useCallback, useContext, useRef } from "react";
+import React, { useCallback, useContext, useEffect, useRef } from "react";
 import { useStore } from "zustand";
+import { moveCursorEffect } from "../Grid/util";
 import Vertex from "./Vertex";
 
 export type GridProps = {
-  vertexSize?: number;
-  gapRatio?: number;
-  dotsPerGrid?: number;
+  scrollAreaRef: RefObject<HTMLDivElement>;
 };
 
 const GridEffect: React.FC<GridProps> = (props) => {
-  const { ...svgProps } = props;
+  const { scrollAreaRef, ...svgProps } = props;
 
   const store = useContext(GridContext)!;
   const { unitSize, vertexSize, gapSize } = store.getInitialState().gridInfo;
@@ -21,8 +20,7 @@ const GridEffect: React.FC<GridProps> = (props) => {
     store,
     (store) => store.dimensions
   );
-  const { ratio, numRows, numCols, gridCellSize, gridUnitSize } =
-    useStore(store).gridInfo;
+  const { ratio, numRows, numCols, gridCellSize } = useStore(store).gridInfo;
   const ref = useRef<SVGSVGElement>(null);
   const strokeDasharray = useCallback(
     (dimension: number) => {
@@ -34,6 +32,24 @@ const GridEffect: React.FC<GridProps> = (props) => {
   const gridCols = numCols / unitSize;
   const gridRows = (numRows * ratio) / unitSize;
   const cellHeight = gridCellSize / ratio;
+
+  useEffect(() => {
+    const scrollArea = scrollAreaRef.current;
+    if (scrollArea) {
+      const handleScroll = () => {
+        const currentScrollTop = scrollAreaRef.current.scrollTop;
+        if (ref.current) {
+          ref.current.setAttribute("data-offset", currentScrollTop.toString());
+          moveCursorEffect(ref.current);
+        }
+      };
+
+      scrollArea.addEventListener("scroll", handleScroll);
+
+      // Cleanup
+      return () => scrollArea.removeEventListener("scroll", handleScroll);
+    }
+  });
 
   const VerticalLines = useCallback(() => {
     return Array.from({ length: gridCols + 1 }).map((_, i) => (
@@ -108,32 +124,17 @@ const GridEffect: React.FC<GridProps> = (props) => {
     );
   };
 
-  // const Sections = useCallback(() => {
-  //   const sectionGap = gapSize;
-  //   return Array.from({ length: numCols - 1 }).map((_, i) => (
-  //     <Section
-  //       key={i}
-  //       custom={i}
-  //       fill={"#121212"}
-  //       position={[gridWidth * i + gridWidth + sectionGap / 3, 0]}
-  //       height={dimensions.height}
-  //       width={gridWidth - (sectionGap * 2) / 3}
-  //       opacity={0.1}
-  //     />
-  //   ));
-  // }, [dimensions.height, gapSize, gridWidth, numCols]);
-
   return (
     <motion.svg
       id={"mask"}
       {...svgProps}
       ref={ref}
-      className={"z-unitSize0 absolute left-0 top-0 h-full w-full opacity-100"}
+      className={"mask absolute left-0 top-0 z-40 h-full w-full opacity-100"}
+      data-offset={scrollAreaRef.current?.scrollTop ?? 0}
     >
       <VerticalLines />
       <HorizontalLines />
       <Vertexs />
-      {/* </motion.mask> */}
     </motion.svg>
   );
 };

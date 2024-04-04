@@ -27,67 +27,6 @@ const NUM_COLS = 48;
 export const CELL_SIZE = 4;
 const VERTEX_SIZE = 9;
 
-export const DEFAULT_COORDS: [number, number] = [1, 1];
-
-export const DEFAULT_GRID_ELEMENTS: Record<CARD_TYPES, GridElement> = {
-  Home: {
-    id: CARD_TYPES.Home,
-    coords: DEFAULT_COORDS,
-    isLocked: false,
-    width: 5,
-    height: 2,
-  },
-  Menu: {
-    id: CARD_TYPES.Menu,
-    coords: [42, 42],
-    isLocked: true,
-    width: 3,
-    height: 3,
-  },
-  Projects: {
-    id: CARD_TYPES.Projects,
-    coords: DEFAULT_COORDS,
-    isLocked: false,
-    width: 5,
-    height: 3,
-  },
-  Experience: {
-    id: CARD_TYPES.Experience,
-    coords: DEFAULT_COORDS,
-    isLocked: false,
-    width: 5,
-    height: 4,
-  },
-  Contacts: {
-    id: CARD_TYPES.Contacts,
-    coords: DEFAULT_COORDS,
-    isLocked: false,
-    width: 2,
-    height: 1.25,
-  },
-  Location: {
-    id: CARD_TYPES.Location,
-    coords: DEFAULT_COORDS,
-    isLocked: false,
-    width: 2.75,
-    height: 2,
-  },
-  Status: {
-    id: CARD_TYPES.Status,
-    coords: DEFAULT_COORDS,
-    isLocked: false,
-    width: 3.5,
-    height: 3.5,
-  },
-  Resume: {
-    id: CARD_TYPES.Resume,
-    coords: DEFAULT_COORDS,
-    isLocked: false,
-    width: 4.0,
-    height: 5.0,
-  },
-};
-
 const getGridProps = (dimensions: Dimensions): Omit<GridInfo, "oldVals"> => {
   const { width, containerHeight, height } = dimensions;
   const ratio = Math.floor((width / height) * CELL_SIZE) / CELL_SIZE;
@@ -126,7 +65,6 @@ export type GridStore = {
   listener: GridElementListener | null;
   addListener: (dispatch: GridElementListener) => () => void;
   gridInfo: GridInfo;
-  initElements: GridElement[];
   pushElements: (ids: CARD_TYPES[]) => void;
   lockElements: (ids: CARD_TYPES[]) => void;
   setDimensions: (update: Partial<Dimensions>) => void;
@@ -175,7 +113,6 @@ export const useGridStore = createStore<GridStore>()((set, get) => {
     },
     dimensions,
     gridInfo: getGridProps(dimensions),
-    initElements: [CARD_TYPES.Home].map((id) => DEFAULT_GRID_ELEMENTS[id]),
     pushElements: (ids: CARD_TYPES[]) => {
       const { listener } = get();
       listener?.pushElements(ids);

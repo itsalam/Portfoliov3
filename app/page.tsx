@@ -3,7 +3,7 @@
 import Effect from "@/components/Backdrop/Effect";
 import ParticlesCanvas from "@/components/Canvases/ParticlesCanvas";
 import MenuCard from "@/components/Cards/MenuCard";
-import Grid from "@/components/Grid";
+import Grid from "@/components/Grid/Grid";
 import Loading from "@/components/Loading";
 import Overlay from "@/components/Overlay";
 import { useCMSStoreInitializer, useResizeGridUpdate } from "@/lib/clientUtils";

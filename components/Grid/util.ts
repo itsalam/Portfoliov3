@@ -1,5 +1,11 @@
 import { GridInfo } from "@/lib/state";
+import { ReadonlyURLSearchParams } from "next/dist/client/components/navigation";
 import { CARD_TYPES } from "../Cards/types";
+import {
+  DEFAULT_GRID_ELEMENTS,
+  DEFAULT_INIT_ELEMS,
+  GRID_QUERY_KEY,
+} from "./consts";
 
 export type GridElement = {
   id: CARD_TYPES;
@@ -141,4 +147,42 @@ export const elementInBounds = (gridElem: GridElement, gridInfo: GridInfo) => {
     gridElem.coords[1] >= bounds.top &&
     gridElem.coords[1] + gridElem.height <= bounds.bottom
   );
+};
+
+export const initializeGridElements = (
+  gridInfo: GridInfo,
+  searchParams: ReadonlyURLSearchParams
+) => {
+  const searchParamElems = searchParams
+    .get(GRID_QUERY_KEY)
+    ?.split(",") as CARD_TYPES[];
+  const initElements = searchParamElems.every((elem) => CARD_TYPES[elem])
+    ? searchParamElems
+    : DEFAULT_INIT_ELEMS;
+
+  const gridElements = new Map<CARD_TYPES, GridElement>();
+  initElements.forEach((id) => {
+    const e = DEFAULT_GRID_ELEMENTS[id];
+    const { gridUnitSize, gridCellSize } = gridInfo;
+    let gridElem = {
+      ...e,
+      coords: [e.coords[0] * gridUnitSize, e.coords[1] * gridUnitSize],
+      width: e.width * gridCellSize,
+      height: e.height * gridCellSize,
+    } as GridElement;
+
+    gridElem = placeNewRect(gridElem, gridElements, gridInfo);
+    gridElements.set(id, { ...gridElem, hasPositioned: true });
+    resolveIntersections(gridElem, gridElements, gridInfo);
+  });
+
+  return gridElements;
+};
+
+export const moveCursorEffect = (canvas: HTMLElement) => {
+  const yOffset = parseInt(canvas.getAttribute("data-offset") ?? "0");
+  const radius = parseInt(canvas.getAttribute("data-circle-radius") ?? "0");
+  const x = parseInt(canvas.getAttribute("data-circle-x") ?? "0");
+  const y = parseInt(canvas.getAttribute("data-circle-y") ?? "0");
+  canvas.style.maskImage = `radial-gradient(circle ${radius}px at ${x}px ${y + yOffset}px, white, transparent)`;
 };

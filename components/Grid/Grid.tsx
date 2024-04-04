@@ -1,97 +1,45 @@
 "use client";
 
-import {
-  DEFAULT_COORDS,
-  DEFAULT_GRID_ELEMENTS,
-  GridContext,
-  GridInfo,
-} from "@/lib/state";
+import { GridContext, GridInfo } from "@/lib/state";
 import {
   AnimatePresence,
   motion,
   useAnimate,
   useAnimation,
 } from "framer-motion";
-import dynamic from "next/dynamic";
-import {
-  ComponentProps,
-  ComponentType,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { useStore } from "zustand";
-import GridBackdrop from "./Backdrop";
-import Card, { TitleCard } from "./Card";
-import LoadingCard from "./Cards/LoadingCard";
-import { CARD_TYPES } from "./Cards/types";
+import GridBackdrop from "../Backdrop";
+import { TitleCard } from "../Card";
+import { CARD_TYPES } from "../Cards/types";
 // import ScrollArea from "./ScrollArea";
 import { ScrollArea } from "@radix-ui/themes";
 import { debounce } from "lodash";
 import {
+  ReadonlyURLSearchParams,
+  usePathname,
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
+import {
+  DEFAULT_COORDS,
+  DEFAULT_GRID_ELEMENTS,
+  ELEMENT_MAP,
+  GRID_QUERY_KEY,
+} from "./consts";
+import {
   GridElement,
+  initializeGridElements,
   placeNewRect,
   resolveIntersections,
-} from "./util/gridUtil";
-
-const cardMap: Record<
-  CARD_TYPES,
-  ComponentType<ComponentProps<typeof Card>>
-> = {
-  Home: dynamic(() => import("./Cards/HeroCard"), {
-    loading: (props) => <LoadingCard {...props} />,
-    ssr: false,
-  }),
-  Menu: dynamic(() => import("./Cards/MenuCard"), {
-    loading: (props) => <LoadingCard {...props} />,
-    ssr: false,
-  }),
-  Projects: dynamic(() => import("./Cards/ProjectsCard"), {
-    loading: (props) => <LoadingCard {...props} />,
-    ssr: false,
-  }),
-  Experience: dynamic(() => import("./Cards/ExperienceCard"), {
-    loading: (props) => <LoadingCard {...props} />,
-    ssr: false,
-  }),
-  Contacts: dynamic(() => import("./Cards/ContactsCard"), {
-    loading: (props) => <LoadingCard {...props} />,
-    ssr: false,
-  }),
-  Location: dynamic(() => import("./Cards/LocationCard"), {
-    loading: (props) => <LoadingCard {...props} />,
-    ssr: false,
-  }),
-  Status: dynamic(() => import("./Cards/StatusCard"), {
-    loading: (props) => <LoadingCard {...props} />,
-    ssr: false,
-  }),
-  Resume: dynamic(() => import("./Cards/ResumeCard"), {
-    loading: (props) => <LoadingCard {...props} />,
-    ssr: false,
-  }),
-};
-
-// const cardMap: Record<
-//   CARD_TYPES,
-//   ComponentType<ComponentProps<typeof Card>>
-// > = {
-//   Home: HeroCard,
-//   Menu: MenuCard,
-//   Projects: ProjectsCard,
-//   Experience: ExperienceCard,
-//   Contacts: ContactCard,
-//   Location: LocationCard,
-//   Status: StatusCard,
-//   Resume: ResumeCard,
-// };
+} from "./util";
 
 const Grid = () => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const context = useContext(GridContext)!;
-  const { initElements, addListener, setDimensions } =
-    context.getInitialState();
+  const { addListener, setDimensions } = context.getInitialState();
   const { gridInfo, dimensions } = useStore(context);
   const [ref, animate] = useAnimate<HTMLDivElement>();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -100,26 +48,16 @@ const Grid = () => {
   const [lowestElem, setLowestElem] = useState<GridElement>();
   const [gridElements, setGridElements] = useState<
     Map<CARD_TYPES, GridElement>
-  >(
-    new Map<CARD_TYPES, GridElement>(
-      initElements.map((e) => {
-        const { gridUnitSize, gridCellSize } = gridInfo;
-        const x = e.coords[0] * gridUnitSize,
-          y = e.coords[1] * gridUnitSize,
-          width = e.width * gridCellSize,
-          height = e.height * gridCellSize;
-        return [
-          e.id,
-          {
-            ...e,
-            coords: [x, y],
-            hasPositioned: true,
-            width,
-            height,
-          },
-        ] as [CARD_TYPES, GridElement];
-      })
-    )
+  >(initializeGridElements(gridInfo, searchParams));
+
+  const createQueryString = useCallback(
+    (name: string, value: string, searchParams: ReadonlyURLSearchParams) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set(name, value);
+
+      return params.toString();
+    },
+    []
   );
 
   const animation = useAnimation();
@@ -208,6 +146,17 @@ const Grid = () => {
   }, [addListener, gridElements, pushElements]);
 
   useEffect(() => {
+    const queryStr = gridElements.size
+      ? createQueryString(
+          GRID_QUERY_KEY,
+          [...gridElements.keys()].join(","),
+          searchParams
+        )
+      : "";
+    router.push(pathname + "?" + queryStr);
+  }, [createQueryString, gridElements, pathname, router, searchParams]);
+
+  useEffect(() => {
     const gridInfo = gridInfoRef.current;
     const elemArrs = Array.from(gridElements.values());
     const unPositionedElements = elemArrs.filter((e) => !e.hasPositioned);
@@ -251,8 +200,6 @@ const Grid = () => {
         );
         setGridElements(new Map(gridElements));
       }
-    }
-    if (elemArrs.length) {
       const lowestElem = elemArrs.reduce((acc, curr) =>
         acc.height + acc.coords[1] > curr.height + curr.coords[1] ? acc : curr
       );
@@ -281,7 +228,7 @@ const Grid = () => {
     (props: { gridElement: GridElement; gridInfo: GridInfo }) => {
       const { id, coords, width, height, isLocked } = props.gridElement;
       const { gridUnitSize, bounds } = props.gridInfo;
-      const CardContent = cardMap[id];
+      const CardContent = ELEMENT_MAP[id];
       const dragTransition = {
         power: 0.08,
         min: 0,
@@ -341,7 +288,7 @@ const Grid = () => {
               );
             })}
           </AnimatePresence>
-          <GridBackdrop gridInfo={gridInfo} />
+          <GridBackdrop scrollAreaRef={scrollAreaRef} />
         </motion.div>
       </ScrollArea>
     </motion.div>
