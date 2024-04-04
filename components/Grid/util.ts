@@ -156,9 +156,10 @@ export const initializeGridElements = (
   const searchParamElems = searchParams
     .get(GRID_QUERY_KEY)
     ?.split(",") as CARD_TYPES[];
-  const initElements = searchParamElems.every((elem) => CARD_TYPES[elem])
-    ? searchParamElems
-    : DEFAULT_INIT_ELEMS;
+  const initElements =
+    searchParamElems && searchParamElems.every((elem) => CARD_TYPES[elem])
+      ? searchParamElems
+      : DEFAULT_INIT_ELEMS;
 
   const gridElements = new Map<CARD_TYPES, GridElement>();
   initElements.forEach((id) => {

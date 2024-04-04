@@ -2,7 +2,7 @@
 
 import { GridContext } from "@/lib/state";
 import { cn } from "@/lib/utils";
-import { Text, Tooltip } from "@radix-ui/themes";
+import { Separator, Text, Tooltip } from "@radix-ui/themes";
 import {
   MotionValue,
   motion,
@@ -10,7 +10,14 @@ import {
   useSpring,
   useTransform,
 } from "framer-motion";
-import { Briefcase, FlaskRound, Home, LucideIcon, Users } from "lucide-react";
+import {
+  Briefcase,
+  FlaskRound,
+  Home,
+  LucideIcon,
+  Moon,
+  Users,
+} from "lucide-react";
 import {
   ComponentProps,
   MouseEvent,
@@ -19,6 +26,8 @@ import {
   useLayoutEffect,
   useRef,
 } from "react";
+
+import { useTheme } from "next-themes";
 import { useStore } from "zustand";
 import { CARD_TYPES } from "./types";
 
@@ -69,6 +78,7 @@ const Item = (props: {
     <Tooltip
       sideOffset={10}
       side="top"
+      delayDuration={100}
       content={
         <Text className="font-favorit" size="3">
           {text}
@@ -99,6 +109,7 @@ const Item = (props: {
 
 export default function MenuCard(props: ComponentProps<typeof motion.div>) {
   const { className, ...rest } = props;
+  const { themes, resolvedTheme, setTheme } = useTheme();
   const store = useContext(GridContext)!;
   const pushElements = store.getInitialState().pushElements;
   const { gridCellSize } = useStore(store).gridInfo;
@@ -151,7 +162,7 @@ export default function MenuCard(props: ComponentProps<typeof motion.div>) {
         variants={{
           initial: { height: 16 + gridCellSize / 2 },
         }}
-        className="absolute bottom-0 left-1/2 z-[1000] flex -translate-x-1/2 items-end gap-4 overflow-visible rounded-full bg-[--gray-a4] p-2 backdrop-brightness-50 transition-all group-hover:bg-[--gray-a3] group-hover:backdrop-brightness-75"
+        className="card absolute bottom-0 left-1/2 z-[1000] flex -translate-x-1/2 items-end gap-4 overflow-visible rounded-full p-2 backdrop-brightness-50 transition-all group-hover:bg-[--gray-a3] group-hover:backdrop-brightness-75"
       >
         {Object.entries(items).map(([key, { icon: Icon, cards }]) => (
           <Item
@@ -171,6 +182,26 @@ export default function MenuCard(props: ComponentProps<typeof motion.div>) {
             />
           </Item>
         ))}
+        <Separator orientation="vertical" size="4" className="h-full py-1" />
+        <Item
+          text={"Toggle Theme"}
+          {...{ x, y }}
+          minSize={0.5}
+          maxSize={0.85}
+          size={gridCellSize}
+          onClick={() => {
+            setTheme(
+              themes[themes.findIndex((theme) => theme === resolvedTheme) ^ 1]
+            );
+          }}
+        >
+          <Moon
+            className="m-auto text-[--gray-11]"
+            size={"20"}
+            absoluteStrokeWidth
+            strokeWidth={2}
+          />
+        </Item>
         <motion.div className="absolute" />
       </motion.div>
     </motion.div>

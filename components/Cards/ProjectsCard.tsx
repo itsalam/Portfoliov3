@@ -82,7 +82,7 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
       });
     },
     600,
-    { trailing: true }
+    { leading: true }
   );
 
   useEffect(() => {
@@ -149,10 +149,9 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
             <Image
               className={cn(
                 "track-img h-full w-full object-cover",
-                "opacity-50 blur-sm brightness-75 contrast-75 saturate-150 transition-all duration-300 hover:opacity-100 group-hover:blur-none",
+                "opacity-50 blur-sm brightness-75 contrast-75 saturate-150 transition-all duration-300 hover:opacity-75 group-hover:blur-none dark:hover:opacity-100",
                 {
-                  "brightness-90": project.name == selectedProject?.name,
-                  "opacity-100 blur-none":
+                  "blur-none brightness-125 dark:opacity-100 dark:brightness-90":
                     project.name == focusedProject?.name ||
                     project.name == selectedProject?.name,
                 }
@@ -170,7 +169,7 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
         key={"body"}
         animate={textBodyControls}
         className={cn(
-          "absolute left-0 top-1/2 flex h-1/2 flex-col px-12 mix-blend-lighten",
+          "absolute left-0 top-1/2 flex h-1/2 flex-col px-12",
           props.className
         )}
       >

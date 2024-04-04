@@ -6,9 +6,7 @@
 
 @layer base {
   :root {
-    :is(.dark, .dark-theme), :is(.dark, .dark-theme) :where(.radix-themes:not(.light, .light-theme)) {
 
-    }
     --grid-size: 96px;
     --background: 0 0% 100%;
     --foreground: 224 71.4% 4.1%;
@@ -70,6 +68,12 @@
     --input: 215 27.9% 16.9%;
     --ring: 216 12.2% 83.9%;
   }
+
+
+
+  /* .dark .rt-TooltipText {
+    color: white;
+  } */
 }
 
 @layer base {
@@ -85,6 +89,10 @@
     --card-background-color: var(--color-panel);
     backdrop-filter: var(--backdrop-filter-panel);
     background-color: var(--card-background-color);
+  }
+
+  .dark .card {
+    @apply backdrop-brightness-50 hover:backdrop-brightness-75;
   }
 }
 
@@ -130,7 +138,9 @@ body {
   translate: -50% -50%;
 }
 
-
+/* .mask {
+  maskImage: radial-gradient(circle var()px at var()px var()px, white, transparent);
+} */
 
 .glass {
   -webkit-backdrop-filter: blur(2px);
@@ -160,14 +170,17 @@ body {
   display: none !important;
 }
 
+.rt-TooltipContent {
+  border-radius: var(--radius-5);
+  --card-background-color: var(--color-panel);
+  backdrop-filter: var(--backdrop-filter-panel);
+  background-color: var(--card-background-color) !important;
+}
+
 .rt-TooltipContent > span:first-of-type {
   display: none;
 }
 
-.dark .rt-TooltipContent {
-  background-color: var(--gray-1);
-}
-
-.dark .rt-TooltipText {
-  color: white;
+.rt-TooltipText {
+  color: hsl(var(--foreground)) !important;
 }

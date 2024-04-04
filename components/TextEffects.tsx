@@ -170,11 +170,7 @@ export const AnimatedText = (props: {
           </PresenceText>
         )}
       </AnimatePresence>
-      <Text
-        className="relative opacity-0"
-        text={currText}
-        style={{ opacity: 0 }}
-      />
+      <Text className="relative opacity-0" text={currText} />
     </motion.div>
   );
 };

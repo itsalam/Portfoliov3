@@ -79,6 +79,7 @@ const Track = (
   };
 
   const handleWheelMove: WheelEventHandler<HTMLDivElement> = (e) => {
+    e.stopPropagation();
     setTrackDist(dist.get() + e.deltaY * -0.33), 0.1;
   };
 

@@ -3,11 +3,13 @@
 import { cn } from "@/lib/utils";
 import { animate, motion } from "framer-motion";
 import { debounce } from "lodash";
+import { useTheme } from "next-themes";
 import { ComponentProps, useRef } from "react";
 import Map, { MapRef } from "react-map-gl";
 
 export default function LocationCard(props: ComponentProps<typeof motion.div>) {
   const { className, ...rest } = props;
+  const { resolvedTheme } = useTheme();
   const locationRef = useRef(null);
   const mapRef = useRef<MapRef>(null);
   const resizeMap = debounce(() => mapRef.current?.resize(), 1000, {
@@ -34,9 +36,13 @@ export default function LocationCard(props: ComponentProps<typeof motion.div>) {
         initialViewState={{
           longitude: -123.12,
           latitude: 49.28,
-          zoom: 3,
+          zoom: 5,
         }}
-        mapStyle="mapbox://styles/mapbox/dark-v11"
+        mapStyle={
+          resolvedTheme === "light"
+            ? "mapbox://styles/mapbox/light-v11"
+            : "mapbox://styles/mapbox/dark-v11"
+        }
       />
     </motion.div>
   );

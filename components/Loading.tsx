@@ -48,7 +48,7 @@ const Loading = forwardRef<
   return (
     <motion.div
       ref={ref}
-      className="absolute bottom-4 right-10 flex h-36 items-start justify-center gap-1 overflow-hidden bg-[#121212] font-favorit text-8xl"
+      className="absolute bottom-4 right-10 flex h-36 items-start justify-center gap-1 overflow-hidden font-favorit text-8xl"
       {...motionProps}
     >
       {Array.from({ length: DIGITS })

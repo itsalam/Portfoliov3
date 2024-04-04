@@ -46,7 +46,7 @@ const getGridProps = (dimensions: Dimensions): Omit<GridInfo, "oldVals"> => {
     gapSize: 2 * VERTEX_SIZE, //fix this later
     bounds: {
       left: 0,
-      right: width,
+      right: width - gridCellSize,
       top: gridUnitSize,
       bottom: height,
     },

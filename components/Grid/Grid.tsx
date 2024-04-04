@@ -74,7 +74,8 @@ const Grid = () => {
         });
       }, delay);
     },
-    50
+    100,
+    { trailing: true }
   );
 
   const pushElements = useCallback(

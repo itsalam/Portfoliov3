@@ -165,8 +165,7 @@ export const TitleCard = forwardRef<
         "h-0 w-0",
         "group flex flex-col overflow-hidden",
         "border-[1px] border-[--gray-a3]",
-        "backdrop-blur-sm backdrop-brightness-50",
-        "hover:border-[--gray-10] hover:bg-[--gray-a4] hover:backdrop-brightness-75",
+        "hover:border-[--gray-10] hover:bg-[--gray-a4] ",
         {
           "border-[--gray-12]": isDrag,
         }
@@ -179,6 +178,7 @@ export const TitleCard = forwardRef<
       isLocked={isLocked}
       variants={{
         animate: {
+          opacity: [0, 1],
           x: [null, x ?? 0],
           y: [null, y ?? 0],
           transition: {
