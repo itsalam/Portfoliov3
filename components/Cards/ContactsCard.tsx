@@ -74,7 +74,7 @@ const Link = forwardRef<
         <Text
           size="2"
           className={cn(
-            "flex items-center overflow-hidden text-[--sage-11] transition-colors duration-300 hover:text-[--sage-12]"
+            "flex items-center overflow-hidden text-[--gray-11] transition-colors duration-300 hover:text-[--gray-12]"
           )}
         >
           {text}
@@ -99,7 +99,7 @@ const Link = forwardRef<
         </Text>
         <Separator
           size="3"
-          className="bg-[--sage-11]"
+          className="bg-[--gray-11]"
           variants={{
             initial: {
               width: "100%",

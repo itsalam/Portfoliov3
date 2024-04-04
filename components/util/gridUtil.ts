@@ -75,22 +75,14 @@ export const resolveIntersections = (
     elems
       .map((displacedRect) => {
         if (isIntersecting(elem, displacedRect, gridInfo)) {
-          console.log(
-            JSON.parse(JSON.stringify({ displacedRect, elem, swap }))
-          );
           displacedRect = placeNewPosition(
             swap ? displacedRect : elem,
             swap ? elem : displacedRect,
             gridElements,
             gridInfo
           );
-          console.log(
-            JSON.parse(JSON.stringify({ displacedRect, elem, swap }))
-          );
           gridElements.set(displacedRect.id, displacedRect);
           hasIntersections = true;
-
-          console.log(JSON.parse(JSON.stringify([...gridElements.values()])));
           resolveIntersections(displacedRect, gridElements, gridInfo, swap);
 
           return displacedRect;

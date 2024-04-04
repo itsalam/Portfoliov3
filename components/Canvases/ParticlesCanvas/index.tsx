@@ -67,7 +67,7 @@ function getSphere(count: number, size: number, p = new Vector4()) {
 
 const ParticleScene = () => {
   const coords = useRef({ x: 0, y: 0 });
-  const particleLength = 100;
+  const particleLength = 75;
   const { gl, size, camera } = useThree();
   const renderRef = useRef<DofPointsMaterial>(null!);
   const sceneRef = useRef<Scene>(null);

@@ -127,7 +127,7 @@ export const maskScrollArea = (
 ) => {
   const maskImageStep1 = percentage > 0 ? "rgba(0, 0, 0, 0) 0%, " : "";
   const maskImageStep2 = percentage < 100 ? ", rgba(0, 0, 0, 0) 100%" : "";
-  const middleSteps = `rgb(0, 0, 0) ${percentage * threshold}%, rgb(0, 0, 0) ${percentage * threshold + 100 - threshold}%`;
+  const middleSteps = `rgb(0, 0, 0, 1) ${percentage * threshold}%, rgb(0, 0, 0, 1) ${percentage * threshold + 100 - threshold}%`;
   element.style.maskImage = `linear-gradient(to ${direction}, ${maskImageStep1}${middleSteps}${maskImageStep2})`;
 };
 

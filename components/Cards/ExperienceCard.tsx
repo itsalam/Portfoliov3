@@ -1,55 +1,28 @@
 "use client";
 
-import { maskScrollArea } from "@/lib/clientUtils";
 import { CMSContext } from "@/lib/state";
 import { cn, formatDate } from "@/lib/utils";
-import { ScrollArea, Separator, Text } from "@radix-ui/themes";
+import { Separator, Text } from "@radix-ui/themes";
 import { motion, useAnimate } from "framer-motion";
-import {
-  ComponentProps,
-  Fragment,
-  UIEvent,
-  useContext,
-  useEffect,
-  useRef,
-} from "react";
+import { ComponentProps, Fragment, useContext } from "react";
 import { useStore } from "zustand";
+import ScrollArea from "../ScrollArea";
 
 export default function ExperienceCard(
   props: ComponentProps<typeof motion.div>
 ) {
-  const { ...rest } = props;
   const [cardRef] = useAnimate();
-  const containerRef = useRef<HTMLDivElement>(null);
   const cms = useContext(CMSContext)!;
   const experiences = useStore(cms, (cms) => cms.works ?? []);
 
-  const handleScroll = (e: UIEvent) => {
-    const h = e.target as HTMLElement;
-    const st = h.scrollTop || document.body.scrollTop;
-    const sh = h.scrollHeight || document.body.scrollHeight;
-    const percent = st / (sh - h.clientHeight);
-    maskScrollArea("bottom", containerRef.current as HTMLElement, percent, 10);
-  };
-
-  useEffect(() => {
-    maskScrollArea("bottom", containerRef.current as HTMLElement, 0, 10);
-  });
-
   return (
     <motion.div
-      {...rest}
+      {...props}
       className={cn("relative flex h-full flex-col")}
       ref={cardRef}
       initial="initial"
     >
-      <ScrollArea
-        onScroll={handleScroll}
-        type="always"
-        scrollbars="vertical"
-        className="py-4 pl-4"
-        ref={containerRef}
-      >
+      <ScrollArea type="always" scrollbars="vertical" className="py-4 pl-4">
         {experiences.map((experience, i) => (
           <div key={i} className="mr-4 flex flex-col gap-y-2 pb-6">
             <Text size="6" className="font-bold">
@@ -69,10 +42,10 @@ export default function ExperienceCard(
                     <Text size="4" className="font-bold">
                       {tenure.title}
                     </Text>
-                    <Text size="2" className="font-bold text-[--sage-11]">
+                    <Text size="2" className="font-bold text-[--gray-11]">
                       {"  //  "}
                     </Text>
-                    <Text size="2" className="font-bold text-[--sage-11]">
+                    <Text size="2" className="font-bold text-[--gray-11]">
                       {tenure.location}
                     </Text>
                   </span>
@@ -82,7 +55,7 @@ export default function ExperienceCard(
                   <ul className="list-disc pl-4">
                     {tenure.descriptions.map(
                       (description: string, k: number) => (
-                        <li key={k} className="text-xs text-[--sage-11]">
+                        <li key={k} className="text-xs text-[--gray-11]">
                           {description}
                         </li>
                       )

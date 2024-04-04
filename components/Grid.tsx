@@ -6,7 +6,6 @@ import {
   GridContext,
   GridInfo,
 } from "@/lib/state";
-import { ScrollArea } from "@radix-ui/themes";
 import {
   AnimatePresence,
   motion,
@@ -28,6 +27,9 @@ import GridBackdrop from "./Backdrop";
 import Card, { TitleCard } from "./Card";
 import LoadingCard from "./Cards/LoadingCard";
 import { CARD_TYPES } from "./Cards/types";
+// import ScrollArea from "./ScrollArea";
+import { ScrollArea } from "@radix-ui/themes";
+import { debounce } from "lodash";
 import {
   GridElement,
   placeNewRect,
@@ -88,14 +90,14 @@ const cardMap: Record<
 
 const Grid = () => {
   const context = useContext(GridContext)!;
-  const [ref, animate] = useAnimate<HTMLDivElement>();
-  const animation = useAnimation();
   const { initElements, addListener, setDimensions } =
     context.getInitialState();
   const { gridInfo, dimensions } = useStore(context);
+  const [ref, animate] = useAnimate<HTMLDivElement>();
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
   const gridInfoRef = useRef(gridInfo);
   const dimensionsRef = useRef(dimensions);
-  const [gridHeight, setGridHeight] = useState<number>(dimensions.height);
+  const [lowestElem, setLowestElem] = useState<GridElement>();
   const [gridElements, setGridElements] = useState<
     Map<CARD_TYPES, GridElement>
   >(
@@ -120,37 +122,57 @@ const Grid = () => {
     )
   );
 
-  const pushElements =
+  const animation = useAnimation();
+
+  const scrollToGridElement = debounce(
+    (gridElement: GridElement, delay = 100) => {
+      setTimeout(() => {
+        scrollAreaRef.current?.scrollTo({
+          top: Math.max(
+            0,
+            gridElement.coords[1] - gridInfoRef.current.gridUnitSize
+          ),
+          behavior: "smooth",
+        });
+      }, delay);
+    },
+    50
+  );
+
+  const pushElements = useCallback(
     (gridInfo: GridInfo, gridElements: Map<CARD_TYPES, GridElement>) =>
-    (ids: CARD_TYPES[]) => {
-      const { gridUnitSize, gridCellSize } = gridInfo;
-      ids.forEach((id) => {
-        let elem = gridElements.get(id);
-        if (elem) {
-          if (!elem.isLocked) {
-            elem.coords = [
-              DEFAULT_COORDS[0] * gridUnitSize,
-              DEFAULT_COORDS[1] * gridUnitSize,
-            ];
+      (ids: CARD_TYPES[]) => {
+        const { gridUnitSize, gridCellSize } = gridInfo;
+        ids.forEach((id) => {
+          let gridElem = gridElements.get(id);
+          if (gridElem) {
+            if (!gridElem.isLocked) {
+              gridElem.coords = [
+                DEFAULT_COORDS[0] * gridUnitSize,
+                DEFAULT_COORDS[1] * gridUnitSize,
+              ];
+            }
+            gridElem = placeNewRect(gridElem, gridElements, gridInfo);
+            gridElements.set(id, { ...gridElem, hasPositioned: true });
+            resolveIntersections(gridElem, gridElements, gridInfo, true);
+            scrollToGridElement(gridElem);
+          } else {
+            const initElem = DEFAULT_GRID_ELEMENTS[id];
+            gridElements.set(id, {
+              ...initElem,
+              coords: [
+                initElem.coords[0] * gridUnitSize,
+                initElem.coords[1] * gridUnitSize,
+              ],
+              width: initElem.width * gridCellSize,
+              height: initElem.height * gridCellSize,
+            });
           }
-          elem = placeNewRect(elem, gridElements, gridInfo);
-          gridElements.set(id, { ...elem, hasPositioned: true });
-          resolveIntersections(elem, gridElements, gridInfo, true);
-        } else {
-          const initElem = DEFAULT_GRID_ELEMENTS[id];
-          gridElements.set(id, {
-            ...initElem,
-            coords: [
-              initElem.coords[0] * gridUnitSize,
-              initElem.coords[1] * gridUnitSize,
-            ],
-            width: initElem.width * gridCellSize,
-            height: initElem.height * gridCellSize,
-          });
-        }
-      });
-      setGridElements(new Map(gridElements));
-    };
+        });
+        setGridElements(new Map(gridElements));
+      },
+    []
+  );
 
   const lockElements =
     (gridElements: Map<CARD_TYPES, GridElement>) => (ids: CARD_TYPES[]) => {
@@ -183,7 +205,7 @@ const Grid = () => {
       closeElements: closeElements(gridElements),
     });
     return () => removeListener();
-  }, [addListener, gridElements]);
+  }, [addListener, gridElements, pushElements]);
 
   useEffect(() => {
     const gridInfo = gridInfoRef.current;
@@ -231,21 +253,29 @@ const Grid = () => {
       }
     }
     if (elemArrs.length) {
-      const tallestElem = elemArrs.reduce((acc, curr) =>
+      const lowestElem = elemArrs.reduce((acc, curr) =>
         acc.height + acc.coords[1] > curr.height + curr.coords[1] ? acc : curr
       );
-      setGridHeight(
-        tallestElem.height + tallestElem.coords[1] + gridInfo.gridCellSize
-      );
+      setLowestElem(lowestElem);
     }
   }, [gridElements, animate, animation]);
 
   useEffect(() => {
-    console.log(gridHeight);
-    setDimensions({
-      containerHeight: Math.max(dimensionsRef.current.height, gridHeight),
-    });
-  }, [gridHeight, setDimensions]);
+    const gridInfo = gridInfoRef.current;
+    const dimensions = dimensionsRef.current;
+    if (lowestElem) {
+      const lowestElemHeight = lowestElem.height + lowestElem.coords[1];
+      if (lowestElemHeight > dimensions.height) {
+        setDimensions({
+          containerHeight: Math.max(
+            dimensionsRef.current.height,
+            lowestElem.height + lowestElem.coords[1] + gridInfo.gridCellSize
+          ),
+        });
+        scrollToGridElement(lowestElem);
+      }
+    }
+  }, [lowestElem, setDimensions]);
 
   const GCard = useCallback(
     (props: { gridElement: GridElement; gridInfo: GridInfo }) => {
@@ -268,6 +298,7 @@ const Grid = () => {
             right: bounds.right - width,
             bottom: bounds.bottom - height,
           }}
+          exit={"exit"}
           width={width}
           height={height}
           dragElastic={0.3}
@@ -292,7 +323,7 @@ const Grid = () => {
       className="relative z-10 h-full w-full overflow-scroll"
       animate={animation}
     >
-      <ScrollArea>
+      <ScrollArea ref={scrollAreaRef}>
         <motion.div
           className="relative h-full w-full"
           style={{

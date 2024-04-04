@@ -6,8 +6,6 @@ import { Text, Tooltip } from "@radix-ui/themes";
 import {
   MotionValue,
   motion,
-  useAnimate,
-  useAnimationControls,
   useMotionValue,
   useSpring,
   useTransform,
@@ -20,10 +18,8 @@ import {
   useContext,
   useLayoutEffect,
   useRef,
-  useState,
 } from "react";
 import { useStore } from "zustand";
-import Card from "../Card";
 import { CARD_TYPES } from "./types";
 
 const Item = (props: {
@@ -38,10 +34,11 @@ const Item = (props: {
 }) => {
   const { children, text, x, y, onClick, minSize, maxSize, size } = props;
   const ref = useRef<HTMLButtonElement>(null);
-  const [domRect, setDomRect] = useState<DOMRect>();
+  const domRect = useMotionValue<DOMRect | null>(null);
   const dist = useTransform(() => {
-    if (!domRect) return size * maxSize;
-    const { left, top, width, height } = domRect;
+    const domVals = domRect.get();
+    if (domVals === null) return size * maxSize;
+    const { left, top, width, height } = domVals;
     const centerX = left + width / 2;
     const centerY = top + height / 2;
     return Math.sqrt(
@@ -50,12 +47,12 @@ const Item = (props: {
   });
 
   useLayoutEffect(() => {
-    setDomRect((ref.current as HTMLElement).getBoundingClientRect());
-  }, []);
+    domRect.set((ref.current as HTMLElement).getBoundingClientRect());
+  }, [domRect]);
 
   const width = useTransform(
     dist,
-    [0, size * maxSize * 1.5],
+    [0, size * maxSize * 1.25],
     [size * maxSize, size * minSize]
   );
 
@@ -83,9 +80,9 @@ const Item = (props: {
         style={{
           width: springWidth,
         }}
-        className="w-g-5/8 relative z-[1000] flex aspect-square items-end justify-end rounded-full bg-[--sage-5] brightness-100 transition-all hover:bg-[--sage-2]"
+        className="w-g-5/8 relative z-[1000] flex aspect-square items-end justify-end rounded-full bg-[--gray-5] brightness-100 transition-all hover:bg-[--gray-2]"
         variants={{
-          leave: {
+          initial: {
             width: [null, size * minSize],
             transition: { stiffness: 650 },
           },
@@ -100,13 +97,11 @@ const Item = (props: {
   );
 };
 
-export default function MenuCard(props: ComponentProps<typeof Card>) {
+export default function MenuCard(props: ComponentProps<typeof motion.div>) {
   const { className, ...rest } = props;
   const store = useContext(GridContext)!;
   const pushElements = store.getInitialState().pushElements;
   const { gridCellSize } = useStore(store).gridInfo;
-  const [ref] = useAnimate();
-  const controls = useAnimationControls();
   const x = useMotionValue(0),
     y = useMotionValue(0);
 
@@ -126,46 +121,58 @@ export default function MenuCard(props: ComponentProps<typeof Card>) {
   };
 
   return (
-    <Card
+    <motion.div
       {...rest}
       className={cn("group absolute z-50 overflow-visible", className)}
-      ref={ref}
       initial="initial"
+      animate="animate"
       id={CARD_TYPES.Menu}
       key={CARD_TYPES.Menu}
+      whileHover={"hover"}
       onMouseMove={trackMouse}
       onMouseLeave={() => {
-        controls.start("leave");
+        // controls.start("leave");
         x.set(0);
         y.set(0);
       }}
-      width={gridCellSize * 3}
-      height={gridCellSize * 0.5}
-      isLocked
+      variants={{
+        animate: {
+          width: [null, gridCellSize * 3],
+          height: [null, gridCellSize * 1],
+          transition: {
+            duration: 0.1,
+          },
+        },
+        hover: {},
+      }}
     >
       <motion.div
-        animate={controls}
-        className="absolute bottom-0 left-1/2 top-1/3 z-[1000] flex -translate-x-1/2 items-end gap-4 overflow-visible rounded-full bg-[--sage-a4] p-2 group-hover:bg-[--sage-a3]"
+        // animate={controls}
+        variants={{
+          initial: { height: 16 + gridCellSize / 2 },
+        }}
+        className="absolute bottom-0 left-1/2 z-[1000] flex -translate-x-1/2 items-end gap-4 overflow-visible rounded-full bg-[--gray-a4] p-2 backdrop-brightness-50 transition-all group-hover:bg-[--gray-a3] group-hover:backdrop-brightness-75"
       >
         {Object.entries(items).map(([key, { icon: Icon, cards }]) => (
           <Item
             key={key}
             text={key}
             {...{ x, y }}
-            minSize={0.6}
+            minSize={0.5}
             maxSize={0.85}
-            size={(gridCellSize * 3) / 4}
+            size={gridCellSize}
             onClick={() => pushElements(cards)}
           >
             <Icon
-              className="m-auto text-[--sage-11]"
+              className="m-auto text-[--gray-11]"
               size={"20"}
               absoluteStrokeWidth
               strokeWidth={2}
             />
           </Item>
         ))}
+        <motion.div className="absolute" />
       </motion.div>
-    </Card>
+    </motion.div>
   );
 }

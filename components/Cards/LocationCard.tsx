@@ -10,18 +10,10 @@ export default function LocationCard(props: ComponentProps<typeof motion.div>) {
   const { className, ...rest } = props;
   const locationRef = useRef(null);
   const mapRef = useRef<MapRef>(null);
-  const resizeMap = debounce(
-    () =>
-      new Promise<void>((res) => {
-        mapRef.current?.once("resize", () => res()).resize();
-      }).then(() => {
-        animate(locationRef.current, { opacity: 1 });
-      }),
-    350,
-    {
-      trailing: true,
-    }
-  );
+  const resizeMap = debounce(() => mapRef.current?.resize(), 1000, {
+    trailing: true,
+    maxWait: 2000,
+  });
 
   return (
     <motion.div
@@ -37,6 +29,7 @@ export default function LocationCard(props: ComponentProps<typeof motion.div>) {
     >
       <Map
         ref={mapRef}
+        onResize={() => animate(locationRef.current, { opacity: 1 })}
         mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_KEY ?? ""}
         initialViewState={{
           longitude: -123.12,

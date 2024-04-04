@@ -6,6 +6,9 @@
 
 @layer base {
   :root {
+    :is(.dark, .dark-theme), :is(.dark, .dark-theme) :where(.radix-themes:not(.light, .light-theme)) {
+
+    }
     --grid-size: 96px;
     --background: 0 0% 100%;
     --foreground: 224 71.4% 4.1%;
@@ -78,7 +81,10 @@
   }
 
   .card {
-    border-radius: 12px;
+    border-radius: var(--radius-5);
+    --card-background-color: var(--color-panel);
+    backdrop-filter: var(--backdrop-filter-panel);
+    background-color: var(--card-background-color);
   }
 }
 
@@ -101,9 +107,9 @@ body {
   background: linear-gradient(
     70deg,
     var(--background-color) 0%,
-    var(--sage-a4) 25%,
+    var(--gray-a4) 25%,
     var(--background-color) 50%,
-    var(--sage-a4) 75%,
+    var(--gray-a4) 75%,
     var(--background-color) 100%
   );
   z-index: 0;
@@ -159,7 +165,7 @@ body {
 }
 
 .dark .rt-TooltipContent {
-  background-color: var(--sage-1);
+  background-color: var(--gray-1);
 }
 
 .dark .rt-TooltipText {

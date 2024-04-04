@@ -151,7 +151,7 @@ export const TitleCard = forwardRef<
         }}
         className={cn(
           className,
-          "z-50 flex aspect-square items-center justify-center rounded-full border-[1px] border-[--sage-a7] transition-all hover:border-[--sage-a10]"
+          "z-50 flex aspect-square items-center justify-center rounded-full border-[1px] border-[--gray-a7] transition-all hover:border-[--gray-a10]"
         )}
         {...props}
       />
@@ -164,11 +164,11 @@ export const TitleCard = forwardRef<
       className={cn(
         "h-0 w-0",
         "group flex flex-col overflow-hidden",
-        "border-[1px] border-[--sage-a3] bg-[--sage-a2]",
+        "border-[1px] border-[--gray-a3]",
         "backdrop-blur-sm backdrop-brightness-50",
-        "hover:border-[--sage-10] hover:bg-[--sage-a4] hover:backdrop-brightness-75",
+        "hover:border-[--gray-10] hover:bg-[--gray-a4] hover:backdrop-brightness-75",
         {
-          "border-[--sage-12]": isDrag,
+          "border-[--gray-12]": isDrag,
         }
       )}
       ref={ref}
@@ -229,7 +229,7 @@ export const TitleCard = forwardRef<
         >
           {title?.toUpperCase()}
         </Text>
-        <div className="absolute bottom-0 left-0 w-full bg-[--sage-a1] transition-all group-hover:bg-[--sage-a10]">
+        <div className="absolute bottom-0 left-0 w-full bg-[--gray-a1] transition-all group-hover:bg-[--gray-a10]">
           <Separator size="4" />
         </div>
         <div className="absolute right-1 z-50 flex h-3/4 gap-1">
@@ -247,7 +247,19 @@ export const TitleCard = forwardRef<
           </Button>
         </div>
       </motion.div>
-      <motion.div className={cn(className, "z-30 h-[inherit] overflow-hidden")}>
+      <motion.div
+        className={cn(className, "z-30 h-[inherit] overflow-hidden opacity-0")}
+        onAnimationComplete={console.log}
+        variants={{
+          open: {
+            opacity: 1,
+            transition: {
+              duration: 0.466,
+              delay: 0.66,
+            },
+          },
+        }}
+      >
         {children}
       </motion.div>
     </Card>

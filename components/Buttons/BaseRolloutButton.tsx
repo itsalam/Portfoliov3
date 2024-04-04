@@ -19,7 +19,7 @@ export const BaseRolloutButton: FC<
     <motion.button
       whileHover="hover"
       className={cn(
-        "flex items-center rounded-full border border-[#ffffff16] bg-[--sage-a5] hover:bg-[--sage-a3]",
+        "flex items-center rounded-full border border-[#ffffff16] bg-[--gray-a5] hover:bg-[--gray-a3]",
         className
       )}
       {...buttonProps}

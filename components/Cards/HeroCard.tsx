@@ -6,6 +6,22 @@ import { Text } from "@radix-ui/themes";
 import { motion, useAnimationControls } from "framer-motion";
 import { ComponentProps, useCallback, useEffect, useRef } from "react";
 
+const MText = motion(Text);
+
+const animateTransition = {
+  initial: {
+    y: "100%",
+    opacity: 0,
+  },
+  show: {
+    y: "0%",
+    opacity: 1,
+    transition: {
+      duration: 0.6,
+    },
+  },
+};
+
 export default function HeroCard(props: ComponentProps<typeof motion.div>) {
   const { ...rest } = props;
   const heroRef = useRef<HTMLDivElement>(null);
@@ -14,6 +30,7 @@ export default function HeroCard(props: ComponentProps<typeof motion.div>) {
 
   useEffect(() => {
     const timeout = setTimeout(() => {
+      console.log("!");
       controls.start("show").then(() => {
         setTimeout(() => {
           controls.start("rotate");
@@ -22,22 +39,6 @@ export default function HeroCard(props: ComponentProps<typeof motion.div>) {
     }, 200);
     return () => clearTimeout(timeout);
   }, [controls]);
-
-  const animateTransition = {
-    initial: {
-      y: "100%",
-      opacity: 0,
-    },
-    show: {
-      y: "0%",
-      opacity: 1,
-      transition: {
-        duration: 0.6,
-      },
-    },
-  };
-
-  const MText = motion(Text);
 
   const TextRotateBody = useCallback(
     () => (
@@ -105,6 +106,7 @@ export default function HeroCard(props: ComponentProps<typeof motion.div>) {
       animate={controls}
       ref={heroRef}
       initial="initial"
+      onAnimationStart={console.log}
     >
       <TextRotateBody />
     </motion.div>
