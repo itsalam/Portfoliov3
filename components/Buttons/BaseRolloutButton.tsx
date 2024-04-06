@@ -1,31 +1,45 @@
 import { cn } from "@/lib/utils";
 import { Text as BaseText } from "@radix-ui/themes";
-import { MotionProps, motion } from "framer-motion";
+import { MotionProps, Variants, motion } from "framer-motion";
 import { LucideIcon } from "lucide-react";
 import { ComponentProps, ComponentType, FC } from "react";
 
 const Text = motion(BaseText);
 
+export type BaseRolloutProps = {
+  ComponentA: ComponentType<ComponentProps<LucideIcon> & MotionProps>;
+  ComponentB: ComponentType<ComponentProps<LucideIcon> & MotionProps>;
+  text: string;
+  iconVariants?: Variants;
+  iconSize?: ComponentProps<LucideIcon>["size"];
+  textSize?: ComponentProps<typeof Text>["size"];
+};
+
 export const BaseRolloutButton: FC<
-  ComponentProps<typeof motion.button> & {
-    ComponentA: ComponentType<ComponentProps<LucideIcon> & MotionProps>;
-    ComponentB: ComponentType<ComponentProps<LucideIcon> & MotionProps>;
-    text: string;
-  }
+  ComponentProps<typeof motion.button> & BaseRolloutProps
 > = (props) => {
-  const { className, ComponentA, ComponentB, text, ...buttonProps } = props;
+  const {
+    className,
+    ComponentA,
+    ComponentB,
+    text,
+    iconVariants,
+    iconSize,
+    textSize,
+    ...buttonProps
+  } = props;
 
   return (
     <motion.button
       whileHover="hover"
       className={cn(
-        "flex items-center rounded-full border border-[#ffffff16] bg-[--gray-a5] hover:bg-[--gray-a3]",
+        "flex items-center rounded-full border border-foreground bg-background",
         className
       )}
       {...buttonProps}
     >
       <motion.div
-        className="relative m-0.5 aspect-square"
+        className="relative aspect-square overflow-hidden p-0.5 "
         variants={{
           initial: {
             rotateZ: "-90deg",
@@ -33,34 +47,43 @@ export const BaseRolloutButton: FC<
           hover: {
             rotateZ: "-180deg",
           },
+          ...iconVariants,
         }}
       >
         <ComponentA
+          className="relative p-1"
+          initial={{
+            opacity: 1,
+          }}
           variants={{
-            initial: {
-              opacity: 1,
-            },
             hover: {
               opacity: 0,
             },
           }}
-          className="relative p-1"
+          transition={{
+            duration: 0.33,
+          }}
+          {...{ size: iconSize }}
         />
         <ComponentB
-          className="absolute left-0 top-0 p-1 opacity-0"
+          className="absolute left-0 top-0 p-1"
+          initial={{
+            opacity: 0,
+          }}
           variants={{
-            initial: {
-              opacity: 0,
-            },
             hover: {
               opacity: 1,
             },
           }}
+          transition={{
+            duration: 0.33,
+          }}
+          {...{ size: iconSize }}
         />
       </motion.div>
 
       <Text
-        size={"2"}
+        size={textSize || "2"}
         className="relative w-0 overflow-hidden whitespace-nowrap"
         variants={{
           initial: {

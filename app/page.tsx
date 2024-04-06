@@ -49,7 +49,7 @@ export default function Hero() {
         <>
           <motion.div
             key={"slide-in"}
-            className="fixed left-0 top-0 z-50 h-screen w-screen origin-bottom bg-black"
+            className="fixed left-0 top-0 z-50 h-screen w-screen origin-bottom bg-[--color-panel]"
             initial={{ scaleY: 0 }}
             animate={{ scaleY: 0 }}
             exit={{ scaleY: 1 }}
@@ -61,7 +61,7 @@ export default function Hero() {
         <>
           <motion.div
             key={"slide-out"}
-            className="fixed left-0 top-0 z-50 h-screen w-screen origin-top bg-black"
+            className="fixed left-0 top-0 z-50 h-screen w-screen origin-top bg-[--color-panel]"
             initial={{ scaleY: 1 }}
             animate={{ scaleY: 0 }}
             exit={{ scaleY: 0 }}
