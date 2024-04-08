@@ -30,7 +30,6 @@ export default function HeroCard(props: ComponentProps<typeof motion.div>) {
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      console.log("!");
       controls.start("show").then(() => {
         setTimeout(() => {
           controls.start("rotate");
@@ -58,7 +57,7 @@ export default function HeroCard(props: ComponentProps<typeof motion.div>) {
             text="(a)"
           />
         </MText>
-        <div className="my-gap-y h-g-5/8 relative flex flex-col gap-0 overflow-hidden pr-0 font-bold">
+        <div className="my-gap-y relative flex h-g-5/8 flex-col gap-0 overflow-hidden pr-0 font-bold">
           <div className="absolute top-0 flex h-full flex-row gap-0">
             <RotateText
               size={"9"}
@@ -102,11 +101,10 @@ export default function HeroCard(props: ComponentProps<typeof motion.div>) {
 
   return (
     <motion.div
-      className={cn("mx-g-2/8 relative flex h-full flex-col justify-center")}
+      className={cn("relative mx-g-2/8 flex h-full flex-col justify-center")}
       animate={controls}
       ref={heroRef}
       initial="initial"
-      onAnimationStart={console.log}
     >
       <TextRotateBody />
     </motion.div>

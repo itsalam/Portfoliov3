@@ -1,5 +1,4 @@
 import { CARD_TYPES } from "@/components/Cards/types";
-import { GridElement } from "@/components/util/gridUtil";
 import { Dispatch, SetStateAction, createContext } from "react";
 import { createStore } from "zustand";
 import { SchemaStores, createCMSSlices } from "./fetchData";
@@ -48,13 +47,13 @@ const getGridProps = (dimensions: Dimensions): Omit<GridInfo, "oldVals"> => {
       left: 0,
       right: width - gridCellSize,
       top: gridUnitSize,
-      bottom: height,
+      bottom: containerHeight,
     },
   };
 };
 
 type GridElementListener = {
-  dispatch: Dispatch<SetStateAction<Map<CARD_TYPES, GridElement>>>;
+  dispatch: Dispatch<SetStateAction<GridElements>>;
   pushElements: (ids: CARD_TYPES[]) => void;
   lockElements: (ids: CARD_TYPES[]) => void;
   closeElements: (ids: CARD_TYPES[]) => void;

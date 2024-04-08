@@ -5,7 +5,15 @@ import {
   DEFAULT_GRID_ELEMENTS,
   DEFAULT_INIT_ELEMS,
   GRID_QUERY_KEY,
+  GridElements,
 } from "./consts";
+
+export type DefaultGridElement = {
+  id: CARD_TYPES;
+  initialCoords: [number, number];
+  initialWidth: number;
+  initialHeight: number;
+};
 
 export type GridElement = {
   id: CARD_TYPES;
@@ -44,37 +52,16 @@ export const isIntersecting = (
   );
 };
 
-export const placeNewRect = (
-  e: GridElement,
-  gridElements: Map<CARD_TYPES, GridElement>,
-  gridInfo: GridInfo
-): GridElement => {
-  if (e.isLocked) return e;
-  const lockedElemArrs = Array.from(gridElements.values()).filter(
-    (lockedElem) => lockedElem.isLocked && lockedElem.id !== e.id
-  );
-
-  const getConflictingRect = (e: GridElement) =>
-    lockedElemArrs.find((lockedElem) =>
-      isIntersecting(e, lockedElem, gridInfo)
-    );
-  let lockedConflictingRect = getConflictingRect(e);
-  while (lockedConflictingRect) {
-    e = placeNewPosition(e, lockedConflictingRect, gridElements, gridInfo);
-    lockedConflictingRect = getConflictingRect(e);
-  }
-
-  return e;
-};
-
 export const resolveIntersections = (
   elem: GridElement,
-  gridElements: Map<CARD_TYPES, GridElement>,
+  gridElements: GridElements,
   gridInfo: GridInfo,
   swap?: boolean
 ) => {
   const elemArrs = Array.from(gridElements.values());
-  const elems: GridElement[] = elemArrs.filter((e) => e.id !== elem.id);
+  const elems: GridElement[] = elemArrs.filter(
+    (e) => e.id !== elem.id && e.hasPositioned
+  );
   let hasIntersections;
   do {
     hasIntersections = false;
@@ -89,7 +76,13 @@ export const resolveIntersections = (
           );
           gridElements.set(displacedRect.id, displacedRect);
           hasIntersections = true;
-          resolveIntersections(displacedRect, gridElements, gridInfo, swap);
+
+          displacedRect = resolveIntersections(
+            displacedRect,
+            gridElements,
+            gridInfo,
+            swap
+          );
 
           return displacedRect;
         }
@@ -97,19 +90,20 @@ export const resolveIntersections = (
       })
       .filter(Boolean) as GridElement[];
   } while (hasIntersections);
-  return gridInfo;
+  elem.hasPositioned = true;
+  return elem;
 };
 
 const placeNewPosition = (
   element: GridElement,
   displacingElem: GridElement,
-  gridElements: Map<CARD_TYPES, GridElement>,
+  gridElements: GridElements,
   gridInfo: GridInfo
 ) => {
   const { gridUnitSize, bounds } = gridInfo;
 
   const elemArrs = Array.from(gridElements.values()).filter(
-    (e) => e.id !== element.id
+    (e) => e.id !== element.id && e.hasPositioned
   );
   const wrapElement =
     displacingElem.width + displacingElem.coords[0] + element.width >
@@ -117,36 +111,28 @@ const placeNewPosition = (
   element.coords[0] = wrapElement
     ? bounds.left + gridUnitSize
     : displacingElem.coords[0] + displacingElem.width + gridUnitSize + 1;
-  console.log({ element, wrapElement });
   if (wrapElement) {
+    // element.coords[1] =
+
     const vertConflicting = elemArrs.filter((conflictingRect) =>
+      // conflictingRect.coords[1] <= element.coords[1] &&
       isIntersecting(element, conflictingRect, gridInfo)
     );
+    // console.log(vertConflicting);
     if (vertConflicting.length) {
-      const lowest = vertConflicting.reduce((lowest, current) => {
+      const tallest = vertConflicting.reduce((lowest, current) => {
         if (
-          current.coords[1] + current.height >
+          current.coords[1] + current.height <
           lowest.coords[1] + lowest.height
         ) {
           return current;
         }
         return lowest;
-      }, vertConflicting[0]);
-      console.log({ tallestElem: lowest, vertConflicting });
-      element.coords[1] = lowest.coords[1] + lowest.height + gridUnitSize;
+      }, displacingElem);
+      element.coords[1] = tallest.coords[1] + tallest.height + gridUnitSize;
     }
   }
   return element;
-};
-
-export const elementInBounds = (gridElem: GridElement, gridInfo: GridInfo) => {
-  const { bounds } = gridInfo;
-  return (
-    gridElem.coords[0] >= bounds.left &&
-    gridElem.coords[0] + gridElem.width <= bounds.right &&
-    gridElem.coords[1] >= bounds.top &&
-    gridElem.coords[1] + gridElem.height <= bounds.bottom
-  );
 };
 
 export const initializeGridElements = (
@@ -163,18 +149,9 @@ export const initializeGridElements = (
 
   const gridElements = new Map<CARD_TYPES, GridElement>();
   initElements.forEach((id) => {
-    const e = DEFAULT_GRID_ELEMENTS[id];
-    const { gridUnitSize, gridCellSize } = gridInfo;
-    let gridElem = {
-      ...e,
-      coords: [e.coords[0] * gridUnitSize, e.coords[1] * gridUnitSize],
-      width: e.width * gridCellSize,
-      height: e.height * gridCellSize,
-    } as GridElement;
-
-    gridElem = placeNewRect(gridElem, gridElements, gridInfo);
-    gridElements.set(id, { ...gridElem, hasPositioned: true });
-    resolveIntersections(gridElem, gridElements, gridInfo);
+    let gridElem = getDefaultGridElement(id, gridInfo);
+    gridElem = resolveIntersections(gridElem, gridElements, gridInfo);
+    gridElements.set(id, gridElem);
   });
 
   return gridElements;
@@ -186,4 +163,72 @@ export const moveCursorEffect = (canvas: HTMLElement) => {
   const x = parseInt(canvas.getAttribute("data-circle-x") ?? "0");
   const y = parseInt(canvas.getAttribute("data-circle-y") ?? "0");
   canvas.style.maskImage = `radial-gradient(circle ${radius}px at ${x}px ${y + yOffset}px, white, transparent)`;
+};
+
+export const getDefaultGridElement = (
+  id: CARD_TYPES,
+  gridInfo: GridInfo
+): GridElement => {
+  const defaultElem = DEFAULT_GRID_ELEMENTS[id];
+  if (id === CARD_TYPES.Home) {
+    console.log(defaultElem);
+  }
+  const { gridUnitSize, bounds } = gridInfo;
+  return {
+    ...defaultElem,
+    coords: [
+      defaultElem.initialCoords[0] * gridUnitSize,
+      defaultElem.initialCoords[1] * gridUnitSize,
+    ],
+    width:
+      Math.round(
+        Math.min(bounds.right - bounds.left, defaultElem.initialWidth) /
+          gridUnitSize
+      ) * gridUnitSize,
+    height: Math.round(defaultElem.initialHeight / gridUnitSize) * gridUnitSize,
+  };
+};
+
+export const updateDraggedElement = (
+  id: CARD_TYPES,
+  gridElements: GridElements
+) => {
+  const element = gridElements.get(id);
+  if (!element) return;
+  const transform = (document.querySelector(`#${element.id}`) as HTMLElement)
+    ?.style?.transform;
+  if (transform) {
+    let translateX = 0;
+    let translateY = 0;
+
+    // Extracting translate values from the transform string
+
+    const matches = transform.match(/-?\d+\.?\d*px/g);
+    if (matches) {
+      translateX = parseFloat(matches[0]);
+      translateY = parseFloat(matches[1]);
+    }
+
+    element.coords = [translateX, translateY];
+    gridElements.set(element.id, element);
+  }
+};
+
+export const binpackElements = (
+  gridElements: GridElements,
+  gridInfo: GridInfo
+) => {
+  gridElements.forEach((element: GridElement) => {
+    const { coords } = getDefaultGridElement(element.id, gridInfo);
+    gridElements.set(element.id, { ...element, coords, hasPositioned: false });
+  });
+
+  gridElements.forEach((element: GridElement) => {
+    gridElements.set(
+      element.id,
+      resolveIntersections(element, gridElements, gridInfo)
+    );
+  });
+
+  // console.log(JSON.parse(JSON.stringify([...gridElements.values()])));
 };

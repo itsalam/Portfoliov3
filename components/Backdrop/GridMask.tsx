@@ -40,7 +40,7 @@ const GridEffect: React.FC<GridProps> = (props) => {
         const currentScrollTop = scrollAreaRef.current.scrollTop;
         if (ref.current) {
           ref.current.setAttribute("data-offset", currentScrollTop.toString());
-          moveCursorEffect(ref.current);
+          moveCursorEffect(ref.current as HTMLElement);
         }
       };
 

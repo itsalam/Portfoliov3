@@ -82,7 +82,7 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
       });
     },
     600,
-    { leading: true }
+    { trailing: true }
   );
 
   useEffect(() => {
@@ -123,7 +123,7 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
       onHoverEnd={() => changeFocusTitle(selectedProject)}
     >
       <Track
-        className={cn("gap-g-2/8 h-4/5")}
+        className={cn("h-4/5 gap-g-2/8")}
         dragRef={dragRef}
         animate={trackControls}
         clickedIndex={clickedProject}

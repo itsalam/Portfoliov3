@@ -7,8 +7,6 @@ import { Separator, Text } from "@radix-ui/themes";
 import {
   AnimationControls,
   PanInfo,
-  TargetAndTransition,
-  VariantLabels,
   motion,
   useAnimationControls,
   useDragControls,
@@ -38,7 +36,18 @@ const Card = forwardRef<
     isLocked?: boolean;
   }
 >((props, ref) => {
-  const { animate, x, y, className, children, id, isLocked, ...rest } = props;
+  const {
+    animate,
+    x,
+    y,
+    className,
+    children,
+    id,
+    isLocked,
+    height,
+    width,
+    ...rest
+  } = props;
   const [initialLoad, setInitialLoad] = useState(true);
   const defaultAnimationControls = useAnimationControls();
   const animationControls = useRef<AnimationControls>(
@@ -48,20 +57,21 @@ const Card = forwardRef<
   );
 
   useEffect(() => {
-    if (!isAnimationControls(animate)) {
-      if (animate) {
-        animationControls.current.start(
-          animate as VariantLabels | TargetAndTransition
-        );
-      } else {
-        animationControls.current.start("animate");
-      }
-    }
     if (initialLoad) {
       animationControls.current.start("open");
       setInitialLoad(false);
     }
   }, [initialLoad, animate]);
+
+  useEffect(() => {
+    animationControls.current.start({
+      width: [null, width],
+      height: [null, height],
+      transition: {
+        duration: 0.01,
+      },
+    });
+  }, [width, height]);
 
   useEffect(() => {
     if (x !== undefined && y !== undefined) {
@@ -86,6 +96,8 @@ const Card = forwardRef<
       animate={animationControls.current}
       ref={ref}
       id={id}
+      width={width}
+      height={height}
       {...rest}
     >
       {children}
@@ -190,7 +202,7 @@ export const TitleCard = forwardRef<
           width: 0,
         },
         open: {
-          width: [0, width, width],
+          width: [null, width, width],
           height: [24, 24, height],
           opacity: [0, 1, 1],
           transition: {
@@ -249,7 +261,6 @@ export const TitleCard = forwardRef<
       </motion.div>
       <motion.div
         className={cn(className, "z-30 h-[inherit] overflow-hidden opacity-0")}
-        onAnimationComplete={console.log}
         variants={{
           open: {
             opacity: 1,

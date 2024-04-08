@@ -19,7 +19,7 @@ const Overlay: React.FC = () => {
 
   return (
     <nav className="fixed left-0 z-0 h-screen w-screen">
-      <div className="top-g-2/8 right-g-3/8  absolute font-favorit">
+      <div className="absolute right-g-3/8  top-g-2/8 font-favorit">
         <Text className="block w-full text-right" size={{ xl: "5", md: "2" }}>
           {currentDate}
         </Text>
@@ -28,7 +28,7 @@ const Overlay: React.FC = () => {
         </Text>
       </div>
       <Text
-        className="right-g-3/8 bottom-g-2/8 absolute text-right font-favorit"
+        className="absolute bottom-g-2/8 right-g-3/8 text-right font-favorit"
         size={{ xl: "5", md: "2" }}
       >
         {screenString}
