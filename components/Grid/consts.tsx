@@ -1,6 +1,6 @@
+import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
 import { ComponentProps, ComponentType } from "react";
-import Card from "../Card";
 import LoadingCard from "../Cards/LoadingCard";
 import { CARD_TYPES } from "../Cards/types";
 import { DefaultGridElement, GridElement } from "./util";
@@ -13,7 +13,7 @@ export const GRID_QUERY_KEY = "content";
 
 export const ELEMENT_MAP: Record<
   CARD_TYPES,
-  ComponentType<ComponentProps<typeof Card>>
+  ComponentType<ComponentProps<typeof motion.div>>
 > = {
   Home: dynamic(() => import("../Cards/HeroCard"), {
     loading: (props) => <LoadingCard {...props} />,

@@ -1,5 +1,5 @@
 import { Object3DNode, extend } from "@react-three/fiber";
-import { NormalBlending, ShaderMaterial, Vector2 } from "three";
+import { NormalBlending, ShaderMaterial, Vector2, Vector3 } from "three";
 
 class DofPointsMaterial extends ShaderMaterial {
   constructor(particleLength: number, fboSize = new Vector2(1, 1)) {
@@ -25,6 +25,7 @@ class DofPointsMaterial extends ShaderMaterial {
         gl_PointSize = vPointSize;
       }`,
       fragmentShader: `uniform float uOpacity;
+      uniform vec3 uColor;
       varying float vDistance;
       varying float vPointSize;
       void main() {
@@ -33,7 +34,7 @@ class DofPointsMaterial extends ShaderMaterial {
         if (dist > 1.0) discard;
         float alpha = mix(0.3 - clamp(vDistance, 0.0 , 0.3), 1.0, 0.1);
         alpha *= (1.0-dist) * 0.4; 
-        gl_FragColor = vec4(vec3(0.69, 0.709, 0.682), alpha);
+        gl_FragColor = vec4(uColor, alpha);
       }`,
       uniforms: {
         positions: { value: null },
@@ -42,6 +43,7 @@ class DofPointsMaterial extends ShaderMaterial {
         uBlur: { value: 10 },
         uParticleLength: { value: particleLength },
         uFboSize: { value: fboSize },
+        uColor: { value: new Vector3(0.215, 0.231, 0.223) },
       },
       transparent: true,
       blending: NormalBlending,

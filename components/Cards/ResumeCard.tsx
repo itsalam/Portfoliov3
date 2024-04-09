@@ -1,19 +1,22 @@
 "use client";
 
+import { useResizeCallBack } from "@/lib/clientUtils";
 import { CMSContext } from "@/lib/state";
 import { cn } from "@/lib/utils";
 import { Spinner } from "@radix-ui/themes";
 import { motion } from "framer-motion";
+import { debounce } from "lodash";
 import { ArrowDown, Download } from "lucide-react";
 import {
   ComponentProps,
   FC,
+  useCallback,
   useContext,
-  useLayoutEffect,
   useRef,
-  useState,
+  useState
 } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
+import "react-pdf/dist/Page/TextLayer.css";
 import { useStore } from "zustand";
 import { BaseRolloutButton } from "../Buttons/BaseRolloutButton";
 
@@ -78,37 +81,45 @@ export default function ResumeCard(props: ComponentProps<typeof motion.div>) {
   const [cardWidth, setCardWidth] = useState(0);
   const [cardHeight, setCardHeight] = useState(0);
 
-  useLayoutEffect(() => {
-    const cardElement = cardRef.current;
-    if (cardElement) {
-      const observer = new ResizeObserver((entries) => {
-        const { width, height } = entries[0].contentRect;
-        setCardWidth(width);
-        setCardHeight(height);
-        // Do something with the width
-      });
-      observer.observe(cardElement);
-      return () => {
-        observer.unobserve(cardElement);
-      };
-    }
-  }, [cardRef]);
+  const updateDimensions = debounce((entries) => {
+    const { width, height } = entries[0].contentRect;
+    setCardWidth(width);
+    setCardHeight(height);
+    // Do something with the width
+  }, 100);
+  useResizeCallBack(updateDimensions, cardRef);
 
-  const handleDownload = () => {
-    if (!resume) return;
-    fetch(resume?.url)
-      .then((res) => res.blob())
-      .then((blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", resume.title);
+  const ResumeContent = useCallback(() => {
+    const handleDownload = () => {
+      if (!resume) return;
+      fetch(resume?.url)
+        .then((res) => res.blob())
+        .then((blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.setAttribute("download", resume.title);
 
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      });
-  };
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        });
+    };
+    return (
+      resume && (
+        <>
+          <Document
+            file={resume.url}
+            className="relative h-full w-full "
+            loading={<Spinner className="m-auto" size={"3"} />}
+          >
+            <Page pageNumber={1} className="w-full" width={cardWidth} />
+          </Document>
+          <DownloadButton onClick={handleDownload} />
+        </>
+      )
+    );
+  }, [resume, cardWidth]);
 
   return (
     <motion.div
@@ -120,23 +131,7 @@ export default function ResumeCard(props: ComponentProps<typeof motion.div>) {
       ref={cardRef}
       initial="initial"
     >
-      {resume && (
-        <>
-          <Document
-            file={resume.url}
-            className="relative h-full w-full "
-            loading={<Spinner className="m-auto" size={"3"} />}
-          >
-            <Page
-              pageNumber={1}
-              className="w-full"
-              width={cardWidth}
-              // height={cardHeight}
-            />
-          </Document>
-          <DownloadButton onClick={handleDownload} />
-        </>
-      )}
+      <ResumeContent />
     </motion.div>
   );
 }

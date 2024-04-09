@@ -1,5 +1,6 @@
 "use client";
 
+import { useResizeCallBack } from "@/lib/clientUtils";
 import { cn } from "@/lib/utils";
 import { animate, motion } from "framer-motion";
 import { debounce } from "lodash";
@@ -12,21 +13,23 @@ export default function LocationCard(props: ComponentProps<typeof motion.div>) {
   const { resolvedTheme } = useTheme();
   const locationRef = useRef(null);
   const mapRef = useRef<MapRef>(null);
-  const resizeMap = debounce(() => mapRef.current?.resize(), 1000, {
-    trailing: true,
-    maxWait: 2000,
-  });
+  const resizeMap = debounce(
+    () => {
+      mapRef.current?.resize();
+    },
+    1000,
+    {
+      trailing: true,
+      maxWait: 2000,
+    }
+  );
+  useResizeCallBack(resizeMap, locationRef);
 
   return (
     <motion.div
       className={cn("relative flex h-full w-full gap-4", className)}
       ref={locationRef}
       onAnimationComplete={resizeMap}
-      variants={{
-        animate: {
-          opacity: [0, 0],
-        },
-      }}
       {...rest}
     >
       <Map

@@ -213,6 +213,7 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
               selectedProject.stack.map((tech) => {
                 return (
                   <MotionBadge
+                    id={tech.name}
                     variant="surface"
                     key={tech.name}
                     color="gray"

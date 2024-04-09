@@ -118,7 +118,15 @@ module.exports = {
       fontSize: {
         grid: ["var(--cell-size)", "var(--cell-size)"],
       },
-      ...propertyUtilities(["padding", "margin", "height", "width", "spacing"]),
+      ...propertyUtilities([
+        "padding",
+        "margin",
+        "height",
+        "width",
+        "spacing",
+        "min-height",
+        "min-width",
+      ]),
     },
   },
   plugins: [require("tailwindcss-animate")],

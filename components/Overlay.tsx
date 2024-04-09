@@ -18,8 +18,8 @@ const Overlay: React.FC = () => {
   }, [dimensions]);
 
   return (
-    <nav className="fixed left-0 z-0 h-screen w-screen">
-      <div className="absolute right-g-3/8  top-g-2/8 font-favorit">
+    <>
+      <div className="absolute  right-0 top-0 z-50 bg-gradient-to-tr from-transparent via-transparent to-background pr-g-3/8 pt-g-2/8 font-favorit">
         <Text className="block w-full text-right" size={{ xl: "5", md: "2" }}>
           {currentDate}
         </Text>
@@ -27,14 +27,15 @@ const Overlay: React.FC = () => {
           <Clock />
         </Text>
       </div>
+
       <Text
-        className="absolute bottom-g-2/8 right-g-3/8 text-right font-favorit"
+        className="absolute bottom-g-2/8 right-g-3/8 z-50 text-right font-favorit"
         size={{ xl: "5", md: "2" }}
       >
         {screenString}
       </Text>
       {/* <div className="container backdrop w-screen h-screen overflow-hidden pointer-events-none -z-50"></div> */}
-    </nav>
+    </>
   );
 };
 

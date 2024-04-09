@@ -57,7 +57,7 @@ const Item = (props: {
 
   useLayoutEffect(() => {
     domRect.set((ref.current as HTMLElement).getBoundingClientRect());
-  }, [domRect]);
+  });
 
   const width = useTransform(
     dist,
@@ -90,7 +90,7 @@ const Item = (props: {
         style={{
           width: springWidth,
         }}
-        className="w-g-5/8 relative z-[1000] flex aspect-square items-end justify-end rounded-full bg-[--gray-5] brightness-100 transition-all hover:bg-[--gray-2]"
+        className="relative z-[1000] flex aspect-square w-g-5/8 items-end justify-end rounded-full bg-[--gray-5] brightness-100 transition-all hover:bg-[--gray-2]"
         variants={{
           initial: {
             width: [null, size * minSize],
@@ -137,8 +137,8 @@ export default function MenuCard(props: ComponentProps<typeof motion.div>) {
       className={cn("group absolute z-50 overflow-visible", className)}
       initial="initial"
       animate="animate"
-      id={CARD_TYPES.Menu}
-      key={CARD_TYPES.Menu}
+      id={"Menu"}
+      key={"Menu"}
       whileHover={"hover"}
       onMouseMove={trackMouse}
       onMouseLeave={() => {
@@ -148,7 +148,7 @@ export default function MenuCard(props: ComponentProps<typeof motion.div>) {
       }}
       variants={{
         animate: {
-          width: [null, gridCellSize * 3],
+          width: [null, 350],
           height: [null, gridCellSize * 1],
           transition: {
             duration: 0.1,
@@ -160,7 +160,7 @@ export default function MenuCard(props: ComponentProps<typeof motion.div>) {
       <motion.div
         // animate={controls}
         variants={{
-          initial: { height: 16 + gridCellSize / 2 },
+          initial: { height: 64 },
         }}
         className="card absolute bottom-0 left-1/2 z-[1000] flex -translate-x-1/2 items-end gap-4 overflow-visible rounded-full p-2 backdrop-brightness-50 transition-all group-hover:bg-[--gray-a3] group-hover:backdrop-brightness-75"
       >
@@ -171,7 +171,7 @@ export default function MenuCard(props: ComponentProps<typeof motion.div>) {
             {...{ x, y }}
             minSize={0.5}
             maxSize={0.85}
-            size={gridCellSize}
+            size={96}
             onClick={() => pushElements(cards)}
           >
             <Icon
@@ -188,7 +188,7 @@ export default function MenuCard(props: ComponentProps<typeof motion.div>) {
           {...{ x, y }}
           minSize={0.5}
           maxSize={0.85}
-          size={gridCellSize}
+          size={96}
           onClick={() => {
             setTheme(
               themes[themes.findIndex((theme) => theme === resolvedTheme) ^ 1]

@@ -9,11 +9,11 @@ import { SchemaStores } from "./fetchData";
 import { Dimensions, GridStore } from "./state";
 
 export const useResizeCallBack = (
-  cb: () => void,
+  cb: ResizeObserverCallback,
   ...refs: RefObject<HTMLElement>[]
 ) => {
   useEffect(() => {
-    window.addEventListener("resize", cb);
+    // window.addEventListener("resize", cb);
     const elements = refs
       .map((ref) => ref.current)
       .filter(Boolean) as HTMLElement[];
@@ -27,7 +27,7 @@ export const useResizeCallBack = (
         elements.forEach((e) => {
           resizeObserver.unobserve(e);
         });
-      window.removeEventListener("resize", cb);
+      // window.removeEventListener("resize", cb);
     };
   }, [cb, refs]);
 };

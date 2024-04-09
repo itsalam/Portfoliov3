@@ -23,7 +23,6 @@ const animateTransition = {
 };
 
 export default function HeroCard(props: ComponentProps<typeof motion.div>) {
-  const { ...rest } = props;
   const heroRef = useRef<HTMLDivElement>(null);
 
   const controls = useAnimationControls();
@@ -57,7 +56,7 @@ export default function HeroCard(props: ComponentProps<typeof motion.div>) {
             text="(a)"
           />
         </MText>
-        <div className="my-gap-y relative flex h-g-5/8 flex-col gap-0 overflow-hidden pr-0 font-bold">
+        <div className="my-gap-y relative flex h-16 flex-col gap-0 overflow-hidden pr-0 font-bold">
           <div className="absolute top-0 flex h-full flex-row gap-0">
             <RotateText
               size={"9"}
@@ -105,6 +104,7 @@ export default function HeroCard(props: ComponentProps<typeof motion.div>) {
       animate={controls}
       ref={heroRef}
       initial="initial"
+      {...props}
     >
       <TextRotateBody />
     </motion.div>

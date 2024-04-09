@@ -2,6 +2,7 @@
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 // import { GUI } from "dat.gui";
+import { useTheme } from "next-themes";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import {
   DataTexture,
@@ -19,6 +20,7 @@ import {
   Scene,
   Texture,
   Vector2,
+  Vector3,
   Vector4,
   WebGLRenderTarget,
   WebGLRenderer,
@@ -71,6 +73,7 @@ const ParticleScene = () => {
   const { gl, size, camera } = useThree();
   const renderRef = useRef<DofPointsMaterial>(null!);
   const sceneRef = useRef<Scene>(null);
+  const { resolvedTheme } = useTheme();
   const particles = useMemo(() => {
     const length = particleLength * particleLength;
     const particles = new Float32Array(length * 3);
@@ -94,6 +97,10 @@ const ParticleScene = () => {
     aperture: 40.0,
     fov: 3.5,
     focus: 4.2,
+    color:
+      resolvedTheme === "light"
+        ? new Vector3(0.215, 0.231, 0.223)
+        : new Vector3(0.69, 0.709, 0.682),
   });
   const type = /(iPad|iPhone|iPod)/g.test(navigator.userAgent)
     ? HalfFloatType
@@ -287,6 +294,10 @@ const ParticleScene = () => {
         options.current.aperture,
         0.1
       );
+      render.uniforms.uColor.value =
+        resolvedTheme === "light"
+          ? new Vector3(0.215, 0.231, 0.223)
+          : new Vector3(0.69, 0.709, 0.682);
     }
   });
 

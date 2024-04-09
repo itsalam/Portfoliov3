@@ -30,7 +30,7 @@ import {
   getDefaultGridElement,
   initializeGridElements,
   resolveIntersections,
-  updateDraggedElement
+  updateDraggedElement,
 } from "./util";
 
 const DRAG_TIMEOUT = 100;
@@ -95,7 +95,11 @@ const Grid = () => {
           // binpackElements(gridElements, gridInfo);
           scrollToGridElement(gridElem);
         } else {
+          console.log("push");
           gridElements.set(id, getDefaultGridElement(id, gridInfo));
+
+          console.log("push ended");
+          console.log(JSON.parse(JSON.stringify([...gridElements.values()])));
           setGridElements(new Map(gridElements));
         }
       });
@@ -143,15 +147,13 @@ const Grid = () => {
   useEffect(() => {
     const { gridUnitSize, oldVals } = gridInfo;
     if (oldVals && oldVals.gridUnitSize !== gridUnitSize) {
+      console.log("binpack");
       setGridElements((gridElements: GridElements) => {
         gridElements.forEach((element) => {
           const { width, height, coords } = getDefaultGridElement(
             element.id,
             gridInfo
           );
-          if (element.id === CARD_TYPES.Home) {
-            console.log(width);
-          }
           gridElements.set(element.id, {
             ...element,
             coords,
@@ -164,7 +166,6 @@ const Grid = () => {
         return new Map(gridElements);
       });
     }
-    console.log(dimensionsRef.current.width, gridInfo);
   }, [gridInfo]);
 
   useEffect(() => {
@@ -187,19 +188,19 @@ const Grid = () => {
         const newGridElem = resolveIntersections(e, gridElements, gridInfo);
         gridElements.set(newGridElem.id, newGridElem);
       });
+
+      console.log("gridelems");
       setGridElements(new Map(gridElements));
       const lowestElem = elemArr.reduce((acc, curr) =>
         acc.height + acc.coords[1] > curr.height + curr.coords[1] ? acc : curr
       );
       setLowestElem(lowestElem);
-      console.log(unPositionedElements, elemArr);
     }
   }, [gridElements]);
 
   useEffect(() => {
     const gridInfo = gridInfoRef.current;
     const dimensions = dimensionsRef.current;
-    console.log(lowestElem);
     if (lowestElem) {
       const lowestElemHeight = lowestElem.height + lowestElem.coords[1];
       if (lowestElemHeight > dimensions.height) {
@@ -273,7 +274,7 @@ const Grid = () => {
       <ScrollArea ref={scrollAreaRef}>
         <motion.div
           className="relative h-full w-full"
-          style={{
+          animate={{
             height: dimensions.containerHeight,
           }}
         >

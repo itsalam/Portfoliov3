@@ -170,9 +170,6 @@ export const getDefaultGridElement = (
   gridInfo: GridInfo
 ): GridElement => {
   const defaultElem = DEFAULT_GRID_ELEMENTS[id];
-  if (id === CARD_TYPES.Home) {
-    console.log(defaultElem);
-  }
   const { gridUnitSize, bounds } = gridInfo;
   return {
     ...defaultElem,
