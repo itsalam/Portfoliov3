@@ -3,9 +3,16 @@
 import { GridContext } from "@/lib/state";
 import { cn } from "@/lib/utils";
 import { Separator, Text } from "@radix-ui/themes";
-import { PanInfo, animate, motion, useDragControls } from "framer-motion";
+import {
+  DOMKeyframesDefinition,
+  PanInfo,
+  animate,
+  motion,
+  useDragControls,
+} from "framer-motion";
 import { debounce } from "lodash";
 import { Lock, LockOpen, X } from "lucide-react";
+import { useTheme } from "next-themes";
 import {
   CSSProperties,
   ComponentProps,
@@ -33,24 +40,39 @@ const Card: FC<
 > = (props) => {
   const { x, y, className, children, id, isLocked, height, width, ...rest } =
     props;
-  const ref = useRef(null);
+  const ref = useRef<HTMLDivElement>(null);
   const initialLoad = useRef(true);
 
   const animation = useMemo(
     () =>
       debounce(() => {
-        animate(ref.current, {
-          x: [null, x, x],
-          y: [null, y, y],
-          opacity: [null, 1, 1],
-          width: [null, null, width],
-          height: [null, null, height],
-          transition: {
-            type: initialLoad.current ? "spring" : "tween",
-            duration: initialLoad.current ? 0.133 : 0.001,
-          },
-        });
-        initialLoad.current = false;
+        if (!ref.current) return;
+        if (initialLoad.current) {
+          animate(ref.current, {
+            x: [null, x, x],
+            y: [null, y, y],
+            opacity: [null, 1, 1],
+            width: [null, null, width],
+            height: [null, null, height],
+            transition: {
+              type: "spring",
+              duration: 0.133,
+            },
+          } as DOMKeyframesDefinition);
+          initialLoad.current = false;
+        } else {
+          console.log(initialLoad);
+          animate(
+            ref.current,
+            {
+              x: [null, x, x],
+              y: [null, y, y],
+              width: [null, null, width],
+              height: [null, null, height],
+            } as DOMKeyframesDefinition,
+            { duration: 0.001 }
+          );
+        }
       }, 10),
     [height, width, x, y]
   );
@@ -70,8 +92,6 @@ const Card: FC<
       className={cn("card absolute origin-top-left transition-all", className)}
       ref={ref}
       id={id}
-      width={width}
-      height={height}
       {...rest}
     >
       {children}
@@ -95,6 +115,7 @@ export const TitleCard: FC<ComponentProps<typeof Card>> = (props) => {
   } = props;
   const dragControls = useDragControls();
   const [isDrag, setIsDrag] = useState(false);
+  const { resolvedTheme } = useTheme();
   const { closeElements, lockElements } = useContext(GridContext)!.getState();
 
   function startDrag(event: PointerEvent) {
@@ -147,7 +168,7 @@ export const TitleCard: FC<ComponentProps<typeof Card>> = (props) => {
         "h-0 w-0",
         "group flex flex-col overflow-hidden",
         "border-[1px] border-[--gray-a3]",
-        "hover:border-[--gray-10] hover:bg-[--gray-a4] ",
+        "hover:border-[--gray-a7] ",
         {
           "border-[--gray-12]": isDrag,
         }
@@ -206,7 +227,14 @@ export const TitleCard: FC<ComponentProps<typeof Card>> = (props) => {
         </div>
       </motion.div>
       <motion.div
-        className={cn(className, "z-30 h-[inherit] overflow-hidden opacity-0")}
+        className={cn(
+          className,
+          "card-bg z-30 h-[inherit] overflow-hidden opacity-0",
+          {
+            "hover:bg-[--gray-1]": resolvedTheme === "light",
+            "dark:hover:bg-[--gray-2]": resolvedTheme !== "light",
+          }
+        )}
         animate={{
           opacity: [0, 1],
           transition: {

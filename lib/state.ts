@@ -1,4 +1,5 @@
 import { CARD_TYPES } from "@/components/Cards/types";
+import { GridElements } from "@/components/Grid/consts";
 import { Dispatch, SetStateAction, createContext } from "react";
 import { createStore } from "zustand";
 import { SchemaStores, createCMSSlices } from "./fetchData";
@@ -20,6 +21,7 @@ export type GridInfo = {
   gapSize: number;
   oldVals?: Omit<GridInfo, "oldVals"> | null;
   bounds: { left: number; right: number; top: number; bottom: number };
+  isMobile: boolean;
 };
 
 const NUM_COLS = 48;
@@ -30,9 +32,7 @@ const getGridProps = (dimensions: Dimensions): Omit<GridInfo, "oldVals"> => {
   const { width, containerHeight, height } = dimensions;
   const ratio = Math.floor((width / height) * CELL_SIZE) / CELL_SIZE;
   const gridUnitSize = width / NUM_COLS;
-  // const gridCellHeight = Math.round(height / NUM_ROWS);
   const gridCellSize = gridUnitSize * CELL_SIZE;
-  // const gridUnitHeight = Math.round(gridCellHeight * UNIT_SIZE);
 
   return {
     unitSize: CELL_SIZE,
@@ -49,6 +49,7 @@ const getGridProps = (dimensions: Dimensions): Omit<GridInfo, "oldVals"> => {
       top: gridUnitSize,
       bottom: containerHeight,
     },
+    isMobile: width < 480,
   };
 };
 

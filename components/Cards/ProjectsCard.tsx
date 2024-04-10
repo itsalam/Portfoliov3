@@ -82,7 +82,7 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
       });
     },
     600,
-    { trailing: true }
+    { leading: true }
   );
 
   useEffect(() => {
@@ -132,7 +132,7 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
             height: [null, "90%"],
           },
           deselected: {
-            height: [null, "66%"],
+            height: [null, "80%"],
           },
         }}
       >
@@ -144,7 +144,7 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
               "track-card group relative h-full cursor-pointer overflow-hidden rounded-sm p-0 duration-300"
             )}
             onHoverStart={handleProjectHover(project)}
-            onClick={() => !dragRef.current && changeSelectedProject(project)}
+            onTap={() => !dragRef.current && changeSelectedProject(project)}
           >
             <Image
               className={cn(

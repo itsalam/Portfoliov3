@@ -9,10 +9,11 @@ import Overlay from "@/components/Overlay";
 import { useCMSStoreInitializer, useResizeGridUpdate } from "@/lib/clientUtils";
 import { CMSContext, GridContext } from "@/lib/state";
 import { ThemePanel } from "@radix-ui/themes";
-import "@radix-ui/themes/styles.css";
 import { AnimatePresence, motion, useAnimate } from "framer-motion";
 import { useContext, useEffect, useState } from "react";
 import { useLoading } from "./providers";
+
+import "./globals.css";
 
 export default function Hero() {
   const [loadingPromises] = useLoading();

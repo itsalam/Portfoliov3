@@ -1,7 +1,7 @@
 "use client";
 
 import { GridContext } from "@/lib/state";
-import { Text } from "@radix-ui/themes";
+import { Separator, Text } from "@radix-ui/themes";
 import React, { useContext, useEffect, useState } from "react";
 import { useStore } from "zustand";
 import Clock from "./util/Clock";
@@ -14,26 +14,30 @@ const Overlay: React.FC = () => {
 
   useEffect(() => {
     const { width, containerHeight } = dimensions;
-    setScreenString(`${width.toFixed()} x ${containerHeight.toFixed()}`);
+    setScreenString(`${width.toFixed()}x${containerHeight.toFixed()}`);
   }, [dimensions]);
 
   return (
     <>
-      <div className="absolute  right-0 top-0 z-50 bg-gradient-to-tr from-transparent via-transparent to-background pr-g-3/8 pt-g-2/8 font-favorit">
-        <Text className="block w-full text-right" size={{ xl: "5", md: "2" }}>
-          {currentDate}
-        </Text>
-        <Text className="block w-full text-right" size={{ xl: "5", md: "2" }}>
-          <Clock />
-        </Text>
+      <div className="font-overlay md:flex-row absolute bottom-g-2/8 right-g-2/8 z-50 flex flex-col gap-1">
+        <div>
+          <Text className="flex w-full justify-center text-right" size={"2"}>
+            {currentDate}
+          </Text>
+          <Separator size={"4"} />
+          <Text className="flex w-full justify-center text-right" size={"1"}>
+            {screenString}
+          </Text>
+        </div>
+
+        <Separator size={"4"} />
+        <Clock />
       </div>
 
-      <Text
-        className="absolute bottom-g-2/8 right-g-3/8 z-50 text-right font-favorit"
-        size={{ xl: "5", md: "2" }}
-      >
-        {screenString}
-      </Text>
+      {/* <Text
+        className="font-overlay absolute  z-50 text-right"
+        size={"9"}
+      ></Text> */}
       {/* <div className="container backdrop w-screen h-screen overflow-hidden pointer-events-none -z-50"></div> */}
     </>
   );

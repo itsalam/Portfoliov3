@@ -1,29 +1,42 @@
-import { motion, useMotionValue } from "framer-motion";
-import { useEffect } from "react";
+import {
+  motion,
+  useMotionValue,
+  useMotionValueEvent,
+  useSpring,
+} from "framer-motion";
+import { useEffect, useRef } from "react";
 import { moveCursorEffect } from "../Grid/util";
 
 const Effect = () => {
-  const x = useMotionValue(-100);
-  const y = useMotionValue(-100);
+  const baseX = useMotionValue(-100);
+  const baseY = useMotionValue(-100);
+  const x = useSpring(baseX, { damping: 10 });
+  const y = useSpring(baseX, { damping: 10 });
+
+  const getCanvas = () => {
+    const canvas = document.getElementById("mask");
+    if (canvas) {
+      canvas.setAttribute("data-circle-radius", `${40}`);
+    }
+    return canvas;
+  };
+  const canvas = useRef(getCanvas());
+
+  const updateAttribute = (dataAttr: string) => (latest: string) => {
+    canvas.current = canvas.current || getCanvas();
+    if (canvas.current !== null) {
+      canvas.current.setAttribute(dataAttr, `${latest}`);
+      moveCursorEffect(canvas.current);
+    }
+  };
+
+  useMotionValueEvent(x, "change", updateAttribute("data-circle-x"));
+  useMotionValueEvent(y, "change", updateAttribute("data-circle-y"));
 
   useEffect(() => {
     const followMouse = (e: MouseEvent) => {
-      x.set(e.clientX);
-      y.set(e.clientY);
-      const follower = document.getElementById("cursor");
-      const canvas = document.getElementById("mask");
-      // Dynamically update the mask on the canvas
-      // Note: For simplicity, this example uses a simple circle mask centered on the follower.
-      // For more complex shapes, you might need an SVG mask or more complex calculations.
-      if (canvas && follower) {
-        const curWidth = follower?.clientWidth;
-        canvas.setAttribute("data-circle-radius", `${curWidth * 1.5}`);
-        canvas.setAttribute("data-circle-x", `${e.clientX - curWidth / 2}`);
-        canvas.setAttribute("data-circle-y", `${e.clientY}`);
-        moveCursorEffect(canvas);
-      }
-      // canvas.style.webkitMaskPosition = `${e.client}px ${e.client}px`;
-      // canvas.style.maskPosition = `${e.client}px ${e.client}px`;
+      baseX.set(e.clientX);
+      baseY.set(e.clientY);
     };
     window.addEventListener("mousemove", followMouse);
     return () => {
@@ -32,9 +45,9 @@ const Effect = () => {
   });
   return (
     <motion.div
-      style={{ x, y }}
+      style={{ x: baseX, y: baseY }}
       id="cursor"
-      className="mouse-effect w-g-4/8 pointer-events-none absolute left-0 top-0 z-[50] aspect-square cursor-none rounded-full backdrop-grayscale backdrop-invert"
+      className="mouse-effect pointer-events-none absolute left-0 top-0 z-[50] aspect-square w-10 cursor-none rounded-full backdrop-grayscale backdrop-invert"
     />
   );
 };

@@ -41,13 +41,14 @@ module.exports = {
       },
     },
     fontFamily: {
+      overlay: ["var(--font-favorit)"],
+      sans: ["var(--font-outward)"],
       display: ["NeueMontreal"],
-      power: ["PowerGroteskTrialLight"],
-      favorit: ["Favorit"],
-      apercu: ["Apercu"],
+      favorit: ["var(--font-favorit)"],
     },
     extend: {
       screens: {
+        xs: "480px",
         "3xl": "1800px",
       },
       backgroundImage: {

@@ -15,7 +15,6 @@ import {
   MouseEventHandler,
   MutableRefObject,
   ReactNode,
-  WheelEventHandler,
   cloneElement,
   isValidElement,
   useCallback,
@@ -32,14 +31,7 @@ const Track = (
     clickedIndex: MutableRefObject<number>;
   }
 ) => {
-  const {
-    className,
-    children,
-    onHoverEnd,
-    dragRef,
-    clickedIndex,
-    ...restProps
-  } = props;
+  const { className, children, dragRef, clickedIndex, ...restProps } = props;
   const [maxDist, setMaxDist] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -76,18 +68,6 @@ const Track = (
     dist.set(
       Math.min(Math.max(coord, maxDist + thresholdDist), 0 - thresholdDist)
     );
-  };
-
-  const handleWheelMove: WheelEventHandler<HTMLDivElement> = (e) => {
-    e.stopPropagation();
-    setTrackDist(dist.get() + e.deltaY * -0.33), 0.1;
-  };
-
-  const handleMouseMove: MouseEventHandler<HTMLDivElement> = (e) => {
-    const containerElement = containerRef.current;
-    if (containerElement && startDrag.current) {
-      setTrackDist(dist.get() + e.movementX, 0.1);
-    }
   };
 
   const panToElement =
@@ -131,7 +111,6 @@ const Track = (
           containerRef.current?.getBoundingClientRect().width || 0
         }
         numItems={numItems}
-        className=""
       />
       <motion.div
         {...restProps}
@@ -143,37 +122,30 @@ const Track = (
             "cursor-grab": !startDrag.current,
           }
         )}
-        onHoverEnd={(e, i) => {
-          onHoverEnd?.(e, i);
-        }}
-        onMouseMove={handleMouseMove}
-        onMouseDown={(e) => {
-          startDrag.current = e.clientX;
-        }}
         onMouseLeave={() => {
           if (!startDrag.current && clickedIndex.current !== -1) {
             panToElement(clickedIndex.current)();
           }
         }}
-        onMouseUp={(e) => {
-          dragRef.current = Math.abs(startDrag.current - e.clientX) > 5;
-          startDrag.current = 0;
-          setTimeout(() => (dragRef.current = false), 25);
-        }}
-        onWheel={handleWheelMove}
         ref={containerRef}
         id="container"
       >
         <motion.div
           ref={trackRef}
+          drag="x"
           style={
             {
               x: springDist,
             } as MotionStyle
           }
-          className={cn("track gap-g-2/8 relative flex items-start", {})}
+          className={cn("track relative flex items-start gap-g-2/8", {})}
           suppressHydrationWarning
           id="track"
+          dragConstraints={{
+            left: maxDist,
+            right: 0,
+          }}
+          dragTransition={{ timeConstant: 200, power: 0.5 }}
           variants={{
             selected: {
               "--mask-height": 0.4,

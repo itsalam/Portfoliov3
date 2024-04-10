@@ -56,35 +56,59 @@ export default function HeroCard(props: ComponentProps<typeof motion.div>) {
             text="(a)"
           />
         </MText>
-        <div className="my-gap-y relative flex h-16 flex-col gap-0 overflow-hidden pr-0 font-bold">
-          <div className="absolute top-0 flex h-full flex-row gap-0">
+        <div className="my-gap-y relative flex flex-col gap-0 overflow-hidden pr-0 font-bold">
+          {/* <div className="absolute top-0 flex h-full flex-row gap-0"> */}
+          <div className="absolute flex flex-col flex-wrap gap-x-4 xs:flex-row">
+            <div className="relative overflow-hidden">
+              <RotateText
+                size={"9"}
+                className="relative left-0 top-0 flex h-16 items-center"
+                range={[2, 0]}
+                text="Vincent"
+                variants={animateTransition}
+              />
+            </div>
+            <div className="relative overflow-hidden">
+              <RotateText
+                size={"9"}
+                className="relative flex h-16 items-center"
+                range={[2, 0]}
+                text="Lam"
+                variants={animateTransition}
+              />
+            </div>
+          </div>
+
+          <div className="relative flex flex-col flex-wrap gap-x-4  xs:flex-row">
+            <div className="relative overflow-hidden">
+              <RotateText
+                size={"9"}
+                className="relative left-0 top-0 flex h-16 items-center"
+                range={[0, 1]}
+                text="Full-Stack"
+              />
+            </div>
+
+            <div className="relative overflow-hidden">
+              <RotateText
+                size={"9"}
+                className="relative flex h-16 items-center font-bold"
+                range={[0, 2]}
+                text="Dev"
+              />
+            </div>
+          </div>
+
+          <div className="absolute h-16 w-full overflow-hidden">
             <RotateText
               size={"9"}
-              className="absolute flex h-full items-center"
-              range={[2, 0]}
-              text="Vincent Lam"
-              variants={animateTransition}
-            />
-            <RotateText
-              size={"9"}
-              className="relative left-0 top-0 flex h-full items-center"
-              range={[0, 1]}
-              text="Full-Stack"
-            />
-            <RotateText
-              size={"9"}
-              className="absolute left-0 top-0 flex h-full items-center"
+              className="absolute left-0 top-0 flex h-16 items-start"
               range={[1, 2]}
               text="Front-End"
             />
-            <span className="relative w-4"> </span>
-            <RotateText
-              size={"9"}
-              className="relative flex items-center font-bold"
-              range={[0, 2]}
-              text="Dev"
-            />
           </div>
+          <span className="relative w-4"> </span>
+          {/* </div> */}
         </div>
         <Text asChild key="body" size={"3"} className="min-w-g-3 z-30 py-0">
           <span>
@@ -100,7 +124,9 @@ export default function HeroCard(props: ComponentProps<typeof motion.div>) {
 
   return (
     <motion.div
-      className={cn("relative mx-g-2/8 flex h-full flex-col justify-center")}
+      className={cn(
+        "relative mx-g-2/8 flex h-full flex-col justify-center p-4 xs:p-0"
+      )}
       animate={controls}
       ref={heroRef}
       initial="initial"

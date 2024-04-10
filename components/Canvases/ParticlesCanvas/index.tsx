@@ -55,7 +55,7 @@ function getPoint(
     Math.random() * 1.8 - 0.95,
     Math.random() * 1.8 - 0.95,
     Math.random() * 1.8 - 0.95,
-    0
+    0.0
   );
   // if (v.length() > 1) return getPoint(v, size, data, offset);
   return v.toArray(data, offset);
@@ -85,21 +85,40 @@ const ParticleScene = () => {
     return particles;
   }, [particleLength]);
 
+  const accentColor = useMemo(() => {
+    const themeElem = document.querySelector(".radix-themes");
+    if (themeElem) {
+      const cssColor =
+        getComputedStyle(themeElem).getPropertyValue("--accent-6");
+      // Extract the numerical components
+      const matches = cssColor.match(
+        /color\(display-p3\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\)/
+      );
+      if (matches) {
+        const r = parseFloat(matches[1]);
+        const g = parseFloat(matches[2]);
+        const b = parseFloat(matches[3]);
+        return new Vector3(r, g, b);
+      }
+    }
+    return new Vector3(0, 0, 0);
+  }, []);
+
   // SHADER CONFIGURATION
   const options = useRef({
     dt: 0.001,
-    cursorSize: 0.03,
-    mouseForce: 50,
+    cursorSize: 0.05,
+    mouseForce: 75,
     resolution: 0.75,
     viscous: 200,
     iterations: 3,
     isViscous: true,
     aperture: 40.0,
     fov: 3.5,
-    focus: 4.2,
+    focus: 2.0,
     color:
       resolvedTheme === "light"
-        ? new Vector3(0.215, 0.231, 0.223)
+        ? new Vector3(0.69, 0.709, 0.682)
         : new Vector3(0.69, 0.709, 0.682),
   });
   const type = /(iPad|iPhone|iPod)/g.test(navigator.userAgent)
@@ -294,10 +313,12 @@ const ParticleScene = () => {
         options.current.aperture,
         0.1
       );
+
       render.uniforms.uColor.value =
         resolvedTheme === "light"
           ? new Vector3(0.215, 0.231, 0.223)
           : new Vector3(0.69, 0.709, 0.682);
+      render.uniforms.uAccent.value = accentColor;
     }
   });
 
@@ -338,6 +359,7 @@ const ParticleScene = () => {
         <DebugView
           texture={fluidFbos.current.vel_0.texture}
           camera={camera as PerspectiveCamera}
+          resolvedTheme={resolvedTheme}
         />
       </scene>
     </>
@@ -347,15 +369,17 @@ const ParticleScene = () => {
 const DebugView = ({
   texture,
   camera,
+  resolvedTheme,
 }: {
   texture: Texture;
   camera: PerspectiveCamera;
+  resolvedTheme?: string;
 }) => {
   texture.needsUpdate = true;
   const material = new MeshBasicMaterial({
     map: texture,
     side: DoubleSide,
-    opacity: 0.03,
+    opacity: resolvedTheme == "light" ? 0.06 : 0.03,
     transparent: true,
   });
 
@@ -379,8 +403,9 @@ const ParticleCanvas = () => {
       className="left-0 z-0 opacity-80"
       gl={{ antialias: true, alpha: true, autoClear: false }}
       camera={{
-        position: [0, 0, 5],
-        fov: 8,
+        position: [0, 0, 2],
+        fov: 30,
+        type: "OrthographicCamera",
       }}
     >
       <ParticleScene />

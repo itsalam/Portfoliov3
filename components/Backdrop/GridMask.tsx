@@ -79,6 +79,7 @@ const GridEffect: React.FC<GridProps> = (props) => {
   ]);
 
   const HorizontalLines = useCallback(() => {
+    console.log(gridRows);
     return Array.from({ length: gridRows + 1 }).map((_, i) => (
       <line
         y1={i * cellHeight}

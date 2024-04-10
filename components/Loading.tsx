@@ -64,7 +64,7 @@ const Loading = forwardRef<
             transition={{
               type: "tween",
               ease: "easeInOut", // This can be adjusted to different easing options
-              duration: 1.5, // Duration of the transition (in seconds)
+              duration: 0.7, // Duration of the transition (in seconds)
             }}
           >
             {Array.from({ length: digit + 1 }).map((_, i: number) => (

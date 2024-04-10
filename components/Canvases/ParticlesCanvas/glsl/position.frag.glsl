@@ -241,7 +241,7 @@ void main() {
     if (pos.x > 0.95 || pos.y > 0.95 || pos.x < -0.95 || pos.y < -0.95){
         pos.y = rand(pos.xy) * 1.8 -0.95;
         pos.x = -0.9 + rand(pos.xz) * 0.1;
-        pos.z = rand(pos.yz) * 1.8 -0.95;
+        pos.z = rand(pos.yz) * 1.8 -0.95;        
         pos.w = 1.0;
     }
     vec2 adjustedUv = (vUv - 0.5) * 2.0;
@@ -253,8 +253,8 @@ void main() {
     vec4 vCameraSpacePosition = vModelViewMatrix * pos;
     vec4 clipSpacePosition = vProjectionMatrix * vCameraSpacePosition;
     vec2 vProjectedTexCoord = (clipSpacePosition.xy / clipSpacePosition.w) * 0.5 + 0.5;
-
-    pos.xyz += texture2D(velocity, vProjectedTexCoord).xyz * 0.003; // basic simulation: moves the particles.
-    gl_FragColor = vec4(pos.xyz + forces, pos.w);
+    vec3 mouseForces = texture2D(velocity, vProjectedTexCoord).xyz * 0.002; // basic simulation: moves the particles.
+    pos.xyz += mouseForces;
+    gl_FragColor = vec4(pos.xyz + forces, 1.0 + length(mouseForces.xy));
 }
          

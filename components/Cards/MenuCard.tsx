@@ -134,7 +134,7 @@ export default function MenuCard(props: ComponentProps<typeof motion.div>) {
   return (
     <motion.div
       {...rest}
-      className={cn("group absolute z-50 overflow-visible", className)}
+      className={cn("safe-pb group absolute z-50 overflow-visible", className)}
       initial="initial"
       animate="animate"
       id={"Menu"}
@@ -149,7 +149,7 @@ export default function MenuCard(props: ComponentProps<typeof motion.div>) {
       variants={{
         animate: {
           width: [null, 350],
-          height: [null, gridCellSize * 1],
+          height: [null, Math.max(64, gridCellSize * 1)],
           transition: {
             duration: 0.1,
           },
@@ -162,7 +162,7 @@ export default function MenuCard(props: ComponentProps<typeof motion.div>) {
         variants={{
           initial: { height: 64 },
         }}
-        className="card absolute bottom-0 left-1/2 z-[1000] flex -translate-x-1/2 items-end gap-4 overflow-visible rounded-full p-2 backdrop-brightness-50 transition-all group-hover:bg-[--gray-a3] group-hover:backdrop-brightness-75"
+        className="card-bg absolute bottom-0 left-1/2 z-[1000] flex -translate-x-1/2 items-end gap-4 overflow-visible rounded-full p-2 backdrop-brightness-50 transition-all group-hover:bg-[--gray-a3] group-hover:backdrop-brightness-75"
       >
         {Object.entries(items).map(([key, { icon: Icon, cards }]) => (
           <Item

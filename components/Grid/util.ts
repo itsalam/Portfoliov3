@@ -8,11 +8,16 @@ import {
   GridElements,
 } from "./consts";
 
+type GridElemDimensions = {
+  width: number;
+  height: number;
+};
+
 export type DefaultGridElement = {
   id: CARD_TYPES;
   initialCoords: [number, number];
-  initialWidth: number;
-  initialHeight: number;
+  initialDimensions: GridElemDimensions;
+  mobileDimensions?: GridElemDimensions;
 };
 
 export type GridElement = {
@@ -170,7 +175,11 @@ export const getDefaultGridElement = (
   gridInfo: GridInfo
 ): GridElement => {
   const defaultElem = DEFAULT_GRID_ELEMENTS[id];
-  const { gridUnitSize, bounds } = gridInfo;
+  const { gridUnitSize, numCols, isMobile } = gridInfo;
+  const dimensions =
+    isMobile && defaultElem.mobileDimensions !== undefined
+      ? defaultElem.mobileDimensions
+      : defaultElem.initialDimensions;
   return {
     ...defaultElem,
     coords: [
@@ -179,10 +188,9 @@ export const getDefaultGridElement = (
     ],
     width:
       Math.round(
-        Math.min(bounds.right - bounds.left, defaultElem.initialWidth) /
-          gridUnitSize
+        Math.min(gridUnitSize * (numCols - 2), dimensions?.width) / gridUnitSize
       ) * gridUnitSize,
-    height: Math.round(defaultElem.initialHeight / gridUnitSize) * gridUnitSize,
+    height: Math.round(dimensions?.height / gridUnitSize) * gridUnitSize,
   };
 };
 

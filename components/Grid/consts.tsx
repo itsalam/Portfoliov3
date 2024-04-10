@@ -49,43 +49,69 @@ export const DEFAULT_GRID_ELEMENTS: Record<CARD_TYPES, DefaultGridElement> = {
   Home: {
     id: CARD_TYPES.Home,
     initialCoords: DEFAULT_COORDS,
-    initialWidth: 550,
-    initialHeight: 225,
+    initialDimensions: {
+      width: 550,
+      height: 225,
+    },
+    mobileDimensions: {
+      width: 550,
+      height: 350,
+    },
   },
   Projects: {
     id: CARD_TYPES.Projects,
     initialCoords: DEFAULT_COORDS,
-    initialWidth: 550,
-    initialHeight: 350,
+    initialDimensions: {
+      width: 550,
+      height: 350,
+    },
+    mobileDimensions: {
+      width: 550,
+      height: 350,
+    },
   },
   Experience: {
     id: CARD_TYPES.Experience,
     initialCoords: DEFAULT_COORDS,
-    initialWidth: 550,
-    initialHeight: 450,
+    initialDimensions: {
+      width: 550,
+      height: 450,
+    },
+    mobileDimensions: {
+      width: 550,
+      height: 650,
+    },
   },
   Contacts: {
     id: CARD_TYPES.Contacts,
     initialCoords: DEFAULT_COORDS,
-    initialWidth: 220,
-    initialHeight: 145,
+    initialDimensions: {
+      width: 220,
+      height: 145,
+    },
   },
   Location: {
     id: CARD_TYPES.Location,
     initialCoords: DEFAULT_COORDS,
-    initialWidth: 300,
-    initialHeight: 225,
+    initialDimensions: {
+      width: 300,
+      height: 225,
+    },
   },
   Status: {
     id: CARD_TYPES.Status,
     initialCoords: DEFAULT_COORDS,
-    initialWidth: 350,
-    initialHeight: 350,
+    initialDimensions: {
+      width: 350,
+      height: 350,
+    },
   },
   Resume: {
     id: CARD_TYPES.Resume,
     initialCoords: DEFAULT_COORDS,
-    initialWidth: 450,
-    initialHeight: 550,
+    initialDimensions: {
+      width: 450,
+      height: 550,
+    },
   },
 };

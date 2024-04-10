@@ -95,10 +95,8 @@ const Grid = () => {
           // binpackElements(gridElements, gridInfo);
           scrollToGridElement(gridElem);
         } else {
-          console.log("push");
           gridElements.set(id, getDefaultGridElement(id, gridInfo));
 
-          console.log("push ended");
           console.log(JSON.parse(JSON.stringify([...gridElements.values()])));
           setGridElements(new Map(gridElements));
         }
@@ -131,6 +129,7 @@ const Grid = () => {
       );
       setLowestElem(lowestElem);
     }
+    binpackElements(gridElements, gridInfoRef.current);
   };
 
   useEffect(() => {
@@ -147,7 +146,6 @@ const Grid = () => {
   useEffect(() => {
     const { gridUnitSize, oldVals } = gridInfo;
     if (oldVals && oldVals.gridUnitSize !== gridUnitSize) {
-      console.log("binpack");
       setGridElements((gridElements: GridElements) => {
         gridElements.forEach((element) => {
           const { width, height, coords } = getDefaultGridElement(
@@ -188,15 +186,20 @@ const Grid = () => {
         const newGridElem = resolveIntersections(e, gridElements, gridInfo);
         gridElements.set(newGridElem.id, newGridElem);
       });
-
-      console.log("gridelems");
       setGridElements(new Map(gridElements));
-      const lowestElem = elemArr.reduce((acc, curr) =>
-        acc.height + acc.coords[1] > curr.height + curr.coords[1] ? acc : curr
+      const closestNewElem = unPositionedElements.reduce((acc, curr) =>
+        acc.height + acc.coords[1] < curr.height + curr.coords[1] ? acc : curr
       );
-      setLowestElem(lowestElem);
+      scrollToGridElement(closestNewElem);
     }
-  }, [gridElements]);
+
+    const lowestElem = elemArr.length
+      ? elemArr.reduce((acc, curr) =>
+          acc.height + acc.coords[1] > curr.height + curr.coords[1] ? acc : curr
+        )
+      : undefined;
+    setLowestElem(lowestElem);
+  }, [gridElements, scrollToGridElement]);
 
   useEffect(() => {
     const gridInfo = gridInfoRef.current;
@@ -207,17 +210,18 @@ const Grid = () => {
         setDimensions({
           containerHeight: Math.max(
             dimensions.height,
-            lowestElem.height + lowestElem.coords[1] + gridInfo.gridCellSize
+            lowestElem.height +
+              lowestElem.coords[1] +
+              Math.max(64, gridInfo.gridCellSize * 1)
           ),
         });
-        scrollToGridElement(lowestElem);
       } else if (lowestElemHeight < dimensions.height) {
         setDimensions({
           containerHeight: dimensions.height,
         });
       }
     }
-  }, [lowestElem, scrollToGridElement, setDimensions]);
+  }, [lowestElem, setDimensions]);
 
   const GCard = useCallback(
     (props: { gridElement: GridElement; gridInfo: GridInfo }) => {

@@ -1,8 +1,9 @@
-@import "./fonts.css";
+
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
 
 @layer base {
   :root {
@@ -84,16 +85,29 @@
     @apply bg-background text-foreground;
   }
 
-  .card {
-    border-radius: var(--radius-5);
+  .card-bg {
     --card-background-color: var(--color-panel);
-    backdrop-filter: var(--backdrop-filter-panel);
     background-color: var(--card-background-color);
   }
 
-  .dark .card {
-    @apply backdrop-brightness-50 hover:backdrop-brightness-75;
+  .card {
+    @apply backdrop-blur-md;
+    border-radius: var(--radius-5);
   }
+
+  .dark .card {
+    @apply backdrop-brightness-50 hover:backdrop-brightness-[.25];
+  }
+}
+
+@layer utilities {
+  .safe-pb {
+    margin-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+.radix-themes {
+  /* --default-font-family: var(--font-vercetti); */
 }
 
 html {
@@ -162,7 +176,8 @@ body {
 }
 
 .track-card {
-  --card-width: 3.0;
+  --card-width: 4.0;
+  min-width: 288px;
   width: calc(var(--cell-size) * var(--card-width))
 }
 

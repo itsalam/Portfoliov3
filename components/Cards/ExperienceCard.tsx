@@ -22,10 +22,14 @@ export default function ExperienceCard(
       ref={cardRef}
       initial="initial"
     >
-      <ScrollArea type="always" scrollbars="vertical" className="py-4 pl-4">
+      <ScrollArea
+        type="always"
+        scrollbars="vertical"
+        className="flex flex-col gap-4 py-4 pl-4"
+      >
         {experiences.map((experience, i) => (
           <div key={i} className="mr-4 flex flex-col gap-y-2 pb-6">
-            <Text size="6" className="font-bold">
+            <Text size="8" className="font-bold">
               {experience.companyName}
             </Text>
             {experience.experiences.map((tenure, j) => (
@@ -38,24 +42,22 @@ export default function ExperienceCard(
                   })}
                 />
                 <div key={j} className="flex flex-col gap-1">
-                  <span className="flex items-baseline gap-2">
+                  <span className="flex flex-wrap items-baseline gap-2">
                     <Text size="4" className="font-bold">
                       {tenure.title}
                     </Text>
-                    <Text size="2" className="font-bold text-[--gray-11]">
-                      {"  //  "}
-                    </Text>
-                    <Text size="2" className="font-bold text-[--gray-11]">
+
+                    <Text size="2" className="font-bold text-[--gray-10]">
                       {tenure.location}
                     </Text>
                   </span>
-                  <span className="text-xs">
+                  <span className="text-xs text-[--gray-10]">
                     {formatDate(tenure.from)} - {formatDate(tenure.to)}
                   </span>
-                  <ul className="list-disc pl-4">
+                  <ul className="flex list-disc flex-col gap-1 pl-4 pt-1 leading-loose">
                     {tenure.descriptions.map(
                       (description: string, k: number) => (
-                        <li key={k} className="text-xs text-[--gray-11]">
+                        <li key={k} className="text-sm text-[--gray-12]">
                           {description}
                         </li>
                       )
