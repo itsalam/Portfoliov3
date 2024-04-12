@@ -79,7 +79,6 @@ const GridEffect: React.FC<GridProps> = (props) => {
   ]);
 
   const HorizontalLines = useCallback(() => {
-    console.log(gridRows);
     return Array.from({ length: gridRows + 1 }).map((_, i) => (
       <line
         y1={i * cellHeight}
@@ -128,6 +127,9 @@ const GridEffect: React.FC<GridProps> = (props) => {
   return (
     <motion.svg
       id={"mask"}
+      initial={{
+        maskImage: "linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1))",
+      }}
       {...svgProps}
       ref={ref}
       className={"mask absolute left-0 top-0 z-40 h-full w-full opacity-100"}

@@ -4,6 +4,7 @@ import { GridContext } from "@/lib/state";
 import { cn } from "@/lib/utils";
 import { Separator, Text, Tooltip } from "@radix-ui/themes";
 import {
+  AnimatePresence,
   MotionValue,
   motion,
   useMotionValue,
@@ -16,6 +17,7 @@ import {
   Home,
   LucideIcon,
   Moon,
+  Sun,
   Users,
 } from "lucide-react";
 import {
@@ -30,6 +32,9 @@ import {
 import { useTheme } from "next-themes";
 import { useStore } from "zustand";
 import { CARD_TYPES } from "./types";
+
+const MoonIcon = motion(Moon);
+const SunIcon = motion(Sun);
 
 const Item = (props: {
   x: MotionValue<number>;
@@ -80,7 +85,7 @@ const Item = (props: {
       side="top"
       delayDuration={100}
       content={
-        <Text className="font-favorit" size="3">
+        <Text className="" size="3">
           {text}
         </Text>
       }
@@ -162,7 +167,7 @@ export default function MenuCard(props: ComponentProps<typeof motion.div>) {
         variants={{
           initial: { height: 64 },
         }}
-        className="card-bg absolute bottom-0 left-1/2 z-[1000] flex -translate-x-1/2 items-end gap-4 overflow-visible rounded-full p-2 backdrop-brightness-50 transition-all group-hover:bg-[--gray-a3] group-hover:backdrop-brightness-75"
+        className="menu-bg absolute bottom-0 left-1/2 z-[1000] flex -translate-x-1/2 items-end gap-4 overflow-visible rounded-full p-2 backdrop-brightness-50 transition-all group-hover:bg-[--gray-a3] group-hover:backdrop-brightness-75"
       >
         {Object.entries(items).map(([key, { icon: Icon, cards }]) => (
           <Item
@@ -195,12 +200,34 @@ export default function MenuCard(props: ComponentProps<typeof motion.div>) {
             );
           }}
         >
-          <Moon
-            className="m-auto text-[--gray-11]"
-            size={"20"}
-            absoluteStrokeWidth
-            strokeWidth={2}
-          />
+          <AnimatePresence mode="wait">
+            {resolvedTheme === themes[0] && (
+              <MoonIcon
+                className="m-auto text-[--gray-11]"
+                size={"20"}
+                key="moon"
+                absoluteStrokeWidth
+                strokeWidth={2}
+                initial={{ rotate: -45, y: -5, opacity: 0.5 }}
+                animate={{ rotate: 0, y: 0, opacity: 1 }}
+                exit={{ rotate: 45, y: -5, opacity: 0.5 }}
+                transition={{ duration: 0.2 }}
+              />
+            )}
+            {resolvedTheme === themes[1] && (
+              <SunIcon
+                className="m-auto text-[--gray-11]"
+                size={"20"}
+                key="sun"
+                absoluteStrokeWidth
+                strokeWidth={2}
+                initial={{ rotate: -45, y: -5, opacity: 0.5 }}
+                animate={{ rotate: 0, y: 0, opacity: 1 }}
+                exit={{ rotate: 45, y: -5, opacity: 0.5 }}
+                transition={{ duration: 0.2 }}
+              />
+            )}
+          </AnimatePresence>
         </Item>
         <motion.div className="absolute" />
       </motion.div>

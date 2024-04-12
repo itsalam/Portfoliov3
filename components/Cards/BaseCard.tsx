@@ -11,7 +11,7 @@ import {
   useDragControls,
 } from "framer-motion";
 import { debounce } from "lodash";
-import { Lock, LockOpen, X } from "lucide-react";
+import { X } from "lucide-react";
 import { useTheme } from "next-themes";
 import {
   CSSProperties,
@@ -23,10 +23,9 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useRef,
-  useState,
+  useRef
 } from "react";
-import { CARD_TYPES } from "./Cards/types";
+import { CARD_TYPES } from "./types";
 
 const Card: FC<
   ComponentProps<typeof motion.div> & {
@@ -35,11 +34,9 @@ const Card: FC<
     x: number;
     y: number;
     close?: () => void;
-    isLocked?: boolean;
   }
 > = (props) => {
-  const { x, y, className, children, id, isLocked, height, width, ...rest } =
-    props;
+  const { x, y, className, children, id, height, width, ...rest } = props;
   const ref = useRef<HTMLDivElement>(null);
   const initialLoad = useRef(true);
 
@@ -88,7 +85,6 @@ const Card: FC<
         height: 0,
         opacity: 0,
       }}
-      drag={!isLocked}
       className={cn("card absolute origin-top-left transition-all", className)}
       ref={ref}
       id={id}
@@ -105,7 +101,6 @@ export const TitleCard: FC<ComponentProps<typeof Card>> = (props) => {
     id,
     children,
     title,
-    isLocked,
     onDragEnd,
     width,
     height,
@@ -114,9 +109,8 @@ export const TitleCard: FC<ComponentProps<typeof Card>> = (props) => {
     ...rest
   } = props;
   const dragControls = useDragControls();
-  const [isDrag, setIsDrag] = useState(false);
   const { resolvedTheme } = useTheme();
-  const { closeElements, lockElements } = useContext(GridContext)!.getState();
+  const { closeElements } = useContext(GridContext)!.getState();
 
   function startDrag(event: PointerEvent) {
     let target = event.target as HTMLElement;
@@ -128,7 +122,6 @@ export const TitleCard: FC<ComponentProps<typeof Card>> = (props) => {
       }
     }
     dragControls.start(event);
-    setIsDrag(true);
   }
 
   function endDrag(
@@ -136,7 +129,6 @@ export const TitleCard: FC<ComponentProps<typeof Card>> = (props) => {
     info: PanInfo
   ) {
     onDragEnd?.(event, info);
-    setIsDrag(false);
   }
 
   const Button = forwardRef<
@@ -152,9 +144,12 @@ export const TitleCard: FC<ComponentProps<typeof Card>> = (props) => {
           e.stopPropagation();
           onClick?.(e);
         }}
+        style={{
+          aspectRatio: "1 / 1",
+        }}
         className={cn(
           className,
-          "z-50 flex aspect-square items-center justify-center rounded-full border-[1px] border-[--gray-a7] transition-all hover:border-[--gray-a10]"
+          "z-50 flex aspect-square w-5 items-center justify-center rounded-full border-[1px] border-[--gray-a7] transition-all hover:border-[--gray-a10]"
         )}
         {...props}
       />
@@ -168,16 +163,12 @@ export const TitleCard: FC<ComponentProps<typeof Card>> = (props) => {
         "h-0 w-0",
         "group flex flex-col overflow-hidden",
         "border-[1px] border-[--gray-a3]",
-        "hover:border-[--gray-a7] ",
-        {
-          "border-[--gray-12]": isDrag,
-        }
+        "hover:border-[--gray-a7] "
       )}
       dragControls={dragControls}
       dragListener={false}
       onDragEnd={endDrag}
       id={id}
-      isLocked={isLocked}
       variants={{
         exit: {
           opacity: 0,
@@ -195,32 +186,22 @@ export const TitleCard: FC<ComponentProps<typeof Card>> = (props) => {
         onPointerDown={startDrag}
         draggable={false}
         className={cn(
-          "group relative z-10 flex h-6 flex-col justify-center bg-[--gray-a3] px-3 py-1 opacity-100 transition-opacity",
-          {
-            "opacity-50": isDrag,
-          }
+          "group relative z-10 flex h-8 flex-col justify-center bg-[--gray-a3] px-3 py-1 opacity-100 transition-opacity"
         )}
       >
         <Text
           size="2"
-          className="w-fit font-favorit"
+          className="color-[--gray-a4] w-fit font-light"
           style={{ ["--letter-spacing"]: "0.02em" } as CSSProperties}
         >
-          {title?.toUpperCase()}
+          {title}
         </Text>
-        <div className="absolute bottom-0 left-0 w-full bg-[--gray-a1] transition-all group-hover:bg-[--gray-a10]">
-          <Separator size="4" />
-        </div>
-        <div className="absolute right-1 z-50 flex h-3/4 gap-1">
-          <Button
-            className={cn(
-              { "opacity-50": !isLocked },
-              "transition-opacity hover:opacity-100"
-            )}
-            onClick={() => id && lockElements([id as CARD_TYPES])}
-          >
-            {isLocked ? <Lock size={10} /> : <LockOpen size={10} />}
-          </Button>
+        <Separator
+          className="absolute bottom-0 left-0 w-full bg-[--gray-a3] transition-all group-hover:bg-[--gray-a7]"
+          size="4"
+        />
+
+        <div className="absolute right-1 z-50 flex h-2/3 gap-1">
           <Button onClick={() => id && closeElements([id as CARD_TYPES])}>
             <X size={9} />
           </Button>

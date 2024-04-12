@@ -130,7 +130,7 @@ export default function ContactCard(props: ComponentProps<typeof motion.div>) {
   const [hoveredLink, setHoveredLink] = useState<string>();
   const Icon = hoveredLink
     ? CONTACTS[hoveredLink]?.Icon
-    : motion(MessageCircleQuestion);
+    : MessageCircleQuestion;
 
   return (
     <motion.div
@@ -151,13 +151,18 @@ export default function ContactCard(props: ComponentProps<typeof motion.div>) {
                 initial={{
                   opacity: 1,
                 }}
+                strokeDasharray={100}
+                strokeDashoffset={100}
                 animate={{
-                  y: [-45, 0],
+                  // strokeDasharray: [0, 100],
+                  strokeDashoffset: [null, 0],
+                  y: [-20, 0],
                   rotate: [-30, 0],
                   opacity: [0, 1],
                 }}
                 exit={{
-                  y: [0, 45],
+                  strokeDashoffset: [null, 100],
+                  y: [0, 20],
                   rotate: [0, 30],
                   opacity: [0.5, 0],
                 }}

@@ -1,6 +1,9 @@
 precision highp float;
 uniform sampler2D particles;
 uniform sampler2D velocity;
+uniform float cameraPos;
+uniform float cameraFov;
+uniform float cameraAspect;
 varying vec2 vUv;
 uniform float time;
 varying mat4 vModelViewMatrix; 
@@ -235,25 +238,35 @@ vec3 computeFlow(float x, float y, float z, float t) {
 //     gl_FragColor = vec4(force*d + forces.xy, 0, 1);
 // }
 
+vec2 getBounds(vec4 pos) {
+  float height = 2.0 * (cameraPos - pos.z) * tan((cameraFov* 3.141592653589793 / 180.0) / 2.0);
+  float width = height * cameraAspect;
+  return vec2(width, height * cameraAspect);
+}
+
+float BOUNDS = 0.6;
+
 void main() {
     float t = time * SPEED;
     vec4 pos = texture2D(particles, vUv).xyzw; // basic simulation: displays the particles in place.
-    if (pos.x > 0.95 || pos.y > 0.95 || pos.x < -0.95 || pos.y < -0.95){
-        pos.y = rand(pos.xy) * 1.8 -0.95;
-        pos.x = -0.9 + rand(pos.xz) * 0.1;
-        pos.z = rand(pos.yz) * 1.8 -0.95;        
+    vec2 bounds = getBounds(pos);
+    if (pos.x > BOUNDS * bounds.x || pos.x < -(BOUNDS * 1.2) * bounds.x || pos.y > BOUNDS * bounds.y || pos.y < -BOUNDS * bounds.y){
+        pos.z = rand(pos.yz) - 0.5;
+        vec2 newBounds = getBounds(pos);
+        pos.y = (rand(pos.xy)-0.5) * newBounds.y;
+        pos.x = (-0.5 - rand(pos.xz) * 0.2) * newBounds.x;
         pos.w = 1.0;
     }
     vec2 adjustedUv = (vUv - 0.5) * 2.0;
     vec3 flow = computeFlow(pos.x, pos.y, pos.z, t) * snoise3(vec3(pos.x, pos.y, t*10.0));
     vec3 curl = computeCurl(pos.x, pos.y, pos.z, t)  * snoise3(vec3(pos.z, pos.z, t));
     
-    curl.x += 0.075;
+    curl.x += 0.175;
     vec3 forces = (flow * 1.0 + curl*3.5)/1200.0;
     vec4 vCameraSpacePosition = vModelViewMatrix * pos;
     vec4 clipSpacePosition = vProjectionMatrix * vCameraSpacePosition;
     vec2 vProjectedTexCoord = (clipSpacePosition.xy / clipSpacePosition.w) * 0.5 + 0.5;
-    vec3 mouseForces = texture2D(velocity, vProjectedTexCoord).xyz * 0.002; // basic simulation: moves the particles.
+    vec3 mouseForces = texture2D(velocity, vProjectedTexCoord).xyz * 0.0013; // basic simulation: moves the particles.
     pos.xyz += mouseForces;
     gl_FragColor = vec4(pos.xyz + forces, 1.0 + length(mouseForces.xy));
 }

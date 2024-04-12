@@ -12,7 +12,7 @@ import {
 } from "react";
 import { useStore } from "zustand";
 import GridBackdrop from "../Backdrop";
-import { TitleCard } from "../Card";
+import { TitleCard } from "../Cards/BaseCard";
 import { CARD_TYPES } from "../Cards/types";
 // import ScrollArea from "./ScrollArea";
 import { ScrollArea } from "@radix-ui/themes";
@@ -105,16 +105,6 @@ const Grid = () => {
     [scrollToGridElement]
   );
 
-  const lockElements = (gridElements: GridElements) => (ids: CARD_TYPES[]) => {
-    ids.forEach((id) => {
-      const elem = gridElements.get(id);
-      if (elem) {
-        gridElements.set(id, { ...elem, isLocked: !elem.isLocked });
-      }
-    });
-    setGridElements(new Map(gridElements));
-  };
-
   const closeElements = (gridElements: GridElements) => (ids: CARD_TYPES[]) => {
     ids.forEach((id) => {
       const elem = gridElements.get(id);
@@ -137,7 +127,6 @@ const Grid = () => {
     const removeListener = addListener({
       dispatch: setGridElements,
       pushElements: pushElements(gridInfo, gridElements),
-      lockElements: lockElements(gridElements),
       closeElements: closeElements(gridElements),
     });
     return () => removeListener();
@@ -164,6 +153,7 @@ const Grid = () => {
         return new Map(gridElements);
       });
     }
+    gridInfoRef.current = gridInfo;
   }, [gridInfo]);
 
   useEffect(() => {
@@ -225,8 +215,9 @@ const Grid = () => {
 
   const GCard = useCallback(
     (props: { gridElement: GridElement; gridInfo: GridInfo }) => {
-      const { id, coords, width, height, isLocked } = props.gridElement;
-      const { gridUnitSize, bounds } = props.gridInfo;
+      const { id, coords, width, height } = props.gridElement;
+      const { gridUnitSize, bounds, isMobile } = props.gridInfo;
+      console.log(isMobile);
       const CardContent = ELEMENT_MAP[id];
       const dragTransition: ComponentProps<typeof TitleCard>["dragTransition"] =
         {
@@ -253,7 +244,7 @@ const Grid = () => {
           dragTransition={dragTransition}
           x={coords[0]}
           y={coords[1]}
-          isLocked={isLocked}
+          drag={!isMobile}
           onDragEnd={() =>
             setTimeout(
               () => updateDraggedElement(id, gridElements),

@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimateText, RotateText } from "@/components/TextEffects";
+import { AnimateText, RotateText } from "@/components/motion/TextEffects";
 import { cn } from "@/lib/utils";
 import { Text } from "@radix-ui/themes";
 import { motion, useAnimationControls } from "framer-motion";

@@ -6,7 +6,7 @@ import { Separator, Text } from "@radix-ui/themes";
 import { motion, useAnimate } from "framer-motion";
 import { ComponentProps, Fragment, useContext } from "react";
 import { useStore } from "zustand";
-import ScrollArea from "../ScrollArea";
+import ScrollArea from "../motion/ScrollArea";
 
 export default function ExperienceCard(
   props: ComponentProps<typeof motion.div>

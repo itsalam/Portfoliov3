@@ -2,14 +2,20 @@ import { cn } from "@/lib/utils";
 import { Theme } from "@radix-ui/themes";
 import "@radix-ui/themes/styles.css";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { Inter } from "next/font/google";
+import { DM_Sans, Space_Grotesk } from "next/font/google";
 import localFont from "next/font/local";
 import React from "react";
 import { Providers } from "./providers";
 
 // If loading a variable font, you don't need to specify the font weight
-const inter = Inter({
+const inter = DM_Sans({
   variable: "--font-inter",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const grotesk = Space_Grotesk({
+  variable: "--font-space",
   subsets: ["latin"],
   display: "swap",
 });
@@ -41,6 +47,7 @@ export default function RootLayout({
     <html
       lang="en"
       className={cn(
+        grotesk.variable,
         inter.variable,
         Favorit.variable,
         Vercetti.variable,

@@ -90,6 +90,11 @@
     background-color: var(--card-background-color);
   }
 
+  .menu-bg {
+    @apply sm:bg-[--card-background-color] bg-background;
+    --card-background-color: var(--color-panel);
+  }
+
   .card {
     @apply backdrop-blur-md;
     border-radius: var(--radius-5);
@@ -107,7 +112,7 @@
 }
 
 .radix-themes {
-  /* --default-font-family: var(--font-vercetti); */
+  --default-font-family: var(--font-space);
 }
 
 html {

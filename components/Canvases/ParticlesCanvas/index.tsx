@@ -2,9 +2,11 @@
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 // import { GUI } from "dat.gui";
+import { GUI } from "dat.gui";
 import { useTheme } from "next-themes";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import {
+  Camera,
   DataTexture,
   DoubleSide,
   FloatType,
@@ -45,25 +47,41 @@ type FBOs = {
   pressure_1: WebGLRenderTarget;
 } & Record<string, WebGLRenderTarget>;
 
+type PointEvent = {
+  clientX: number;
+  clientY: number;
+};
+
+function calculateVisibleDimensions(
+  camera: Camera & { fov: number; aspect: number }
+) {
+  const height =
+    2 * Math.tan(MathUtils.degToRad(camera.fov) / 2) * camera.position.z;
+  const width = height * camera.aspect;
+  return new Vector2(width, height);
+}
+
 function getPoint(
   v: Vector4,
   size: number,
   data: Float32Array,
-  offset: number
+  offset: number,
+  bounds: Vector2
 ) {
   v.set(
-    Math.random() * 1.8 - 0.95,
-    Math.random() * 1.8 - 0.95,
-    Math.random() * 1.8 - 0.95,
+    (Math.random() - 0.5) * bounds.x,
+    (Math.random() - 0.5) * bounds.y,
+    Math.random() - 0.5,
     0.0
   );
   // if (v.length() > 1) return getPoint(v, size, data, offset);
   return v.toArray(data, offset);
 }
 
-function getSphere(count: number, size: number, p = new Vector4()) {
+function initializePoints(count: number, size: number, bounds: Vector2) {
   const data = new Float32Array(count * 4);
-  for (let i = 0; i < count * 4; i += 4) getPoint(p, size, data, i);
+  for (let i = 0; i < count * 4; i += 4)
+    getPoint(new Vector4(), size, data, i, bounds);
   return data;
 }
 
@@ -115,7 +133,7 @@ const ParticleScene = () => {
     isViscous: true,
     aperture: 40.0,
     fov: 3.5,
-    focus: 2.0,
+    focus: 1.8,
     color:
       resolvedTheme === "light"
         ? new Vector3(0.69, 0.709, 0.682)
@@ -128,6 +146,9 @@ const ParticleScene = () => {
   const height = useRef(Math.round(size.height * options.current.resolution));
   const cellScale = useRef(new Vector2(1 / width.current, 1 / height.current));
   const fboSize = useRef(new Vector2(width.current, height.current));
+  const povSize = useRef(
+    calculateVisibleDimensions(camera as PerspectiveCamera)
+  );
 
   const fluidFbos = useRef<FBOs>({
     vel_0: createRenderTarget(),
@@ -144,18 +165,18 @@ const ParticleScene = () => {
     position_1: createRenderTarget({ size: particleLength, gl }),
   });
 
-  // useEffect(() => {
-  //   const optionsCur = options.current;
-  //   const gui = new GUI();
-  //   gui.add(optionsCur, "dt", 0, 0.3);
-  //   gui.add(optionsCur, "cursorSize", 0, 0.3);
-  //   gui.add(optionsCur, "focus", 0, 40);
-  //   gui.add(optionsCur, "aperture", 0, 40);
-  //   gui.add(optionsCur, "fov", 0, 0);
-  //   return () => {
-  //     gui.destroy();
-  //   };
-  // });
+  useEffect(() => {
+    const optionsCur = options.current;
+    const gui = new GUI();
+    gui.add(optionsCur, "dt", 0, 0.3);
+    gui.add(optionsCur, "cursorSize", 0, 0.3);
+    gui.add(optionsCur, "focus", 0, 40);
+    gui.add(optionsCur, "aperture", 0, 40);
+    gui.add(optionsCur, "fov", 0, 0);
+    return () => {
+      gui.destroy();
+    };
+  });
 
   function createRenderTarget(options?: { size: number; gl: WebGLRenderer }) {
     const { size, gl } = options ?? {};
@@ -173,7 +194,11 @@ const ParticleScene = () => {
     );
     if (size && gl) {
       const texture = new DataTexture(
-        getSphere(size * size, 128),
+        initializePoints(
+          size * size,
+          128,
+          calculateVisibleDimensions(camera as PerspectiveCamera)
+        ),
         size,
         size,
         RGBAFormat,
@@ -201,6 +226,7 @@ const ParticleScene = () => {
     boundarySpace,
     cellScale: cellScale.current,
     fboSize: fboSize.current,
+    povSize: povSize.current,
   };
 
   const advection = new Advection({
@@ -252,18 +278,26 @@ const ParticleScene = () => {
     velocity: fluidFbos.current.vel_0,
     dst: particleFbos.current.position_0,
     dst1: particleFbos.current.position_1,
+    cameraPos: camera.position.z,
+    cameraFov: (camera as PerspectiveCamera).fov,
+    cameraAspect: (camera as PerspectiveCamera).aspect,
   });
 
   useEffect(() => {
-    const handleMouse = (ev: MouseEvent) => {
+    const handleMove = (point: PointEvent) => {
       coords.current = {
-        x: (ev.clientX / window.innerWidth) * 2 - 1,
-        y: -(ev.clientY / window.innerHeight) * 2 + 1,
+        x: (point.clientX / window.innerWidth) * 2 - 1,
+        y: -(point.clientY / window.innerHeight) * 2 + 1,
       };
     };
-    window.addEventListener("mousemove", handleMouse, { passive: true });
+    const handleTouch = (ev: TouchEvent) => {
+      handleMove(ev.touches[0]);
+    };
+    window.addEventListener("mousemove", handleMove, { passive: true });
+    window.addEventListener("touchmove", handleTouch, { passive: true });
     return () => {
-      window.removeEventListener("mousemove", handleMouse);
+      window.removeEventListener("mousemove", handleMove);
+      window.removeEventListener("touchmove", handleTouch);
     };
   }, []);
 
@@ -294,8 +328,10 @@ const ParticleScene = () => {
     pressurePass.update({ velocity, pressure });
 
     position.update({
+      povSize: povSize.current,
       velocity: fluidFbos.current.vel_0,
       time: clock.getElapsedTime(),
+      camera: camera as PerspectiveCamera,
     });
 
     const render = renderRef.current;
@@ -334,19 +370,24 @@ const ParticleScene = () => {
       height.current = Math.round(size.height * options.current.resolution);
       fboSize.current.set(width.current, height.current);
       cellScale.current.set(1 / width.current, 1 / height.current);
+      console.log(povSize);
       resizeAllFBO();
     };
     document.body.addEventListener("resize", recalcSize, false);
     return () => {
       document.body.removeEventListener("resize", recalcSize);
     };
-  }, [resizeAllFBO, size, size.height, size.width]);
+  }, [camera, resizeAllFBO, size, size.height, size.width]);
 
   return (
     <>
       <scene ref={sceneRef}>
         <points>
-          <dofPointsMaterial ref={renderRef} particleLength={particleLength} />
+          <dofPointsMaterial
+            toneMapped={false}
+            ref={renderRef}
+            particleLength={particleLength}
+          />
           <bufferGeometry>
             <bufferAttribute
               attach="attributes-position"
@@ -356,11 +397,11 @@ const ParticleScene = () => {
             />
           </bufferGeometry>
         </points>
-        <DebugView
+        {/* <DebugView
           texture={fluidFbos.current.vel_0.texture}
           camera={camera as PerspectiveCamera}
           resolvedTheme={resolvedTheme}
-        />
+        /> */}
       </scene>
     </>
   );
@@ -383,12 +424,6 @@ const DebugView = ({
     transparent: true,
   });
 
-  function calculateVisibleDimensions(camera: PerspectiveCamera) {
-    const height =
-      2 * Math.tan(MathUtils.degToRad(camera.fov) / 2) * camera.position.z;
-    const width = height * camera.aspect;
-    return { width, height };
-  }
   const { width, height } = calculateVisibleDimensions(camera);
   const geometry = new PlaneGeometry(width, height); // Full viewport quad
 
@@ -403,13 +438,12 @@ const ParticleCanvas = () => {
       className="left-0 z-0 opacity-80"
       gl={{ antialias: true, alpha: true, autoClear: false }}
       camera={{
-        position: [0, 0, 2],
-        fov: 30,
-        type: "OrthographicCamera",
+        position: [0, 0, 1],
+        fov: 50,
+        // type: "OrthographicCamera",
       }}
     >
       <ParticleScene />
-      {/* <Stats /> */}
     </Canvas>
   );
 };

@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimateText, AnimatedText } from "@/components/TextEffects";
+import { AnimateText, AnimatedText } from "@/components/motion/TextEffects";
 import { Project } from "@/lib/fetchData";
 import { CMSContext } from "@/lib/state";
 import { cn } from "@/lib/utils";
@@ -47,7 +47,7 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
       }) => (
         <AnimateText
           size={"8"}
-          className={cn("w-min text-7xl font-bold", className)}
+          className={cn("w-min font-bold", className)}
           text={text}
         />
       );

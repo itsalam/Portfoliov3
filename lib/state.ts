@@ -49,14 +49,13 @@ const getGridProps = (dimensions: Dimensions): Omit<GridInfo, "oldVals"> => {
       top: gridUnitSize,
       bottom: containerHeight,
     },
-    isMobile: width < 480,
+    isMobile: width < 550,
   };
 };
 
 type GridElementListener = {
   dispatch: Dispatch<SetStateAction<GridElements>>;
   pushElements: (ids: CARD_TYPES[]) => void;
-  lockElements: (ids: CARD_TYPES[]) => void;
   closeElements: (ids: CARD_TYPES[]) => void;
 };
 
@@ -66,7 +65,6 @@ export type GridStore = {
   addListener: (dispatch: GridElementListener) => () => void;
   gridInfo: GridInfo;
   pushElements: (ids: CARD_TYPES[]) => void;
-  lockElements: (ids: CARD_TYPES[]) => void;
   setDimensions: (update: Partial<Dimensions>) => void;
   closeElements: (ids: CARD_TYPES[]) => void;
   updateDimensions: () => void;
@@ -116,9 +114,6 @@ export const useGridStore = createStore<GridStore>()((set, get) => {
     pushElements: (ids: CARD_TYPES[]) => {
       const { listener } = get();
       listener?.pushElements(ids);
-    },
-    lockElements: (ids: CARD_TYPES[]) => {
-      get().listener?.lockElements(ids);
     },
     closeElements: (ids: CARD_TYPES[]) => {
       get().listener?.closeElements(ids);

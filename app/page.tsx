@@ -29,7 +29,7 @@ export default function Hero() {
     let resolvedCount = 0;
     const updateProgress = () => {
       resolvedCount++;
-      setLoadingProgress((resolvedCount / loadingPromises.length) * 100);
+      setLoadingProgress(~~((resolvedCount / loadingPromises.length) * 100));
     };
     loadingPromises.forEach((promise) => {
       promise

@@ -1,6 +1,6 @@
 "use client";
 
-import { TitleCard } from "@/components/Card";
+import { TitleCard } from "@/components/Cards/BaseCard";
 import { cn } from "@/lib/utils";
 import { motion, useAnimate } from "framer-motion";
 import { ComponentProps } from "react";
