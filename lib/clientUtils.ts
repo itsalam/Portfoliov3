@@ -162,3 +162,42 @@ export function isAnimationControls(
     "start" in animationControls
   );
 }
+
+export function p3ColorToArr(cssVarName: string): [number, number, number] {
+  // Retrieve the CSS variable value from the root element
+  const themeElem = document.querySelector(".radix-themes");
+  if (!themeElem) {
+    console.error(
+      "Could not find the root element of the Radix UI theme. " +
+        "Please make sure you're using Radix UI v1.0.0 or higher."
+    );
+    return [0, 0, 0];
+  }
+  const style = getComputedStyle(themeElem);
+  const displayP3Color = style.getPropertyValue(cssVarName).trim();
+
+  // Extract the numeric values from the color(display-p3 {r} {g} {b}) format
+  const regex = /color\(display-p3\s+([^ ]+)\s+([^ ]+)\s+([^ ]+)\)/;
+  const matches = displayP3Color.match(regex);
+
+  if (!matches) {
+    console.error("Invalid display-p3 color format: ", {
+      displayP3Color,
+      cssVarName,
+    });
+    return [0, 0, 0]; // Return default black in case of error
+  }
+
+  // Convert the extracted values to floats and normalize
+  const r = parseFloat(matches[1]);
+  const g = parseFloat(matches[2]);
+  const b = parseFloat(matches[3]);
+  return [r, g, b];
+}
+
+export function p3ToHex(cssVarName: string) {
+  const [r, g, b] = p3ColorToArr(cssVarName).map((val) =>
+    Math.round(val * 255)
+  );
+  return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+}

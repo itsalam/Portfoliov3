@@ -1,13 +1,11 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { MotionValue, motion } from "framer-motion";
 
-import { FC, RefObject } from "react";
+import { FC } from "react";
 import GridMask from "./GridMask";
 
-const GridBackdrop: FC<{ scrollAreaRef: RefObject<HTMLDivElement> }> = ({
-  scrollAreaRef,
-}) => {
+const GridBackdrop: FC<{ scrollY: MotionValue<number> }> = ({ scrollY }) => {
   return (
     <motion.div
       whileInView={"view"}
@@ -16,7 +14,7 @@ const GridBackdrop: FC<{ scrollAreaRef: RefObject<HTMLDivElement> }> = ({
       viewport={{ once: true }}
       className="relative left-0 -z-50 h-full w-full"
     >
-      <GridMask scrollAreaRef={scrollAreaRef} />
+      <GridMask scrollY={scrollY} />
     </motion.div>
   );
 };

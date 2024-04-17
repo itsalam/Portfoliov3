@@ -1,5 +1,6 @@
 "use client";
 
+import { p3ColorToArr } from "@/lib/clientUtils";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useTheme } from "next-themes";
 import { useCallback, useEffect, useMemo, useRef } from "react";
@@ -85,35 +86,7 @@ function initializePoints(count: number, size: number, bounds: Vector2) {
 }
 
 function cssColorToGLSLVec3(cssVarName: string) {
-  // Retrieve the CSS variable value from the root element
-  const themeElem = document.querySelector(".radix-themes");
-  if (!themeElem) {
-    console.error(
-      "Could not find the root element of the Radix UI theme. " +
-        "Please make sure you're using Radix UI v1.0.0 or higher."
-    );
-    return new Vector3(0, 0, 0);
-  }
-  const style = getComputedStyle(themeElem);
-  const displayP3Color = style.getPropertyValue(cssVarName).trim();
-
-  // Extract the numeric values from the color(display-p3 {r} {g} {b}) format
-  const regex = /color\(display-p3\s+([^ ]+)\s+([^ ]+)\s+([^ ]+)\)/;
-  const matches = displayP3Color.match(regex);
-
-  if (!matches) {
-    console.error("Invalid display-p3 color format: ", {
-      displayP3Color,
-      cssVarName,
-    });
-    return new Vector3(0, 0, 0); // Return default black in case of error
-  }
-
-  // Convert the extracted values to floats and normalize
-  const r = parseFloat(matches[1]);
-  const g = parseFloat(matches[2]);
-  const b = parseFloat(matches[3]);
-  return new Vector3(r, g, b);
+  return new Vector3(...p3ColorToArr(cssVarName));
 }
 
 const ParticleScene = () => {
@@ -397,7 +370,6 @@ const ParticleScene = () => {
       height.current = Math.round(size.height * options.current.resolution);
       fboSize.current.set(width.current, height.current);
       cellScale.current.set(1 / width.current, 1 / height.current);
-      console.log(povSize);
       resizeAllFBO();
     };
     document.body.addEventListener("resize", recalcSize, false);

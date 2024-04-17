@@ -39,7 +39,6 @@ const Text = motion(BaseText);
 
 const Item = (props: {
   x: MotionValue<number>;
-  y: MotionValue<number>;
   size: number;
   minSize: number;
   maxSize: number;
@@ -47,18 +46,15 @@ const Item = (props: {
   text: string;
   onClick: (event: MouseEvent) => void;
 }) => {
-  const { children, text, x, y, onClick, minSize, maxSize, size } = props;
+  const { children, text, x, onClick, minSize, maxSize, size } = props;
   const ref = useRef<HTMLButtonElement>(null);
   const domRect = useMotionValue<DOMRect | null>(null);
   const dist = useTransform(() => {
     const domVals = domRect.get();
     if (domVals === null) return size * maxSize;
-    const { left, top, width, height } = domVals;
+    const { left, width } = domVals;
     const centerX = left + width / 2;
-    const centerY = top + height / 2;
-    return Math.sqrt(
-      Math.pow(x.get() - centerX, 2) + Math.pow(y.get() - centerY, 2)
-    );
+    return Math.abs(x.get() - centerX);
   });
 
   useLayoutEffect(() => {
@@ -71,7 +67,6 @@ const Item = (props: {
     [size * maxSize, size * minSize]
   );
 
-  const springWidth = useSpring(width, { stiffness: 650 });
   const iconScale = useSpring(
     useTransform(
       width,
@@ -105,7 +100,7 @@ const Item = (props: {
       <motion.button
         ref={ref}
         style={{
-          width: springWidth,
+          width,
         }}
         className="relative z-[1000] flex aspect-square w-g-5/8 items-end justify-end rounded-full bg-[--gray-5] text-[--gray-11] brightness-100 transition-all hover:bg-[--gray-2] hover:text-[--accent-11]"
         variants={{
@@ -130,12 +125,10 @@ export default function MenuCard(props: ComponentProps<typeof motion.div>) {
   const store = useContext(GridContext)!;
   const pushElements = store.getInitialState().pushElements;
   const { gridCellSize } = useStore(store).gridInfo;
-  const x = useMotionValue(0),
-    y = useMotionValue(0);
+  const x = useMotionValue(0);
 
   const trackMouse = (ev: MouseEvent) => {
     x.set(ev.clientX);
-    y.set(ev.clientY);
   };
 
   const items: Record<string, { icon: LucideIcon; cards: CARD_TYPES[] }> = {
@@ -161,7 +154,6 @@ export default function MenuCard(props: ComponentProps<typeof motion.div>) {
       onMouseLeave={() => {
         // controls.start("leave");
         x.set(0);
-        y.set(0);
       }}
       variants={{
         animate: {
@@ -185,7 +177,7 @@ export default function MenuCard(props: ComponentProps<typeof motion.div>) {
           <Item
             key={key}
             text={key}
-            {...{ x, y }}
+            {...{ x }}
             minSize={0.5}
             maxSize={0.85}
             size={96}
@@ -202,7 +194,7 @@ export default function MenuCard(props: ComponentProps<typeof motion.div>) {
         <Separator orientation="vertical" size="4" className="h-full py-1" />
         <Item
           text={"Toggle Theme"}
-          {...{ x, y }}
+          {...{ x }}
           minSize={0.5}
           maxSize={0.85}
           size={96}
@@ -220,10 +212,10 @@ export default function MenuCard(props: ComponentProps<typeof motion.div>) {
                 key="moon"
                 absoluteStrokeWidth
                 strokeWidth={2}
-                initial={{ rotate: -45, y: -5, opacity: 0.5 }}
+                initial={{ rotate: -20, y: -5, opacity: 0.5 }}
                 animate={{ rotate: 0, y: 0, opacity: 1 }}
-                exit={{ rotate: 45, y: -5, opacity: 0.5 }}
-                transition={{ duration: 0.2 }}
+                exit={{ rotate: -20, y: -5, opacity: 0.5 }}
+                transition={{ duration: 0.1 }}
               />
             )}
             {resolvedTheme === themes[1] && (
@@ -233,10 +225,10 @@ export default function MenuCard(props: ComponentProps<typeof motion.div>) {
                 key="sun"
                 absoluteStrokeWidth
                 strokeWidth={2}
-                initial={{ rotate: -45, y: -5, opacity: 0.5 }}
+                initial={{ rotate: 20, y: -5, opacity: 0.5 }}
                 animate={{ rotate: 0, y: 0, opacity: 1 }}
-                exit={{ rotate: 45, y: -5, opacity: 0.5 }}
-                transition={{ duration: 0.2 }}
+                exit={{ rotate: 20, y: -5, opacity: 0.5 }}
+                transition={{ duration: 0.1 }}
               />
             )}
           </AnimatePresence>

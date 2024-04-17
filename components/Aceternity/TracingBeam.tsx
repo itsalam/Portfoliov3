@@ -1,57 +1,69 @@
 "use client";
+import { p3ToHex } from "@/lib/clientUtils";
 import { cn } from "@/lib/utils";
-import { motion, useScroll, useSpring, useTransform } from "framer-motion";
-import {
-    ComponentProps,
-    ReactNode,
-    RefObject,
-    useEffect,
-    useRef,
-    useState,
-} from "react";
+import { MotionValue, motion, useSpring, useTransform } from "framer-motion";
+import { useTheme } from "next-themes";
+import { ComponentProps, ReactNode, useMemo, useRef } from "react";
 
 export const TracingBeam: React.FC<
   ComponentProps<typeof motion.div> & {
     children: ReactNode;
-    scrollAreaRef: RefObject<HTMLDivElement>;
+    scrollYProgress: MotionValue<number>;
+    height: number;
+    offset: number;
   }
 > = (props) => {
-  const { className, children, scrollAreaRef, ...otherProps } = props;
-
-  const { scrollYProgress } = useScroll({
-    target: scrollAreaRef,
-    // offset: ["start start", "end start"],
-  });
-
+  const {
+    className,
+    children,
+    scrollYProgress,
+    height,
+    offset,
+    ...otherProps
+  } = props;
+  const { resolvedTheme } = useTheme();
   scrollYProgress.on("change", console.log);
-
   const contentRef = useRef<HTMLDivElement>(null);
-  const [svgHeight, setSvgHeight] = useState(0);
 
-  useEffect(() => {
-    if (contentRef.current) {
-      setSvgHeight(contentRef.current.offsetHeight);
-    }
-  }, []);
-
-  const y1 = useSpring(
-    useTransform(scrollYProgress, [0, 0.8], [50, svgHeight]),
-    {
-      stiffness: 500,
-      damping: 90,
-    }
-  );
+  const y1 = useSpring(useTransform(scrollYProgress, [0, 0.8], [0, height]), {
+    stiffness: 300,
+    damping: 90,
+  });
   const y2 = useSpring(
-    useTransform(scrollYProgress, [0, 1], [50, svgHeight - 200]),
+    useTransform(scrollYProgress, [0, 1], [0, height - 200]),
     {
-      stiffness: 500,
+      stiffness: 300,
       damping: 90,
     }
   );
+
+  const baseColor = useMemo(() => p3ToHex("--gray-5"), [resolvedTheme]);
+  const accentColor = useMemo(() => p3ToHex("--accent-8"), [resolvedTheme]);
+  const accentColor2 = useMemo(() => p3ToHex("--accent-7"), [resolvedTheme]);
+
+  const backgroundColor = useTransform(
+    y2,
+    [0, (height - 200) * 0.05],
+    [accentColor, baseColor]
+  );
+
+  const borderColor = useTransform(
+    y2,
+    [0, (height - 200) * 0.05],
+    [accentColor2, baseColor]
+  );
+
+  console.log(baseColor);
 
   return (
-    <motion.div className={cn(className)} {...otherProps}>
-      <div className="absolute -left-4 top-3 md:-left-20">
+    <motion.div
+      className={cn("relative h-full w-full", className)}
+      animate={{
+        height,
+      }}
+      {...otherProps}
+    >
+      <motion.div className="absolute right-2 top-2 sm:right-g-2/8 sm:top-g-2/8">
         <motion.div
           transition={{
             duration: 0.2,
@@ -62,41 +74,40 @@ export const TracingBeam: React.FC<
               scrollYProgress.get() > 0
                 ? "none"
                 : "rgba(0, 0, 0, 0.24) 0px 3px 8px",
+            borderColor: "#ECEEED",
           }}
-          className="border-netural-200 ml-[27px] flex h-4 w-4 items-center justify-center rounded-full border shadow-sm"
+          className="ml-[27px] flex h-4 w-4 items-center justify-center rounded-full border shadow-sm"
         >
           <motion.div
             transition={{
               duration: 0.2,
               delay: 0.5,
             }}
-            animate={{
-              backgroundColor:
-                scrollYProgress.get() > 0 ? "white" : "var(--emerald-500)",
-              borderColor:
-                scrollYProgress.get() > 0 ? "white" : "var(--emerald-600)",
+            style={{
+              backgroundColor,
+              borderColor,
             }}
-            className="h-2 w-2  rounded-full border border-neutral-300 bg-white"
+            className={cn("h-2 w-2 rounded-full border")}
           />
         </motion.div>
-        <svg
-          viewBox={`0 0 20 ${svgHeight}`}
+        <motion.svg
+          viewBox={`0 0 20 ${height - offset}`}
           width="20"
-          height={svgHeight} // Set the SVG height
-          className=" ml-4 block"
+          height={height - offset} // Set the SVG height
+          className="ml-4 block"
           aria-hidden="true"
         >
           <motion.path
-            d={`M 1 0V -36 l 18 24 V ${svgHeight * 0.8} l -18 24V ${svgHeight}`}
+            d={`M 1 0V -36 l 18 24 V ${height * 0.8 - offset} l -18 24V ${height - offset}`}
             fill="none"
-            stroke="#9091A0"
+            stroke={baseColor}
             strokeOpacity="0.16"
             transition={{
               duration: 10,
             }}
-          ></motion.path>
+          />
           <motion.path
-            d={`M 1 0V -36 l 18 24 V ${svgHeight * 0.8} l -18 24V ${svgHeight}`}
+            d={`M 1 0V -36 l 18 24 V ${height * 0.8 - offset} l -18 24V ${height - offset}`}
             fill="none"
             stroke="url(#gradient)"
             strokeWidth="1.25"
@@ -104,7 +115,7 @@ export const TracingBeam: React.FC<
             transition={{
               duration: 10,
             }}
-          ></motion.path>
+          />
           <defs>
             <motion.linearGradient
               id="gradient"
@@ -114,15 +125,21 @@ export const TracingBeam: React.FC<
               y1={y1} // set y1 for gradient
               y2={y2} // set y2 for gradient
             >
-              <stop stopColor="#18CCFC" stopOpacity="0"></stop>
-              <stop stopColor="#18CCFC"></stop>
-              <stop offset="0.325" stopColor="#6344F5"></stop>
-              <stop offset="1" stopColor="#AE48FF" stopOpacity="0"></stop>
+              <stop stopColor="var(--accent-8)" stopOpacity="0"></stop>
+              <stop stopColor="var(--accent-9)"></stop>
+              <stop offset="0.325" stopColor="var(--iris-9)"></stop>
+              <stop
+                offset="1"
+                stopColor="var(--accent-8)"
+                stopOpacity="0"
+              ></stop>
             </motion.linearGradient>
           </defs>
-        </svg>
+        </motion.svg>
+      </motion.div>
+      <div className="relative h-full w-full" ref={contentRef}>
+        {children}
       </div>
-      <div ref={contentRef}>{children}</div>
     </motion.div>
   );
 };

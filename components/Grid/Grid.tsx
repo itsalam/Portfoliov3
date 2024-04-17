@@ -2,7 +2,12 @@
 "use client";
 
 import { GridContext, GridInfo } from "@/lib/state";
-import { AnimatePresence, motion, useAnimation } from "framer-motion";
+import {
+  AnimatePresence,
+  motion,
+  useAnimation,
+  useScroll,
+} from "framer-motion";
 import {
   ComponentProps,
   useCallback,
@@ -17,17 +22,13 @@ import { TitleCard } from "../Cards/BaseCard";
 import { CARD_TYPES } from "../Cards/types";
 // import ScrollArea from "./ScrollArea";
 import { debounce } from "lodash";
-import {
-  ReadonlyURLSearchParams,
-  usePathname,
-  useRouter,
-  useSearchParams,
-} from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { TracingBeam } from "../Aceternity/TracingBeam";
 import { ELEMENT_MAP, GRID_QUERY_KEY, GridElements } from "./consts";
 import {
   GridElement,
   binpackElements,
+  createQueryString,
   getDefaultGridElement,
   initializeGridElements,
   resolveIntersections,
@@ -58,15 +59,10 @@ const Grid = () => {
     return elemMap;
   });
 
-  const createQueryString = useCallback(
-    (name: string, value: string, searchParams: ReadonlyURLSearchParams) => {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set(name, value);
-
-      return params.toString();
-    },
-    []
-  );
+  const { scrollYProgress, scrollY } = useScroll({
+    container: scrollAreaRef,
+    // offset: ["start start", "end start"],
+  });
 
   const animation = useAnimation();
 
@@ -178,7 +174,7 @@ const Grid = () => {
         )
       : "";
     router.push(pathname + "?" + queryStr);
-  }, [createQueryString, gridElements, pathname, router, searchParams]);
+  }, [gridElements, pathname, router, searchParams]);
 
   useEffect(() => {
     const gridInfo = gridInfoRef.current;
@@ -280,14 +276,12 @@ const Grid = () => {
     >
       <div className="h-full w-full overflow-scroll" ref={scrollAreaRef}>
         <TracingBeam
-          scrollAreaRef={scrollAreaRef}
-          className="relative h-full w-full"
-          animate={{
-            height: dimensions.containerHeight,
-          }}
+          scrollYProgress={scrollYProgress}
+          height={dimensions.containerHeight}
           transition={{
             duration: (SCROLL_TO_CARD_DELAY * 0.5) / 1000,
           }}
+          offset={gridInfo.gridCellSize}
         >
           <AnimatePresence>
             {[...gridElements.values()].map((gridElement) => {
@@ -300,7 +294,7 @@ const Grid = () => {
               );
             })}
           </AnimatePresence>
-          <GridBackdrop scrollAreaRef={scrollAreaRef} />
+          <GridBackdrop scrollY={scrollY} />
         </TracingBeam>
       </div>
     </motion.div>

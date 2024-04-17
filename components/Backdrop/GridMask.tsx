@@ -1,25 +1,19 @@
 "use client";
 
 import { GridContext } from "@/lib/state";
-import { motion } from "framer-motion";
-import React, {
-  RefObject,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-} from "react";
+import { MotionValue, motion } from "framer-motion";
+import React, { useCallback, useContext, useEffect, useRef } from "react";
 import { useStore } from "zustand";
 import { moveCursorEffect } from "../Grid/util";
 import Effect from "./Effect";
 import Vertex from "./Vertex";
 
 export type GridProps = {
-  scrollAreaRef: RefObject<HTMLDivElement>;
+  scrollY: MotionValue<number>;
 };
 
 const GridEffect: React.FC<GridProps> = (props) => {
-  const { scrollAreaRef, ...svgProps } = props;
+  const { scrollY, ...svgProps } = props;
 
   const store = useContext(GridContext)!;
   const { unitSize, vertexSize, gapSize } = store.getInitialState().gridInfo;
@@ -41,22 +35,16 @@ const GridEffect: React.FC<GridProps> = (props) => {
   const cellHeight = gridCellSize / ratio;
 
   useEffect(() => {
-    const scrollArea = scrollAreaRef.current;
-    if (scrollArea) {
-      const handleScroll = () => {
-        const currentScrollTop = scrollAreaRef.current?.scrollTop;
-        if (ref.current && currentScrollTop) {
-          ref.current.setAttribute("data-offset", currentScrollTop.toString());
-          moveCursorEffect(ref.current);
-        }
-      };
-
-      scrollArea.addEventListener("scroll", handleScroll);
-
-      // Cleanup
-      return () => scrollArea.removeEventListener("scroll", handleScroll);
-    }
-  });
+    const unsub = scrollY.on("change", (val) => {
+      if (ref.current) {
+        ref.current.setAttribute("data-offset", val.toString());
+        moveCursorEffect(ref.current);
+      }
+    });
+    return () => {
+      unsub();
+    };
+  }, [scrollY]);
 
   const VerticalLines = useCallback(() => {
     return Array.from({ length: gridCols + 1 }).map((_, i) => (
@@ -152,7 +140,6 @@ const GridEffect: React.FC<GridProps> = (props) => {
         {...svgProps}
         ref={ref}
         className={"mask absolute left-0 top-0 z-40 h-full w-full opacity-100"}
-        data-offset={scrollAreaRef.current?.scrollTop ?? 0}
       >
         <VerticalLines />
         <HorizontalLines />

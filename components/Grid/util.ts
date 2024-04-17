@@ -236,3 +236,14 @@ export const binpackElements = (
 
   // console.log(JSON.parse(JSON.stringify([...gridElements.values()])));
 };
+
+export const createQueryString = (
+  name: string,
+  value: string,
+  searchParams: ReadonlyURLSearchParams
+) => {
+  const params = new URLSearchParams(searchParams.toString());
+  params.set(name, value);
+
+  return params.toString();
+};
