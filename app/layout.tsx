@@ -53,10 +53,16 @@ export default function RootLayout({
         Vercetti.variable,
         DanhDa.variable
       )}
+      suppressHydrationWarning
     >
       <body>
         <Providers>
-          <Theme grayColor="sage" accentColor="teal">
+          <Theme
+            grayColor="sage"
+            accentColor="teal"
+            id="theme"
+            className="overflow-hidden"
+          >
             <main
               id="main"
               className="container flex h-screen max-h-[100dvh] flex-col overflow-hidden"

@@ -8,12 +8,10 @@ import Loading from "@/components/Loading";
 import Overlay from "@/components/Overlay";
 import { useCMSStoreInitializer, useResizeGridUpdate } from "@/lib/clientUtils";
 import { CMSContext, GridContext } from "@/lib/state";
-import { ThemePanel } from "@radix-ui/themes";
-import { AnimatePresence, motion, useAnimate } from "framer-motion";
+import { useAnimate } from "framer-motion";
 import { useContext, useEffect, useState } from "react";
-import { useLoading } from "./providers";
-
 import "./globals.css";
+import { useLoading } from "./providers";
 
 export default function Hero() {
   const [loadingPromises] = useLoading();
@@ -45,37 +43,39 @@ export default function Hero() {
 
   // Empty dependency array means this effect runs once on mount
   return (
-    <AnimatePresence mode="wait">
-      {loading ? (
-        <>
+    <>
+      {/* <AnimatePresence mode="wait">
+        {loading ? (
           <motion.div
             key={"slide-in"}
-            className="fixed left-0 top-0 z-50 h-screen w-screen origin-bottom bg-[--color-panel]"
+            className="fixed left-0 top-0 z-50 h-screen w-screen origin-bottom bg-card"
             initial={{ scaleY: 0 }}
             animate={{ scaleY: 0 }}
             exit={{ scaleY: 1 }}
-            transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
           />
-          <Loading prog={loadingProgress} ref={scope} setLoading={setLoading} />
-        </>
-      ) : (
-        <>
+        ) : (
           <motion.div
             key={"slide-out"}
-            className="fixed left-0 top-0 z-50 h-screen w-screen origin-top bg-[--color-panel]"
+            className="fixed left-0 top-0 z-50 h-screen w-screen origin-top bg-card"
             initial={{ scaleY: 1 }}
             animate={{ scaleY: 0 }}
             exit={{ scaleY: 0 }}
-            transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
           />
-          <Overlay />
+        )}
+      </AnimatePresence> */}
+      {loading ? (
+        <Loading prog={loadingProgress} ref={scope} setLoading={setLoading} />
+      ) : (
+        <>
           <Grid />
-          <ParticlesCanvas />
+          <Overlay />
           <MenuCard className="bottom-g-4/8 left-1/2 z-50 -translate-x-1/2" />
           <Effect />
-          <ThemePanel />
         </>
       )}
-    </AnimatePresence>
+      <ParticlesCanvas />
+    </>
   );
 }

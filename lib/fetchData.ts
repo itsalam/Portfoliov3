@@ -1,6 +1,7 @@
 import { client } from "@/sanity/lib/client";
 import { SanityDocument } from "next-sanity";
 import type { Image } from "sanity";
+import { StoreApi } from "zustand";
 
 type SanitySvgSrc = Image & { stroke: boolean };
 
@@ -85,20 +86,22 @@ function makeSanityStore<T extends Partial<SanityDocument>>(
   schemaName: string,
   additionalQuery?: string
 ) {
-  return async (set: any) => {
+  return async (set: StoreApi<T>["setState"]) => {
     // Use `any` or a more specific type for Zustand's set method if available
     const data = await getSchema<T>(
       Schemas[schemaName as keyof typeof Schemas],
       additionalQuery
     );
-    set((state: Partial<SchemaStores>) => ({
+    set((state: Partial<T>) => ({
       ...state,
       [schemaName]: data,
     }));
   };
 }
 
-export const createCMSSlices = (setState): Promise<void>[] => {
+export const createCMSSlices = (
+  setState: StoreApi<Partial<SchemaStores>>["setState"]
+): Promise<void>[] => {
   const technology = makeSanityStore<Technology>("technology");
   const projects = makeSanityStore<Project>("projects", "{..., stack[]->}");
   const works = makeSanityStore<Work>("works");

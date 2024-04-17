@@ -13,9 +13,10 @@ import {
   useCallback,
   useContext,
   useRef,
-  useState
+  useState,
 } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
+import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 import { useStore } from "zustand";
 import { BaseRolloutButton } from "../Buttons/BaseRolloutButton";
@@ -79,12 +80,12 @@ export default function ResumeCard(props: ComponentProps<typeof motion.div>) {
   const cms = useContext(CMSContext)!;
   const resume = useStore(cms, (cms) => cms.resume);
   const [cardWidth, setCardWidth] = useState(0);
-  const [cardHeight, setCardHeight] = useState(0);
+  // const [cardHeight, setCardHeight] = useState(0);
 
   const updateDimensions = debounce((entries) => {
-    const { width, height } = entries[0].contentRect;
+    const { width } = entries[0].contentRect;
     setCardWidth(width);
-    setCardHeight(height);
+    // setCardHeight(height);
     // Do something with the width
   }, 100);
   useResizeCallBack(updateDimensions, cardRef);

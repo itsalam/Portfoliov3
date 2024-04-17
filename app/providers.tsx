@@ -28,7 +28,7 @@ export function Providers(props: { children: ReactNode }) {
   const [loadingProg, setLoading] = useState<Promise<void>[]>(
     Array.from({ length: 5 }, (_, i) => {
       return new Promise<void>((resolve) => {
-        const randomDelay = Math.floor(Math.random() * (i * 2000)) + 50;
+        const randomDelay = Math.floor(Math.random() * (i * 1000));
         setTimeout(() => {
           resolve();
         }, randomDelay);

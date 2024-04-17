@@ -12,7 +12,6 @@ import {
 } from "framer-motion";
 import { debounce } from "lodash";
 import { X } from "lucide-react";
-import { useTheme } from "next-themes";
 import {
   CSSProperties,
   ComponentProps,
@@ -22,8 +21,7 @@ import {
   forwardRef,
   useContext,
   useEffect,
-  useMemo,
-  useRef
+  useRef,
 } from "react";
 import { CARD_TYPES } from "./types";
 
@@ -40,39 +38,26 @@ const Card: FC<
   const ref = useRef<HTMLDivElement>(null);
   const initialLoad = useRef(true);
 
-  const animation = useMemo(
-    () =>
-      debounce(() => {
-        if (!ref.current) return;
-        if (initialLoad.current) {
-          animate(ref.current, {
-            x: [null, x, x],
-            y: [null, y, y],
-            opacity: [null, 1, 1],
-            width: [null, null, width],
-            height: [null, null, height],
-            transition: {
-              type: "spring",
-              duration: 0.133,
-            },
-          } as DOMKeyframesDefinition);
-          initialLoad.current = false;
-        } else {
-          console.log(initialLoad);
-          animate(
-            ref.current,
-            {
-              x: [null, x, x],
-              y: [null, y, y],
-              width: [null, null, width],
-              height: [null, null, height],
-            } as DOMKeyframesDefinition,
-            { duration: 0.001 }
-          );
-        }
-      }, 10),
-    [height, width, x, y]
-  );
+  const animation = debounce(() => {
+    if (!ref.current) return;
+    if (initialLoad.current) {
+      animate(ref.current, {
+        opacity: [null, 1],
+        width: [32, width],
+        height: [32, height],
+      } as DOMKeyframesDefinition);
+      initialLoad.current = false;
+    } else {
+      animate(
+        ref.current,
+        {
+          width: [null, width],
+          height: [null, height],
+        } as DOMKeyframesDefinition,
+        { duration: 0.001, type: "tween" }
+      );
+    }
+  }, 10);
 
   useEffect(() => {
     animation();
@@ -84,6 +69,10 @@ const Card: FC<
         width: 0,
         height: 0,
         opacity: 0,
+      }}
+      style={{
+        x,
+        y,
       }}
       className={cn("card absolute origin-top-left transition-all", className)}
       ref={ref}
@@ -109,7 +98,6 @@ export const TitleCard: FC<ComponentProps<typeof Card>> = (props) => {
     ...rest
   } = props;
   const dragControls = useDragControls();
-  const { resolvedTheme } = useTheme();
   const { closeElements } = useContext(GridContext)!.getState();
 
   function startDrag(event: PointerEvent) {
@@ -149,7 +137,7 @@ export const TitleCard: FC<ComponentProps<typeof Card>> = (props) => {
         }}
         className={cn(
           className,
-          "z-50 flex aspect-square w-5 items-center justify-center rounded-full border-[1px] border-[--gray-a7] transition-all hover:border-[--gray-a10]"
+          "z-50 flex aspect-square w-5 items-center justify-center rounded-full border-[1px] border-[--gray-a7] transition-all hover:border-[--accent-a10] hover:text-[--accent-a10]"
         )}
         {...props}
       />
@@ -161,9 +149,9 @@ export const TitleCard: FC<ComponentProps<typeof Card>> = (props) => {
     <Card
       className={cn(
         "h-0 w-0",
-        "group flex flex-col overflow-hidden",
+        "group/card flex flex-col overflow-hidden",
         "border-[1px] border-[--gray-a3]",
-        "hover:border-[--gray-a7] "
+        "hover:border-[--gray-a7] hover:shadow-xl"
       )}
       dragControls={dragControls}
       dragListener={false}
@@ -186,18 +174,18 @@ export const TitleCard: FC<ComponentProps<typeof Card>> = (props) => {
         onPointerDown={startDrag}
         draggable={false}
         className={cn(
-          "group relative z-10 flex h-8 flex-col justify-center bg-[--gray-a3] px-3 py-1 opacity-100 transition-opacity"
+          "relative z-10 flex h-8 flex-col justify-center bg-[--gray-a3] px-3 py-1 opacity-100 transition-opacity"
         )}
       >
         <Text
           size="2"
-          className="color-[--gray-a4] w-fit font-light"
+          className="color-[--gray-a4] user-select-none pointer-events-none w-fit select-none font-light transition-colors group-hover/card:text-[--accent-11]"
           style={{ ["--letter-spacing"]: "0.02em" } as CSSProperties}
         >
           {title}
         </Text>
         <Separator
-          className="absolute bottom-0 left-0 w-full bg-[--gray-a3] transition-all group-hover:bg-[--gray-a7]"
+          className="absolute bottom-0 left-0 w-full bg-[--gray-a3] transition-all group-hover/card:bg-[--gray-a7]"
           size="4"
         />
 
@@ -210,11 +198,7 @@ export const TitleCard: FC<ComponentProps<typeof Card>> = (props) => {
       <motion.div
         className={cn(
           className,
-          "card-bg z-30 h-[inherit] overflow-hidden opacity-0",
-          {
-            "hover:bg-[--gray-1]": resolvedTheme === "light",
-            "dark:hover:bg-[--gray-2]": resolvedTheme !== "light",
-          }
+          "card-bg z-30 h-full overflow-hidden opacity-0"
         )}
         animate={{
           opacity: [0, 1],

@@ -9,21 +9,21 @@ const Clock: React.FC = () => {
   const [isAm, setIsAm] = useState(new Date().getHours() >= 12);
   const [hours, setHours] = useState(new Date().getHours() % 12 || 12);
   const [minutes, setMinutes] = useState(new Date().getMinutes());
-  const [seconds, setSeconds] = useState(new Date().getSeconds());
+  // const [seconds, setSeconds] = useState(new Date().getSeconds());
 
   useEffect(() => {
     const interval = setInterval(() => {
       const date = new Date();
       const hours = date.getHours();
       const minutes = date.getMinutes();
-      const seconds = date.getSeconds();
+      // const seconds = date.getSeconds();
       const formattedHours = hours % 12 || 12;
 
       // const formattedSeconds = seconds.toString().padStart(2, "0");
       // setCurrentTime(`${formattedHours}:${formattedMinutes}`);
       setHours(formattedHours);
       setMinutes(minutes);
-      setSeconds(seconds);
+      // setSeconds(seconds);
       setIsAm(hours >= 12);
     }, 1000);
 

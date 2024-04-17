@@ -10,13 +10,13 @@ import { moveCursorEffect } from "../Grid/util";
 const Effect = () => {
   const baseX = useMotionValue(-100);
   const baseY = useMotionValue(-100);
-  const x = useSpring(baseX, { stiffness: 200, damping: 30 });
-  const y = useSpring(baseY, { stiffness: 200, damping: 30 });
+  const x = useSpring(baseX, { stiffness: 250, damping: 30 });
+  const y = useSpring(baseY, { stiffness: 250, damping: 30 });
 
   const getCanvas = () => {
     const canvas = document.getElementById("mask");
     if (canvas) {
-      canvas.setAttribute("data-circle-radius", `${40}`);
+      canvas.setAttribute("data-circle-radius", `${64}`);
     }
     return canvas;
   };
@@ -50,15 +50,12 @@ const Effect = () => {
   });
   return (
     <motion.div
-      initial={{
-        maskImage: "linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1))",
-      }}
       style={{
         x,
         y,
       }}
       id="cursor"
-      className="mouse-effect pointer-events-none absolute left-0 top-0 z-[50] aspect-square w-10 cursor-none rounded-full backdrop-grayscale backdrop-invert"
+      className="pointer-events-none absolute left-0 top-0 z-[50] aspect-square w-[1px] cursor-none rounded-full opacity-0"
     />
   );
 };

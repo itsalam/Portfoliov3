@@ -3,7 +3,7 @@ import { Text } from "@radix-ui/themes";
 import { motion } from "framer-motion";
 import React, { ComponentProps, useCallback, useEffect, useRef } from "react";
 
-enum DIRECTION {
+export enum DIRECTION {
   UP = -1,
   DOWN = 1,
 }

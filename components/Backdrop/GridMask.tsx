@@ -2,9 +2,16 @@
 
 import { GridContext } from "@/lib/state";
 import { motion } from "framer-motion";
-import React, { useCallback, useContext, useEffect, useRef } from "react";
+import React, {
+  RefObject,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+} from "react";
 import { useStore } from "zustand";
 import { moveCursorEffect } from "../Grid/util";
+import Effect from "./Effect";
 import Vertex from "./Vertex";
 
 export type GridProps = {
@@ -37,10 +44,10 @@ const GridEffect: React.FC<GridProps> = (props) => {
     const scrollArea = scrollAreaRef.current;
     if (scrollArea) {
       const handleScroll = () => {
-        const currentScrollTop = scrollAreaRef.current.scrollTop;
-        if (ref.current) {
+        const currentScrollTop = scrollAreaRef.current?.scrollTop;
+        if (ref.current && currentScrollTop) {
           ref.current.setAttribute("data-offset", currentScrollTop.toString());
-          moveCursorEffect(ref.current as HTMLElement);
+          moveCursorEffect(ref.current);
         }
       };
 
@@ -64,7 +71,11 @@ const GridEffect: React.FC<GridProps> = (props) => {
         }
         strokeDashoffset={-gapSize / 2}
         stroke={
-          i % unitSize === 0 ? "#aaaaaa" : i % 2 === 0 ? "#777777" : "#555555"
+          i % unitSize === 0
+            ? "var(--accent-a9)"
+            : i % 2 === 0
+              ? "var(--accent-a6)"
+              : "var(--accent-a3)"
         }
       />
     ));
@@ -91,7 +102,11 @@ const GridEffect: React.FC<GridProps> = (props) => {
           i !== 0 && i !== gridRows ? strokeDasharray(gridCellSize) : 0
         }
         stroke={
-          i % unitSize === 0 ? "#aaaaaa" : i % 2 === 0 ? "#777777" : "#555555"
+          i % unitSize === 0
+            ? "var(--accent-a9)"
+            : i % 2 === 0
+              ? "var(--accent-a6)"
+              : "var(--accent-a3)"
         }
       />
     ));
@@ -109,15 +124,18 @@ const GridEffect: React.FC<GridProps> = (props) => {
     return Array.from({ length: gridCols - 1 }).map((_, i) =>
       Array.from({ length: gridRows }).map((_, j) => (
         <Vertex
+          thickness={
+            (i + 1) % unitSize === 0 && (j + 1) % unitSize === 0 ? 1 : 0.8
+          }
           key={`${i}-${j}`}
           position={[(i + 1) * gridCellSize, (j + 1) * cellHeight]}
           size={vertexSize}
           fill={
             (i + 1) % unitSize === 0 && (j + 1) % unitSize === 0
-              ? "#ffffff"
+              ? "var(--accent-a12)"
               : (i + 1) % 2 === 0 && (j + 1) % 2 === 0
-                ? "#999999"
-                : "#666666"
+                ? "var(--accent-a9)"
+                : "var(--accent-a6)"
           }
         />
       ))
@@ -125,20 +143,23 @@ const GridEffect: React.FC<GridProps> = (props) => {
   };
 
   return (
-    <motion.svg
-      id={"mask"}
-      initial={{
-        maskImage: "linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1))",
-      }}
-      {...svgProps}
-      ref={ref}
-      className={"mask absolute left-0 top-0 z-40 h-full w-full opacity-100"}
-      data-offset={scrollAreaRef.current?.scrollTop ?? 0}
-    >
-      <VerticalLines />
-      <HorizontalLines />
-      <Vertexs />
-    </motion.svg>
+    <>
+      <motion.svg
+        id={"mask"}
+        initial={{
+          maskImage: "linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1))",
+        }}
+        {...svgProps}
+        ref={ref}
+        className={"mask absolute left-0 top-0 z-40 h-full w-full opacity-100"}
+        data-offset={scrollAreaRef.current?.scrollTop ?? 0}
+      >
+        <VerticalLines />
+        <HorizontalLines />
+        <Vertexs />
+      </motion.svg>
+      <Effect />
+    </>
   );
 };
 

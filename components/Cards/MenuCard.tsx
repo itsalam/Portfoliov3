@@ -2,7 +2,7 @@
 
 import { GridContext } from "@/lib/state";
 import { cn } from "@/lib/utils";
-import { Separator, Text, Tooltip } from "@radix-ui/themes";
+import { Text as BaseText, Separator, Tooltip } from "@radix-ui/themes";
 import {
   AnimatePresence,
   MotionValue,
@@ -35,6 +35,7 @@ import { CARD_TYPES } from "./types";
 
 const MoonIcon = motion(Moon);
 const SunIcon = motion(Sun);
+const Text = motion(BaseText);
 
 const Item = (props: {
   x: MotionValue<number>;
@@ -85,7 +86,18 @@ const Item = (props: {
       side="top"
       delayDuration={100}
       content={
-        <Text className="" size="3">
+        <Text
+          className=""
+          size="3"
+          initial={{
+            y: -10,
+            opacity: 0,
+          }}
+          animate={{
+            y: 0,
+            opacity: 1,
+          }}
+        >
           {text}
         </Text>
       }
@@ -95,7 +107,7 @@ const Item = (props: {
         style={{
           width: springWidth,
         }}
-        className="relative z-[1000] flex aspect-square w-g-5/8 items-end justify-end rounded-full bg-[--gray-5] brightness-100 transition-all hover:bg-[--gray-2]"
+        className="relative z-[1000] flex aspect-square w-g-5/8 items-end justify-end rounded-full bg-[--gray-5] text-[--gray-11] brightness-100 transition-all hover:bg-[--gray-2] hover:text-[--accent-11]"
         variants={{
           initial: {
             width: [null, size * minSize],
@@ -167,7 +179,7 @@ export default function MenuCard(props: ComponentProps<typeof motion.div>) {
         variants={{
           initial: { height: 64 },
         }}
-        className="menu-bg absolute bottom-0 left-1/2 z-[1000] flex -translate-x-1/2 items-end gap-4 overflow-visible rounded-full p-2 backdrop-brightness-50 transition-all group-hover:bg-[--gray-a3] group-hover:backdrop-brightness-75"
+        className="menu-bg absolute bottom-0 left-1/2 z-[1000] flex -translate-x-1/2 items-end gap-4 overflow-visible rounded-full p-2 transition-all"
       >
         {Object.entries(items).map(([key, { icon: Icon, cards }]) => (
           <Item
@@ -180,7 +192,7 @@ export default function MenuCard(props: ComponentProps<typeof motion.div>) {
             onClick={() => pushElements(cards)}
           >
             <Icon
-              className="m-auto text-[--gray-11]"
+              className="m-auto"
               size={"20"}
               absoluteStrokeWidth
               strokeWidth={2}
@@ -203,7 +215,7 @@ export default function MenuCard(props: ComponentProps<typeof motion.div>) {
           <AnimatePresence mode="wait">
             {resolvedTheme === themes[0] && (
               <MoonIcon
-                className="m-auto text-[--gray-11]"
+                className="m-auto"
                 size={"20"}
                 key="moon"
                 absoluteStrokeWidth
@@ -216,7 +228,7 @@ export default function MenuCard(props: ComponentProps<typeof motion.div>) {
             )}
             {resolvedTheme === themes[1] && (
               <SunIcon
-                className="m-auto text-[--gray-11]"
+                className="m-auto"
                 size={"20"}
                 key="sun"
                 absoluteStrokeWidth

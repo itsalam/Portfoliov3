@@ -21,9 +21,9 @@ class DofPointsMaterial extends ShaderMaterial {
         vec4 mvPosition = modelViewMatrix * vec4(pos.xyz, 1.0);
         gl_Position = projectionMatrix * mvPosition;
         gl_Position.xy /= ratio;
-        vDistance = abs((uFocus + sin(uTime * 0.2) * 0.25) - -mvPosition.z);  
-        vPointSize = min((step(0.1, position.x)) * vDistance * uBlur, 75.0) + 3.0;
-        vSpeed = pos.w;
+        vDistance = uFocus + sin(uTime * 0.2) + mvPosition.z*2.0;  
+        vPointSize = min(abs(vDistance * uBlur), 75.0) + 3.0;
+
         gl_PointSize = vPointSize;
       }`,
       fragmentShader: `uniform float uOpacity;
@@ -32,14 +32,13 @@ class DofPointsMaterial extends ShaderMaterial {
       uniform vec3 uAccent;
       varying float vDistance;
       varying float vPointSize;
-      varying float vSpeed;
       void main() {
         vec2 cxy = 2.0 * gl_PointCoord - 1.0;
         float dist = dot(cxy, cxy);
         if (dist > 1.0) discard;
         float alpha = clamp(uTime/ 10.0, 0.0, 1.0) * mix(0.3 - clamp(vDistance, 0.0 , 0.3), 1.0, 0.1);
-        alpha *= (1.0-dist) * 0.4 + 0.2; 
-        gl_FragColor = vec4(mix(uColor, uAccent, (vSpeed-1.0)*200.0), alpha);
+        alpha *= (1.0-dist) * 0.4 + 0.02; 
+        gl_FragColor = vec4(uAccent, alpha);
       }`,
       uniforms: {
         positions: { value: null },

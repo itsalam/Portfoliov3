@@ -64,7 +64,7 @@ const Overlay: React.FC = () => {
   };
 
   return (
-    <div className="font-overlay md:flex-row absolute bottom-g-2/8 right-g-2/8 z-50 flex flex-col gap-x-1 gap-y-0.5">
+    <div className="absolute bottom-g-2/8 right-g-2/8 z-50 hidden flex-col gap-x-1 gap-y-0.5 font-overlay text-[--accent-12] xs:flex md:flex-row ">
       <div className="flex flex-col gap-0.5">
         <Text className="flex w-full justify-center text-right" size={"2"}>
           {currentDate}

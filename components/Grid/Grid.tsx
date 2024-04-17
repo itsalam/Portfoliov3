@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { GridContext, GridInfo } from "@/lib/state";
@@ -15,7 +16,6 @@ import GridBackdrop from "../Backdrop";
 import { TitleCard } from "../Cards/BaseCard";
 import { CARD_TYPES } from "../Cards/types";
 // import ScrollArea from "./ScrollArea";
-import { ScrollArea } from "@radix-ui/themes";
 import { debounce } from "lodash";
 import {
   ReadonlyURLSearchParams,
@@ -23,6 +23,7 @@ import {
   useRouter,
   useSearchParams,
 } from "next/navigation";
+import { TracingBeam } from "../Aceternity/TracingBeam";
 import { ELEMENT_MAP, GRID_QUERY_KEY, GridElements } from "./consts";
 import {
   GridElement,
@@ -34,6 +35,7 @@ import {
 } from "./util";
 
 const DRAG_TIMEOUT = 100;
+const SCROLL_TO_CARD_DELAY = 500;
 
 const Grid = () => {
   const router = useRouter();
@@ -81,7 +83,7 @@ const Grid = () => {
           });
         }, delay);
       },
-      100,
+      SCROLL_TO_CARD_DELAY,
       { trailing: true }
     ),
     []
@@ -96,8 +98,6 @@ const Grid = () => {
           scrollToGridElement(gridElem);
         } else {
           gridElements.set(id, getDefaultGridElement(id, gridInfo));
-
-          console.log(JSON.parse(JSON.stringify([...gridElements.values()])));
           setGridElements(new Map(gridElements));
         }
       });
@@ -132,26 +132,39 @@ const Grid = () => {
     return () => removeListener();
   }, [addListener, gridElements, pushElements]);
 
+  const adjustElements = useCallback(
+    debounce(
+      (gridInfo) => {
+        setGridElements((gridElements: GridElements) => {
+          console.log("resizing");
+          const newGridElements = new Map(gridElements); // Clone to ensure immutability
+          newGridElements.forEach((element) => {
+            const { width, height, coords } = getDefaultGridElement(
+              element.id,
+              gridInfo
+            );
+            newGridElements.set(element.id, {
+              ...element,
+              coords,
+              hasPositioned: false,
+              width,
+              height,
+            });
+          });
+          binpackElements(newGridElements, gridInfo);
+          return newGridElements;
+        });
+      },
+      200,
+      { trailing: true }
+    ),
+    []
+  );
+
   useEffect(() => {
     const { gridUnitSize, oldVals } = gridInfo;
     if (oldVals && oldVals.gridUnitSize !== gridUnitSize) {
-      setGridElements((gridElements: GridElements) => {
-        gridElements.forEach((element) => {
-          const { width, height, coords } = getDefaultGridElement(
-            element.id,
-            gridInfo
-          );
-          gridElements.set(element.id, {
-            ...element,
-            coords,
-            hasPositioned: false,
-            width,
-            height,
-          });
-        });
-        binpackElements(gridElements, gridInfo);
-        return new Map(gridElements);
-      });
+      adjustElements(gridInfo);
     }
     gridInfoRef.current = gridInfo;
   }, [gridInfo]);
@@ -217,7 +230,6 @@ const Grid = () => {
     (props: { gridElement: GridElement; gridInfo: GridInfo }) => {
       const { id, coords, width, height } = props.gridElement;
       const { gridUnitSize, bounds, isMobile } = props.gridInfo;
-      console.log(isMobile);
       const CardContent = ELEMENT_MAP[id];
       const dragTransition: ComponentProps<typeof TitleCard>["dragTransition"] =
         {
@@ -263,14 +275,18 @@ const Grid = () => {
     <motion.div
       ref={gridRef}
       id="grid"
-      className="relative z-10 h-full w-full overflow-scroll"
+      className="relative z-10 h-full w-full"
       animate={animation}
     >
-      <ScrollArea ref={scrollAreaRef}>
-        <motion.div
+      <div className="h-full w-full overflow-scroll" ref={scrollAreaRef}>
+        <TracingBeam
+          scrollAreaRef={scrollAreaRef}
           className="relative h-full w-full"
           animate={{
             height: dimensions.containerHeight,
+          }}
+          transition={{
+            duration: (SCROLL_TO_CARD_DELAY * 0.5) / 1000,
           }}
         >
           <AnimatePresence>
@@ -285,8 +301,8 @@ const Grid = () => {
             })}
           </AnimatePresence>
           <GridBackdrop scrollAreaRef={scrollAreaRef} />
-        </motion.div>
-      </ScrollArea>
+        </TracingBeam>
+      </div>
     </motion.div>
   );
 };

@@ -78,7 +78,7 @@ export const CMSContext = createContext<ReturnType<typeof useCMSStore> | null>(
 export const useCMSStore = (
   setLoading: Dispatch<SetStateAction<Promise<void>[]>>
 ) =>
-  createStore<Partial<SchemaStores>>()((set, get) => {
+  createStore<Partial<SchemaStores>>()((set) => {
     return {
       initialize: () => {
         const slices = createCMSSlices(set);
@@ -129,6 +129,7 @@ export const useGridStore = createStore<GridStore>()((set, get) => {
       const root = document.documentElement;
       root.style.setProperty("--cell-size", `${newVals.gridCellSize}px`);
       root.style.setProperty("--cell-padding", `${newVals.gapSize / 4}px`);
+      root.style.setProperty("--width", `${fullDimensions.width}px`);
       set(() => ({
         dimensions: fullDimensions,
         gridInfo: { ...newVals, oldVals },

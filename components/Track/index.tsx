@@ -1,12 +1,6 @@
 import { maskScrollArea, useResizeCallBack } from "@/lib/clientUtils";
 import { cn } from "@/lib/utils";
-import {
-  MotionStyle,
-  Variant,
-  motion,
-  useMotionValue,
-  useSpring,
-} from "framer-motion";
+import { Variant, animate, motion, useMotionValue } from "framer-motion";
 import {
   Children,
   ComponentPropsWithRef,
@@ -37,20 +31,24 @@ const Track = (
   const trackRef = useRef<HTMLDivElement>(null);
   const startDrag = useRef(0);
   const dist = useMotionValue(0);
-  const springDist = useSpring(dist, { damping: 30 });
   const numItems = useMemo(
     () => Children.count(children as ReactNode),
     [children]
   );
   const [itemWidth, setItemWidth] = useState<number>(0);
 
-  dist.on("change", (value) => {
-    const containerElement = containerRef.current;
-    if (containerElement) {
-      const middleStepPercent = Math.abs(value / maxDist);
-      maskScrollArea("right", containerElement, middleStepPercent);
-    }
-  });
+  useEffect(() => {
+    const unsubscribe = dist.on("change", (value) => {
+      const containerElement = containerRef.current;
+      if (containerElement) {
+        const middleStepPercent = Math.abs(value / maxDist);
+        maskScrollArea("right", containerElement, middleStepPercent);
+      }
+    });
+    return () => {
+      unsubscribe();
+    };
+  }, [dist, maxDist]);
 
   const handleResize = useCallback(() => {
     const trackSize = trackRef.current?.getBoundingClientRect().width || 0,
@@ -63,12 +61,24 @@ const Track = (
 
   useResizeCallBack(handleResize, trackRef, containerRef);
 
-  const setTrackDist = (coord: number, threshold?: number) => {
-    const thresholdDist = (threshold ?? 0) * maxDist;
-    dist.set(
-      Math.min(Math.max(coord, maxDist + thresholdDist), 0 - thresholdDist)
-    );
-  };
+  const setTrackDist = useCallback(
+    (coord: number, threshold?: number, useAnimate?: boolean) => {
+      const thresholdDist = (threshold ?? 0) * maxDist;
+      const coordDist = Math.min(
+        Math.max(coord, maxDist + thresholdDist),
+        0 - thresholdDist
+      );
+      if (useAnimate) {
+        animate(dist, coordDist, {
+          type: "spring",
+          damping: 50,
+        });
+      } else {
+        dist.set(coordDist);
+      }
+    },
+    [dist, maxDist]
+  );
 
   const panToElement =
     (index: number, priorOnClick?: MouseEventHandler) => (e?: MouseEvent) => {
@@ -81,7 +91,9 @@ const Track = (
             elem.getBoundingClientRect().x +
             (container.getBoundingClientRect().width -
               elem.getBoundingClientRect().width) /
-              2
+              2,
+          0,
+          true
         );
       }
       e && priorOnClick?.(e);
@@ -101,10 +113,27 @@ const Track = (
     maskScrollArea("right", containerElement, 0);
   }, []);
 
+  useEffect(() => {
+    const containerElement = containerRef.current;
+    const handleWheelMove = (e: WheelEvent) => {
+      e.stopPropagation();
+      e.preventDefault();
+      setTrackDist(dist.get() + e.deltaY * -0.33), 0.1;
+    };
+
+    if (!containerElement) return;
+    containerRef.current.addEventListener("wheel", handleWheelMove, {
+      passive: false,
+    });
+    return () => {
+      containerRef.current?.removeEventListener("wheel", handleWheelMove);
+    };
+  }, [dist, setTrackDist]);
+
   return (
     <>
       <TrackBar
-        dist={springDist}
+        dist={dist}
         trackRef={trackRef}
         itemWidth={itemWidth}
         containerWidth={
@@ -122,6 +151,7 @@ const Track = (
             "cursor-grab": !startDrag.current,
           }
         )}
+        // onWheel={handleWheelMove}
         onMouseLeave={() => {
           if (!startDrag.current && clickedIndex.current !== -1) {
             panToElement(clickedIndex.current)();
@@ -133,11 +163,9 @@ const Track = (
         <motion.div
           ref={trackRef}
           drag="x"
-          style={
-            {
-              x: springDist,
-            } as MotionStyle
-          }
+          style={{
+            x: dist,
+          }}
           className={cn("track relative flex items-start gap-g-2/8", {})}
           suppressHydrationWarning
           id="track"
@@ -145,7 +173,7 @@ const Track = (
             left: maxDist,
             right: 0,
           }}
-          dragTransition={{ timeConstant: 200, power: 0.5 }}
+          // dragTransition={{ power: 0.1 }}
           variants={{
             selected: {
               "--mask-height": 0.4,

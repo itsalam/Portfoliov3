@@ -82,7 +82,7 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
       });
     },
     600,
-    { leading: true }
+    { trailing: true, leading: true, maxWait: 600 }
   );
 
   useEffect(() => {
@@ -106,10 +106,10 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
     [projects]
   );
 
-  const handleProjectHover = (project: Project) => () => {
+  const handleProjectHover = (project?: Project) => () => {
     if (focusedProject && focusedProject !== selectedProject)
       changeFocusTitle(project);
-    if (!(selectedProject && project === selectedProject))
+    else if (!(selectedProject && project === selectedProject))
       changeFocusTitle(project);
   };
 
@@ -120,7 +120,9 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
         "relative flex h-full flex-1 flex-col justify-start gap-2 p-4"
       )}
       ref={projectsRef}
-      onHoverEnd={() => changeFocusTitle(selectedProject)}
+      onHoverEnd={() =>
+        setTimeout(() => handleProjectHover(selectedProject)(), 1000)
+      }
     >
       <Track
         className={cn("h-4/5 gap-g-2/8")}
@@ -173,7 +175,7 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
           props.className
         )}
       >
-        <motion.div className="flex justify-between gap-2 pb-4 pr-4">
+        <motion.div className="flex justify-between gap-2 pr-4">
           <ProjectTitle
             text={focusedProject?.name || selectedProject?.name || "Projects."}
             reverse={!focusedProject}

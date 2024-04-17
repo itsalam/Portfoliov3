@@ -14,7 +14,6 @@ type DivergenceProps = {
 } & Omit<BasePassProps, "material">;
 
 type UpdateProps = {
-  povSize: Vector2;
   velocity: WebGLRenderTarget;
   time: number;
   camera: PerspectiveCamera;
@@ -26,7 +25,6 @@ export default class Position extends BasePass<UpdateProps> {
   constructor(simProps: DivergenceProps) {
     const { velocity, dst1, cameraPos, cameraAspect, cameraFov, ...baseProps } =
       simProps;
-    console.log({ cameraAspect, cameraFov, cameraPos });
     super({
       ...baseProps,
       raw: false,

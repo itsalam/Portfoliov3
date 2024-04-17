@@ -35,10 +35,6 @@ export const ELEMENT_MAP: Record<
     loading: (props) => <LoadingCard {...props} />,
     ssr: false,
   }),
-  Status: dynamic(() => import("../Cards/StatusCard"), {
-    loading: (props) => <LoadingCard {...props} />,
-    ssr: false,
-  }),
   Resume: dynamic(() => import("../Cards/ResumeCard"), {
     loading: (props) => <LoadingCard {...props} />,
     ssr: false,
@@ -96,14 +92,6 @@ export const DEFAULT_GRID_ELEMENTS: Record<CARD_TYPES, DefaultGridElement> = {
     initialDimensions: {
       width: 300,
       height: 225,
-    },
-  },
-  Status: {
-    id: CARD_TYPES.Status,
-    initialCoords: DEFAULT_COORDS,
-    initialDimensions: {
-      width: 350,
-      height: 350,
     },
   },
   Resume: {

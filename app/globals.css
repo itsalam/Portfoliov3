@@ -6,6 +6,7 @@
 
 
 @layer base {
+  
   :root {
 
     --grid-size: 96px;
@@ -91,8 +92,11 @@
   }
 
   .menu-bg {
-    @apply sm:bg-[--card-background-color] bg-background;
-    --card-background-color: var(--color-panel);
+    @apply sm:bg-[--gray-a4] bg-[--gray-1] group-hover:bg-[--gray-a2] backdrop-brightness-75;
+  }
+
+  .dark .menu-bg {
+    @apply sm:bg-[--gray-a1] backdrop-brightness-50;
   }
 
   .card {
@@ -101,7 +105,7 @@
   }
 
   .dark .card {
-    @apply backdrop-brightness-50 hover:backdrop-brightness-[.25];
+    @apply backdrop-brightness-50;
   }
 }
 
@@ -111,16 +115,37 @@
   }
 }
 
-.radix-themes {
+#particle-canvas {
+  mix-blend-mode: color-dodge;
+}
+
+
+#theme {
+  z-index: 0;
   --default-font-family: var(--font-space);
 }
 
-html {
-  --color-page-background: var(--sand-12);
+#theme::before {
+  --accent-gradient: var(--gray-8);
+  --gray-gradient: var(--accent-3);
+  content: '';
+  position: absolute;
+  width: 140vmax;
+  height: 140vmax;
+  top: 50%;
+  left: 50%;
+  z-index: 0;
+  transform: translate(-50%, -50%) rotate(20deg);
+  transform-origin: center;
+  background: linear-gradient(90deg, var(--gray-gradient) 0%, var(--accent-gradient) 25%, var(--gray-gradient) 50%, var(--accent-gradient) 75%, var(--gray-gradient) 100%);
+  animation: Scroll 20s linear infinite;
+  background-size: 200% 200%;
+  background-position: 50% 50%;
 }
 
-html.dark {
-  --color-page-background: var(--sand-1);
+.dark #theme::before {
+  --accent-gradient: var(--gray-4);
+  --gray-gradient: var(--iris-2);
 }
 
 body {
@@ -131,25 +156,15 @@ body {
 .backdrop {
   --background-color: var(--gray-a5);
   mask: url(#clipping);
-  background: linear-gradient(
-    70deg,
-    var(--background-color) 0%,
-    var(--gray-a4) 25%,
-    var(--background-color) 50%,
-    var(--gray-a4) 75%,
-    var(--background-color) 100%
-  );
-  z-index: 0;
-  animation: Scroll 12s linear infinite;
-  background-size: 300% 200%;
 }
 
 @keyframes Scroll {
   0% {
-    background-position: 0% 0%;
+    background-position: 0% 50%;
   }
+
   100% {
-    background-position: 100% 33%;
+    background-position: 100% 50%; 
   }
 }
 

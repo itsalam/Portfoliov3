@@ -113,6 +113,7 @@ export const AnimatedText = (props: {
       setPrevText(currText);
       setCurrText(text);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [text]);
 
   const PresenceText = useCallback(

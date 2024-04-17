@@ -1,8 +1,6 @@
 "use client";
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-// import { GUI } from "dat.gui";
-import { GUI } from "dat.gui";
 import { useTheme } from "next-themes";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import {
@@ -21,6 +19,7 @@ import {
   RepeatWrapping,
   Scene,
   Texture,
+  TextureDataType,
   Vector2,
   Vector3,
   Vector4,
@@ -72,7 +71,7 @@ function getPoint(
     (Math.random() - 0.5) * bounds.x,
     (Math.random() - 0.5) * bounds.y,
     Math.random() - 0.5,
-    0.0
+    1000
   );
   // if (v.length() > 1) return getPoint(v, size, data, offset);
   return v.toArray(data, offset);
@@ -83,6 +82,38 @@ function initializePoints(count: number, size: number, bounds: Vector2) {
   for (let i = 0; i < count * 4; i += 4)
     getPoint(new Vector4(), size, data, i, bounds);
   return data;
+}
+
+function cssColorToGLSLVec3(cssVarName: string) {
+  // Retrieve the CSS variable value from the root element
+  const themeElem = document.querySelector(".radix-themes");
+  if (!themeElem) {
+    console.error(
+      "Could not find the root element of the Radix UI theme. " +
+        "Please make sure you're using Radix UI v1.0.0 or higher."
+    );
+    return new Vector3(0, 0, 0);
+  }
+  const style = getComputedStyle(themeElem);
+  const displayP3Color = style.getPropertyValue(cssVarName).trim();
+
+  // Extract the numeric values from the color(display-p3 {r} {g} {b}) format
+  const regex = /color\(display-p3\s+([^ ]+)\s+([^ ]+)\s+([^ ]+)\)/;
+  const matches = displayP3Color.match(regex);
+
+  if (!matches) {
+    console.error("Invalid display-p3 color format: ", {
+      displayP3Color,
+      cssVarName,
+    });
+    return new Vector3(0, 0, 0); // Return default black in case of error
+  }
+
+  // Convert the extracted values to floats and normalize
+  const r = parseFloat(matches[1]);
+  const g = parseFloat(matches[2]);
+  const b = parseFloat(matches[3]);
+  return new Vector3(r, g, b);
 }
 
 const ParticleScene = () => {
@@ -103,45 +134,40 @@ const ParticleScene = () => {
     return particles;
   }, [particleLength]);
 
-  const accentColor = useMemo(() => {
-    const themeElem = document.querySelector(".radix-themes");
-    if (themeElem) {
-      const cssColor =
-        getComputedStyle(themeElem).getPropertyValue("--accent-6");
-      // Extract the numerical components
-      const matches = cssColor.match(
-        /color\(display-p3\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\)/
-      );
-      if (matches) {
-        const r = parseFloat(matches[1]);
-        const g = parseFloat(matches[2]);
-        const b = parseFloat(matches[3]);
-        return new Vector3(r, g, b);
-      }
-    }
-    return new Vector3(0, 0, 0);
-  }, []);
+  const accentColor = useMemo(
+    () =>
+      cssColorToGLSLVec3(
+        resolvedTheme === "light" ? "--accent-6" : "--accent-9"
+      ),
+    [resolvedTheme]
+  );
+  const grayColor = useMemo(
+    () =>
+      cssColorToGLSLVec3(resolvedTheme === "light" ? "--gray-6" : "--gray-10"),
+    [resolvedTheme]
+  );
 
   // SHADER CONFIGURATION
   const options = useRef({
     dt: 0.001,
-    cursorSize: 0.05,
+    cursorSize: 0.035,
     mouseForce: 75,
-    resolution: 0.75,
+    resolution: 1.0,
     viscous: 200,
     iterations: 3,
     isViscous: true,
     aperture: 40.0,
     fov: 3.5,
-    focus: 1.8,
-    color:
-      resolvedTheme === "light"
-        ? new Vector3(0.69, 0.709, 0.682)
-        : new Vector3(0.69, 0.709, 0.682),
+    focus: 2.6,
+    accent: accentColor,
+    color: grayColor,
   });
-  const type = /(iPad|iPhone|iPod)/g.test(navigator.userAgent)
-    ? HalfFloatType
-    : FloatType;
+
+  const type = useRef(
+    (/(iPad|iPhone|iPod)/g.test(navigator.userAgent)
+      ? HalfFloatType
+      : FloatType) as TextureDataType
+  );
   const width = useRef(Math.round(size.width * options.current.resolution));
   const height = useRef(Math.round(size.height * options.current.resolution));
   const cellScale = useRef(new Vector2(1 / width.current, 1 / height.current));
@@ -165,18 +191,18 @@ const ParticleScene = () => {
     position_1: createRenderTarget({ size: particleLength, gl }),
   });
 
-  useEffect(() => {
-    const optionsCur = options.current;
-    const gui = new GUI();
-    gui.add(optionsCur, "dt", 0, 0.3);
-    gui.add(optionsCur, "cursorSize", 0, 0.3);
-    gui.add(optionsCur, "focus", 0, 40);
-    gui.add(optionsCur, "aperture", 0, 40);
-    gui.add(optionsCur, "fov", 0, 0);
-    return () => {
-      gui.destroy();
-    };
-  });
+  // useEffect(() => {
+  //   const optionsCur = options.current;
+  //   const gui = new GUI();
+  //   gui.add(optionsCur, "dt", 0, 0.3);
+  //   gui.add(optionsCur, "cursorSize", 0, 0.3);
+  //   gui.add(optionsCur, "focus", 0, 40);
+  //   gui.add(optionsCur, "aperture", 0, 40);
+  //   gui.add(optionsCur, "fov", 0, 0);
+  //   return () => {
+  //     gui.destroy();
+  //   };
+  // });
 
   function createRenderTarget(options?: { size: number; gl: WebGLRenderer }) {
     const { size, gl } = options ?? {};
@@ -184,7 +210,7 @@ const ParticleScene = () => {
       size ?? fboSize.current.x,
       size ?? fboSize.current.y,
       {
-        type,
+        type: type.current,
         minFilter: NearestFilter,
         magFilter: NearestFilter,
         wrapS: RepeatWrapping,
@@ -328,7 +354,6 @@ const ParticleScene = () => {
     pressurePass.update({ velocity, pressure });
 
     position.update({
-      povSize: povSize.current,
       velocity: fluidFbos.current.vel_0,
       time: clock.getElapsedTime(),
       camera: camera as PerspectiveCamera,
@@ -349,14 +374,16 @@ const ParticleScene = () => {
         options.current.aperture,
         0.1
       );
-
-      render.uniforms.uColor.value =
-        resolvedTheme === "light"
-          ? new Vector3(0.215, 0.231, 0.223)
-          : new Vector3(0.69, 0.709, 0.682);
-      render.uniforms.uAccent.value = accentColor;
     }
   });
+
+  useEffect(() => {
+    const render = renderRef.current;
+    if (render) {
+      render.uniforms.uColor.value = grayColor;
+      render.uniforms.uAccent.value = accentColor;
+    }
+  }, [accentColor, grayColor, resolvedTheme]);
 
   useEffect(() => {
     gl.autoClear = false;
@@ -397,11 +424,11 @@ const ParticleScene = () => {
             />
           </bufferGeometry>
         </points>
-        {/* <DebugView
+        <DebugView
           texture={fluidFbos.current.vel_0.texture}
           camera={camera as PerspectiveCamera}
           resolvedTheme={resolvedTheme}
-        /> */}
+        />
       </scene>
     </>
   );
@@ -420,7 +447,7 @@ const DebugView = ({
   const material = new MeshBasicMaterial({
     map: texture,
     side: DoubleSide,
-    opacity: resolvedTheme == "light" ? 0.06 : 0.03,
+    opacity: resolvedTheme == "light" ? 0.03 : 0.03,
     transparent: true,
   });
 
@@ -435,12 +462,11 @@ const ParticleCanvas = () => {
     <Canvas
       id="particle-canvas"
       style={{ position: "absolute" }}
-      className="left-0 z-0 opacity-80"
+      className="left-0 z-0 opacity-100"
       gl={{ antialias: true, alpha: true, autoClear: false }}
       camera={{
         position: [0, 0, 1],
-        fov: 50,
-        // type: "OrthographicCamera",
+        fov: 75,
       }}
     >
       <ParticleScene />

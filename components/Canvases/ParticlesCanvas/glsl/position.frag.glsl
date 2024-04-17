@@ -6,14 +6,12 @@ uniform float cameraFov;
 uniform float cameraAspect;
 varying vec2 vUv;
 uniform float time;
-varying mat4 vModelViewMatrix; 
-varying mat4 vProjectionMatrix; 
 
 const float PI = 3.14159265359;
 const float EPI = 0.05;
 const float STEP = 100.0;
 const float FLUID_STEP = 1.0;
-const float SPEED = 0.01;
+const float SPEED = 0.004;
 
 float rand(vec2 co){
     return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
@@ -223,25 +221,10 @@ vec3 computeFlow(float x, float y, float z, float t) {
   );
 }
 
-// void main(){
-//     vec2 adjustedUv = (vUv - 0.5) * 2.0;
-//     float t = time * SPEED;
-//     vec3 flow = computeFlow(adjustedUv.x, adjustedUv.y, 0.0, t) * snoise3(vec3(adjustedUv.y, adjustedUv.x, t*10.0));
-//     // vec3 curl = computeCurl(adjustedUv.x, adjustedUv.y, 0.0, t)  * snoise3(vec3(adjustedUv.x, adjustedUv.y, t));
-//     // Calculate the position relative to the center
-//     vec2 pos = adjustedUv - center;
-//     vec2 circle = pos ;
-//     float d = step(length(circle), scale);
-//     d *= d;
-//     flow.x += 0.25;
-//     vec3 forces = (flow)/150.0;
-//     gl_FragColor = vec4(force*d + forces.xy, 0, 1);
-// }
-
 vec2 getBounds(vec4 pos) {
-  float height = 2.0 * (cameraPos - pos.z) * tan((cameraFov* 3.141592653589793 / 180.0) / 2.0);
-  float width = height * cameraAspect;
-  return vec2(width, height * cameraAspect);
+  float height = 2.0 * (cameraPos - pos.z) * tan((cameraFov* 3.1416 / 180.0) / 2.0);
+  float width = height * max(1.0/cameraAspect, cameraAspect);
+  return vec2(width, height * max(1.0/cameraAspect, cameraAspect));
 }
 
 float BOUNDS = 0.6;
@@ -250,24 +233,22 @@ void main() {
     float t = time * SPEED;
     vec4 pos = texture2D(particles, vUv).xyzw; // basic simulation: displays the particles in place.
     vec2 bounds = getBounds(pos);
-    if (pos.x > BOUNDS * bounds.x || pos.x < -(BOUNDS * 1.2) * bounds.x || pos.y > BOUNDS * bounds.y || pos.y < -BOUNDS * bounds.y){
+    if (pos.x > BOUNDS * bounds.x || pos.x < -(BOUNDS * 1.2) * bounds.x || pos.y > BOUNDS * bounds.y || pos.y < -BOUNDS * bounds.y || pos.z > 2.0 || pos.z < -2.0){
         pos.z = rand(pos.yz) - 0.5;
-        vec2 newBounds = getBounds(pos);
-        pos.y = (rand(pos.xy)-0.5) * newBounds.y;
-        pos.x = (-0.5 - rand(pos.xz) * 0.2) * newBounds.x;
+        bounds = getBounds(pos);
+        pos.y = (rand(pos.xy)-0.5) * bounds.y;
+        pos.x = (-0.5 - rand(pos.xz) * 0.1) * bounds.x;
         pos.w = 1.0;
     }
     vec2 adjustedUv = (vUv - 0.5) * 2.0;
     vec3 flow = computeFlow(pos.x, pos.y, pos.z, t) * snoise3(vec3(pos.x, pos.y, t*10.0));
     vec3 curl = computeCurl(pos.x, pos.y, pos.z, t)  * snoise3(vec3(pos.z, pos.z, t));
     
-    curl.x += 0.175;
     vec3 forces = (flow * 1.0 + curl*3.5)/1200.0;
-    vec4 vCameraSpacePosition = vModelViewMatrix * pos;
-    vec4 clipSpacePosition = vProjectionMatrix * vCameraSpacePosition;
-    vec2 vProjectedTexCoord = (clipSpacePosition.xy / clipSpacePosition.w) * 0.5 + 0.5;
-    vec3 mouseForces = texture2D(velocity, vProjectedTexCoord).xyz * 0.0013; // basic simulation: moves the particles.
-    pos.xyz += mouseForces;
-    gl_FragColor = vec4(pos.xyz + forces, 1.0 + length(mouseForces.xy));
+    forces.x += 0.1 * SPEED;
+    vec3 mouseForces = texture2D(velocity, vec2(clamp((pos.x + bounds.x/2.0)/bounds.x, 0.01, 0.99), clamp((pos.y + bounds.y/2.0)/bounds.y, 0.01, 0.99))).xyz * 0.0015; // basic simulation: moves the particles.
+    pos.xyz += mouseForces;forces *= mix(pos.z, mix(0.1, 0.3, (pos.z - 0.8) * 5.0), step(0.8, pos.z));
+
+    gl_FragColor = vec4(pos.xyz + forces, pos.w);
 }
          

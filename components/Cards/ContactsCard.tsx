@@ -60,21 +60,21 @@ const Link = forwardRef<
         setIsHovered(true);
       }}
       onHoverEnd={() => setIsHovered(false)}
-      className="flex flex-col gap-y-1"
+      className="group flex flex-col gap-y-1"
       animate={isHovered ? "hover" : "exit"}
       ref={ref}
       {...rest}
     >
       <a
         href={value}
-        className="relative w-min overflow-hidden"
+        className=" relative w-min overflow-hidden"
         target="_blank"
         rel="noreferrer"
       >
         <Text
           size="2"
           className={cn(
-            "flex items-center overflow-hidden text-[--gray-11] transition-colors duration-300 hover:text-[--gray-12]"
+            "flex items-center overflow-hidden text-[--gray-11] transition-colors duration-300 group-hover:text-[--accent-10]"
           )}
         >
           {text}
@@ -99,7 +99,7 @@ const Link = forwardRef<
         </Text>
         <Separator
           size="3"
-          className="bg-[--gray-11]"
+          className="bg-[--gray-11] transition-colors duration-300 group-hover:bg-[--accent-10]"
           variants={{
             initial: {
               width: "100%",
@@ -135,45 +135,57 @@ export default function ContactCard(props: ComponentProps<typeof motion.div>) {
   return (
     <motion.div
       {...rest}
-      className={cn("relative flex flex-1 items-center gap-3 p-3", className)}
+      className={cn(
+        "relative flex h-full flex-1 items-center gap-3 p-3",
+        className
+      )}
       ref={projectsRef}
+      onMouseLeave={() => setHoveredLink(undefined)}
     >
       <motion.div className="my-auto flex-1 rounded-full px-4">
         <motion.div
           className="bg-blur-xl relative aspect-square overflow-hidden rounded-full bg-[--gray-a5]"
           variants={{}}
         >
-          <AnimatePresence>
-            {hoveredLink && (
-              <Icon
-                className="absolute left-0 top-0 h-full w-full p-4 text-[--gray-10]"
-                key={hoveredLink}
-                initial={{
-                  opacity: 1,
-                }}
-                strokeDasharray={100}
-                strokeDashoffset={100}
-                animate={{
-                  // strokeDasharray: [0, 100],
-                  strokeDashoffset: [null, 0],
-                  y: [-20, 0],
-                  rotate: [-30, 0],
-                  opacity: [0, 1],
-                }}
-                exit={{
-                  strokeDashoffset: [null, 100],
-                  y: [0, 20],
-                  rotate: [0, 30],
-                  opacity: [0.5, 0],
-                }}
-              />
-            )}
+          <AnimatePresence mode="wait">
+            <Icon
+              className="absolute left-0 top-0 h-full w-full p-4 text-[--accent-9]"
+              key={hoveredLink}
+              initial={{
+                opacity: 1,
+              }}
+              strokeDasharray={100}
+              strokeDashoffset={100}
+              animate={{
+                // strokeDasharray: [0, 100],
+                strokeDashoffset: [100, 0],
+                // y: [-20, 0],
+                // rotate: [-30, 0],
+                opacity: [null, 1],
+              }}
+              exit={{
+                strokeDashoffset: [0, 100],
+                // y: [0, 20],
+                // rotate: [0, 30],
+                opacity: [null, 0],
+              }}
+              transition={{
+                strokeDashoffset: {
+                  type: "tween",
+                  duration: 0.15,
+                },
+                opacity: {
+                  type: "tween",
+                  duration: 0.2,
+                },
+              }}
+            />
           </AnimatePresence>
         </motion.div>
       </motion.div>
 
       <div className="relative flex flex-1 flex-col justify-center gap-2">
-        {Object.entries(CONTACTS).map(([key, { value }], i) => (
+        {Object.entries(CONTACTS).map(([key, { value }]) => (
           <Link
             key={key}
             text={key}

@@ -9,7 +9,7 @@ import {
   forwardRef,
   useCallback,
 } from "react";
-import { DigitSpinner } from "./motion/DigitSpinner";
+import { DIRECTION, DigitSpinner } from "./motion/DigitSpinner";
 
 const Loading = forwardRef<
   ElementRef<typeof motion.div>,
@@ -39,11 +39,14 @@ const Loading = forwardRef<
           digit={~~(debounceProg / 100)}
           onAnimationComplete={handleAnimationComplete}
         />
-        <DigitSpinner digit={~~(debounceProg / 10) % 10} />
+        <DigitSpinner
+          direction={DIRECTION.UP}
+          digit={~~(debounceProg / 10) % 10}
+        />
         <DigitSpinner digit={~~debounceProg % 10} />
       </>
     );
-  }, [debounceProg]);
+  }, [debounceProg, setLoading]);
 
   return (
     <motion.div
