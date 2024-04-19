@@ -11,7 +11,7 @@ const float PI = 3.14159265359;
 const float EPI = 0.05;
 const float STEP = 100.0;
 const float FLUID_STEP = 1.0;
-const float SPEED = 0.004;
+const float SPEED = 0.0075;
 
 float rand(vec2 co){
     return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
@@ -244,7 +244,7 @@ void main() {
     vec3 flow = computeFlow(pos.x, pos.y, pos.z, t) * snoise3(vec3(pos.x, pos.y, t*10.0));
     vec3 curl = computeCurl(pos.x, pos.y, pos.z, t)  * snoise3(vec3(pos.z, pos.z, t));
     
-    vec3 forces = (flow * 1.0 + curl*3.5)/1200.0;
+    vec3 forces = (flow * 1.0 + curl*3.5)/800.0;
     forces.x += 0.1 * SPEED;
     vec3 mouseForces = texture2D(velocity, vec2(clamp((pos.x + bounds.x/2.0)/bounds.x, 0.01, 0.99), clamp((pos.y + bounds.y/2.0)/bounds.y, 0.01, 0.99))).xyz * 0.0015; // basic simulation: moves the particles.
     pos.xyz += mouseForces;forces *= mix(pos.z, mix(0.1, 0.3, (pos.z - 0.8) * 5.0), step(0.8, pos.z));

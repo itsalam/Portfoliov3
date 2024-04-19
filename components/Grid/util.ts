@@ -18,6 +18,7 @@ export type DefaultGridElement = {
   initialCoords: [number, number];
   initialDimensions: GridElemDimensions;
   mobileDimensions?: GridElemDimensions;
+  wideDimensions?: GridElemDimensions;
 };
 
 export type GridElement = {
@@ -174,11 +175,8 @@ export const getDefaultGridElement = (
   gridInfo: GridInfo
 ): GridElement => {
   const defaultElem = DEFAULT_GRID_ELEMENTS[id];
-  const { gridUnitSize, numCols, isMobile } = gridInfo;
-  const dimensions =
-    isMobile && defaultElem.mobileDimensions !== undefined
-      ? defaultElem.mobileDimensions
-      : defaultElem.initialDimensions;
+  const { gridUnitSize, numCols } = gridInfo;
+  const dimensions = getDefaultGridElementDimensions(gridInfo, defaultElem);
   return {
     ...defaultElem,
     coords: [
@@ -246,4 +244,16 @@ export const createQueryString = (
   params.set(name, value);
 
   return params.toString();
+};
+
+export const getDefaultGridElementDimensions = (
+  gridInfo: GridInfo,
+  defaultElem: DefaultGridElement
+) => {
+  const { isMobile, isWide } = gridInfo;
+  return isMobile && defaultElem.mobileDimensions !== undefined
+    ? defaultElem.mobileDimensions
+    : isWide && defaultElem.wideDimensions !== undefined
+      ? defaultElem.wideDimensions
+      : defaultElem.initialDimensions;
 };

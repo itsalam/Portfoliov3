@@ -1,4 +1,5 @@
-import { maskScrollArea, useResizeCallBack } from "@/lib/clientUtils";
+import { maskScrollArea } from "@/lib/clientUtils";
+import { useResizeCallBack } from "@/lib/hooks";
 import { cn } from "@/lib/utils";
 import { Variant, animate, motion, useMotionValue } from "framer-motion";
 import {
@@ -122,11 +123,11 @@ const Track = (
     };
 
     if (!containerElement) return;
-    containerRef.current.addEventListener("wheel", handleWheelMove, {
+    containerElement.addEventListener("wheel", handleWheelMove, {
       passive: false,
     });
     return () => {
-      containerRef.current?.removeEventListener("wheel", handleWheelMove);
+      containerElement?.removeEventListener("wheel", handleWheelMove);
     };
   }, [dist, setTrackDist]);
 

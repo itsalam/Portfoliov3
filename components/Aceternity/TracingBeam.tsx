@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import { p3ToHex } from "@/lib/clientUtils";
 import { cn } from "@/lib/utils";
@@ -22,7 +23,6 @@ export const TracingBeam: React.FC<
     ...otherProps
   } = props;
   const { resolvedTheme } = useTheme();
-  scrollYProgress.on("change", console.log);
   const contentRef = useRef<HTMLDivElement>(null);
 
   const y1 = useSpring(useTransform(scrollYProgress, [0, 0.8], [0, height]), {
@@ -53,8 +53,6 @@ export const TracingBeam: React.FC<
     [accentColor2, baseColor]
   );
 
-  console.log(baseColor);
-
   return (
     <motion.div
       className={cn("relative h-full w-full", className)}
@@ -72,7 +70,7 @@ export const TracingBeam: React.FC<
           animate={{
             boxShadow:
               scrollYProgress.get() > 0
-                ? "none"
+                ? "rgba(0, 0, 0, 0.0) 0px 0px 0px"
                 : "rgba(0, 0, 0, 0.24) 0px 3px 8px",
             borderColor: "#ECEEED",
           }}

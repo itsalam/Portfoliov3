@@ -65,6 +65,10 @@ const Card: FC<
 
   return (
     <motion.div
+      onMouseDown={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+      }}
       initial={{
         width: 0,
         height: 0,

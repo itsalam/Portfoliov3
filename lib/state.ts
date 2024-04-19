@@ -22,6 +22,7 @@ export type GridInfo = {
   oldVals?: Omit<GridInfo, "oldVals"> | null;
   bounds: { left: number; right: number; top: number; bottom: number };
   isMobile: boolean;
+  isWide: boolean;
 };
 
 const NUM_COLS = 48;
@@ -50,6 +51,7 @@ const getGridProps = (dimensions: Dimensions): Omit<GridInfo, "oldVals"> => {
       bottom: containerHeight,
     },
     isMobile: width < 550,
+    isWide: width > 1800,
   };
 };
 

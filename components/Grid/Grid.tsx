@@ -21,6 +21,8 @@ import GridBackdrop from "../Backdrop";
 import { TitleCard } from "../Cards/BaseCard";
 import { CARD_TYPES } from "../Cards/types";
 // import ScrollArea from "./ScrollArea";
+import { useScrollMask } from "@/lib/hooks";
+import { ScrollArea } from "@radix-ui/themes";
 import { debounce } from "lodash";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { TracingBeam } from "../Aceternity/TracingBeam";
@@ -35,7 +37,7 @@ import {
   updateDraggedElement,
 } from "./util";
 
-const DRAG_TIMEOUT = 100;
+const DRAG_TIMEOUT = 500;
 const SCROLL_TO_CARD_DELAY = 500;
 
 const Grid = () => {
@@ -47,6 +49,7 @@ const Grid = () => {
   const { gridInfo, dimensions } = useStore(context);
   const gridRef = useRef<HTMLDivElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const onScroll = useScrollMask(scrollAreaRef);
   const gridInfoRef = useRef(gridInfo);
   const dimensionsRef = useRef(dimensions);
   const [lowestElem, setLowestElem] = useState<GridElement>();
@@ -132,7 +135,6 @@ const Grid = () => {
     debounce(
       (gridInfo) => {
         setGridElements((gridElements: GridElements) => {
-          console.log("resizing");
           const newGridElements = new Map(gridElements); // Clone to ensure immutability
           newGridElements.forEach((element) => {
             const { width, height, coords } = getDefaultGridElement(
@@ -229,8 +231,8 @@ const Grid = () => {
       const CardContent = ELEMENT_MAP[id];
       const dragTransition: ComponentProps<typeof TitleCard>["dragTransition"] =
         {
-          max: 10,
-          power: 0,
+          max: 3,
+          power: 0.2,
           timeConstant: DRAG_TIMEOUT,
           modifyTarget: (target: number) =>
             Math.round(target / gridUnitSize) * gridUnitSize,
@@ -253,11 +255,11 @@ const Grid = () => {
           x={coords[0]}
           y={coords[1]}
           drag={!isMobile}
-          onDragEnd={() =>
-            setTimeout(
-              () => updateDraggedElement(id, gridElements),
-              DRAG_TIMEOUT * 1.1
-            )
+          onDragEnd={(e, i) =>
+            setTimeout(() => {
+              console.log(e, i);
+              updateDraggedElement(id, gridElements);
+            }, DRAG_TIMEOUT * 1.1)
           }
         >
           <CardContent />
@@ -271,10 +273,14 @@ const Grid = () => {
     <motion.div
       ref={gridRef}
       id="grid"
-      className="relative z-10 h-full w-full"
+      className="container relative z-10 h-full"
       animate={animation}
     >
-      <div className="h-full w-full overflow-scroll" ref={scrollAreaRef}>
+      <ScrollArea
+        className="h-full w-full"
+        ref={scrollAreaRef}
+        onScroll={onScroll}
+      >
         <TracingBeam
           scrollYProgress={scrollYProgress}
           height={dimensions.containerHeight}
@@ -282,6 +288,14 @@ const Grid = () => {
             duration: (SCROLL_TO_CARD_DELAY * 0.5) / 1000,
           }}
           offset={gridInfo.gridCellSize}
+          initial={"initial"}
+          variants={{
+            initial: {
+              transition: {
+                staggerChildren: 0.8,
+              },
+            },
+          }}
         >
           <AnimatePresence>
             {[...gridElements.values()].map((gridElement) => {
@@ -296,7 +310,7 @@ const Grid = () => {
           </AnimatePresence>
           <GridBackdrop scrollY={scrollY} />
         </TracingBeam>
-      </div>
+      </ScrollArea>
     </motion.div>
   );
 };

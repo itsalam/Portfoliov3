@@ -50,7 +50,6 @@ export const theme = {
   extend: {
     screens: {
       xs: "480px",
-      "3xl": "1800px",
     },
     backgroundImage: {
       "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",

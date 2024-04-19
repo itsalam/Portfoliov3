@@ -1,13 +1,13 @@
 "use client";
 
-import Effect from "@/components/Backdrop/Effect";
 import ParticlesCanvas from "@/components/Canvases/ParticlesCanvas";
 import MenuCard from "@/components/Cards/MenuCard";
 import Grid from "@/components/Grid/Grid";
 import Loading from "@/components/Loading";
 import Overlay from "@/components/Overlay";
-import { useCMSStoreInitializer, useResizeGridUpdate } from "@/lib/clientUtils";
+import { useCMSStoreInitializer, useResizeGridUpdate } from "@/lib/hooks";
 import { CMSContext, GridContext } from "@/lib/state";
+import { ThemePanel } from "@radix-ui/themes";
 import { useAnimate } from "framer-motion";
 import { useContext, useEffect, useState } from "react";
 import "./globals.css";
@@ -44,27 +44,6 @@ export default function Hero() {
   // Empty dependency array means this effect runs once on mount
   return (
     <>
-      {/* <AnimatePresence mode="wait">
-        {loading ? (
-          <motion.div
-            key={"slide-in"}
-            className="fixed left-0 top-0 z-50 h-screen w-screen origin-bottom bg-card"
-            initial={{ scaleY: 0 }}
-            animate={{ scaleY: 0 }}
-            exit={{ scaleY: 1 }}
-            transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
-          />
-        ) : (
-          <motion.div
-            key={"slide-out"}
-            className="fixed left-0 top-0 z-50 h-screen w-screen origin-top bg-card"
-            initial={{ scaleY: 1 }}
-            animate={{ scaleY: 0 }}
-            exit={{ scaleY: 0 }}
-            transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
-          />
-        )}
-      </AnimatePresence> */}
       {loading ? (
         <Loading prog={loadingProgress} ref={scope} setLoading={setLoading} />
       ) : (
@@ -72,7 +51,7 @@ export default function Hero() {
           <Grid />
           <Overlay />
           <MenuCard className="bottom-g-4/8 left-1/2 z-50 -translate-x-1/2" />
-          <Effect />
+          <ThemePanel defaultOpen={false} />
         </>
       )}
       <ParticlesCanvas />

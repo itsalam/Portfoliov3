@@ -1,17 +1,19 @@
 "use client";
 
+import { useScrollMask } from "@/lib/hooks";
 import { CMSContext } from "@/lib/state";
 import { cn, formatDate } from "@/lib/utils";
-import { Separator, Text } from "@radix-ui/themes";
+import { ScrollArea, Separator, Text } from "@radix-ui/themes";
 import { motion, useAnimate } from "framer-motion";
-import { ComponentProps, Fragment, useContext } from "react";
+import { ComponentProps, Fragment, useContext, useRef } from "react";
 import { useStore } from "zustand";
-import ScrollArea from "../motion/ScrollArea";
 
 export default function ExperienceCard(
   props: ComponentProps<typeof motion.div>
 ) {
   const [cardRef] = useAnimate();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const handleScroll = useScrollMask(scrollRef);
   const cms = useContext(CMSContext)!;
   const experiences = useStore(cms, (cms) => cms.works ?? []);
 
@@ -26,6 +28,8 @@ export default function ExperienceCard(
         type="always"
         scrollbars="vertical"
         className="flex flex-col gap-4 py-4 pl-4"
+        ref={scrollRef}
+        onScroll={handleScroll}
       >
         {experiences.map((experience, i) => (
           <div key={i} className="mr-4 flex flex-col gap-y-2 pb-6">

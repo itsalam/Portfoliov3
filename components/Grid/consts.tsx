@@ -53,6 +53,10 @@ export const DEFAULT_GRID_ELEMENTS: Record<CARD_TYPES, DefaultGridElement> = {
       width: 550,
       height: 350,
     },
+    wideDimensions: {
+      width: 550,
+      height: 350,
+    },
   },
   Projects: {
     id: CARD_TYPES.Projects,
@@ -65,17 +69,25 @@ export const DEFAULT_GRID_ELEMENTS: Record<CARD_TYPES, DefaultGridElement> = {
       width: 550,
       height: 350,
     },
+    wideDimensions: {
+      width: 750,
+      height: 350,
+    },
   },
   Experience: {
     id: CARD_TYPES.Experience,
     initialCoords: DEFAULT_COORDS,
     initialDimensions: {
       width: 550,
-      height: 450,
+      height: 650,
     },
     mobileDimensions: {
       width: 550,
       height: 650,
+    },
+    wideDimensions: {
+      width: 650,
+      height: 850,
     },
   },
   Contacts: {
@@ -85,6 +97,7 @@ export const DEFAULT_GRID_ELEMENTS: Record<CARD_TYPES, DefaultGridElement> = {
       width: 220,
       height: 145,
     },
+    wideDimensions: { width: 275, height: 150 },
   },
   Location: {
     id: CARD_TYPES.Location,
@@ -93,6 +106,7 @@ export const DEFAULT_GRID_ELEMENTS: Record<CARD_TYPES, DefaultGridElement> = {
       width: 300,
       height: 225,
     },
+    wideDimensions: { width: 500, height: 350 },
   },
   Resume: {
     id: CARD_TYPES.Resume,

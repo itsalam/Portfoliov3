@@ -87,8 +87,12 @@
   }
 
   .card-bg {
-    --card-background-color: var(--color-panel);
+    --card-background-color: var(--white-a9);
     background-color: var(--card-background-color);
+  }
+
+  .dark .card-bg {
+    --card-background-color: var(--black-a9);
   }
 
   .menu-bg {
@@ -100,12 +104,7 @@
   }
 
   .card {
-    @apply backdrop-blur-md;
     border-radius: var(--radius-5);
-  }
-
-  .dark .card {
-    @apply backdrop-brightness-50;
   }
 }
 
@@ -127,7 +126,7 @@
 
 #theme::before {
   --accent-gradient: var(--gray-8);
-  --gray-gradient: var(--accent-3);
+  --gray-gradient: var(--accent-4);
   content: '';
   position: absolute;
   width: 140vmax;
@@ -218,4 +217,10 @@ body {
 
 .rt-TooltipText {
   color: hsl(var(--foreground)) !important;
+}
+
+@media (min-width: 1920px){
+  .container {
+    max-width: 1920px;
+  }
 }

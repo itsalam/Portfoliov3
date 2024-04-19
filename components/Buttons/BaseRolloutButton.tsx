@@ -51,7 +51,7 @@ export const BaseRolloutButton: FC<
         }}
       >
         <ComponentA
-          className="relative p-1"
+          className="relative aspect-square h-full p-1"
           initial={{
             opacity: 1,
           }}
@@ -66,7 +66,7 @@ export const BaseRolloutButton: FC<
           {...{ size: iconSize }}
         />
         <ComponentB
-          className="absolute left-0 top-0 p-1"
+          className="absolute left-0.5 top-0.5 aspect-square p-1"
           initial={{
             opacity: 0,
           }}

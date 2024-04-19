@@ -142,9 +142,9 @@ export default function ContactCard(props: ComponentProps<typeof motion.div>) {
       ref={projectsRef}
       onMouseLeave={() => setHoveredLink(undefined)}
     >
-      <motion.div className="my-auto flex-1 rounded-full px-4">
+      <motion.div className="flex h-full w-full flex-1 justify-center rounded-full p-2">
         <motion.div
-          className="bg-blur-xl relative aspect-square overflow-hidden rounded-full bg-[--gray-a5]"
+          className="bg-blur-xl relative aspect-square max-h-full max-w-full overflow-hidden rounded-full bg-[--gray-a5]"
           variants={{}}
         >
           <AnimatePresence mode="wait">

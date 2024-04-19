@@ -1,126 +1,16 @@
 "use client";
 
-import { useLoading } from "@/app/providers";
-import { AnimationControls, motion, useMotionValue } from "framer-motion";
-import { debounce } from "lodash";
-import { ComponentProps, RefObject, useEffect, useState } from "react";
-import { StoreApi, useStore } from "zustand";
-import { SchemaStores } from "./fetchData";
-import { Dimensions, GridStore } from "./state";
-
-export const useResizeCallBack = (
-  cb: ResizeObserverCallback,
-  ...refs: RefObject<HTMLElement>[]
-) => {
-  useEffect(() => {
-    // window.addEventListener("resize", cb);
-    const elements = refs
-      .map((ref) => ref.current)
-      .filter(Boolean) as HTMLElement[];
-    const resizeObserver = new ResizeObserver(cb);
-    elements.forEach((e) => {
-      resizeObserver.observe(e);
-    });
-
-    return () => {
-      elements.length &&
-        elements.forEach((e) => {
-          resizeObserver.unobserve(e);
-        });
-      // window.removeEventListener("resize", cb);
-    };
-  }, [cb, refs]);
-};
-
-export const useCMSStoreInitializer = (
-  store: StoreApi<Partial<SchemaStores>>
-) => {
-  const initialLoad = useMotionValue(true);
-
-  const initialize = store.getInitialState().initialize;
-  useEffect(() => {
-    if (initialLoad.get() && initialize) {
-      initialize();
-      initialLoad.set(false);
-    }
-  }, [initialLoad, initialize]);
-};
-
-export function useResizeGridUpdate(store: StoreApi<GridStore>) {
-  const initialLoad = useMotionValue(true);
-  const [, setLoadingPromises] = useLoading();
-  const updateDimensions = () => {
-    const mainGrid = document
-      ?.querySelector("#main")
-      ?.getBoundingClientRect() as DOMRect;
-
-    const dimensions = (
-      mainGrid
-        ? { width: mainGrid.width, height: mainGrid.height }
-        : {
-            width: typeof window !== "undefined" ? window.innerWidth : 0,
-            height: typeof window !== "undefined" ? window.innerHeight : 0,
-          }
-    ) as Dimensions;
-    return dimensions;
-  };
-  const setDimensions = useStore(store).setDimensions;
-  const handleResize = debounce(
-    () => {
-      setDimensions(updateDimensions());
-      if (initialLoad) {
-        initialLoad.set(false);
-        return;
-      }
-    },
-    50,
-    {
-      trailing: true,
-    }
-  );
-
-  useEffect(() => {
-    const loadPromise = new Promise<void>((resolve) => {
-      initialLoad.on("change", (initialLoad) => {
-        !initialLoad.valueOf() && resolve();
-      });
-    });
-    if (initialLoad.get()) {
-      setLoadingPromises((curr) => curr.concat([loadPromise]));
-      handleResize();
-    }
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [handleResize, initialLoad, setLoadingPromises]);
-}
-
-export const animateTransition = {
-  initial: {
-    y: "100%",
-    opacity: 0.0,
-  },
-  show: {
-    y: "0%",
-    opacity: 1,
-    transition: {
-      duration: 0.2,
-    },
-  },
-  exit: {
-    y: "-100%",
-    opacity: 0.0,
-    transition: {
-      duration: 0.133,
-    },
-  },
-};
+import { AnimationControls, motion } from "framer-motion";
+import { ComponentProps, useEffect, useState } from "react";
 
 export function isAnimationControl(obj: object): obj is AnimationControls {
   return "start" in obj && typeof obj.start === "function";
 }
 
+export type Direction = "right" | "left" | "top" | "bottom";
+
 export const maskScrollArea = (
-  direction: "right" | "left" | "top" | "bottom",
+  direction: Direction,
   element: HTMLElement,
   percentage: number,
   threshold = 5
@@ -163,36 +53,40 @@ export function isAnimationControls(
   );
 }
 
-export function p3ColorToArr(cssVarName: string): [number, number, number] {
-  // Retrieve the CSS variable value from the root element
+export function getCSSVarColor(cssVarName: string): string {
   const themeElem = document.querySelector(".radix-themes");
   if (!themeElem) {
     console.error(
       "Could not find the root element of the Radix UI theme. " +
         "Please make sure you're using Radix UI v1.0.0 or higher."
     );
-    return [0, 0, 0];
+    return "";
   }
   const style = getComputedStyle(themeElem);
-  const displayP3Color = style.getPropertyValue(cssVarName).trim();
+  return style.getPropertyValue(cssVarName).trim();
+}
 
-  // Extract the numeric values from the color(display-p3 {r} {g} {b}) format
-  const regex = /color\(display-p3\s+([^ ]+)\s+([^ ]+)\s+([^ ]+)\)/;
-  const matches = displayP3Color.match(regex);
-
-  if (!matches) {
+export function p3ColorToArr(cssVarName: string): [number, number, number] {
+  const cssVarValue = getCSSVarColor(cssVarName);
+  const hexRegex = /#([a-fA-F0-9]{2})([a-fA-F0-9]{2})([a-fA-F0-9]{2})/;
+  const hexMatches = cssVarValue.match(hexRegex);
+  const p3Regex = /color\(display-p3\s+([^ ]+)\s+([^ ]+)\s+([^ ]+)\)/;
+  const P3matches = cssVarValue.match(p3Regex);
+  if (hexMatches) {
+    const [, r, g, b] = hexMatches.map((match) => parseInt(match, 16) / 255);
+    return [r, g, b];
+  } else if (P3matches) {
+    const r = parseFloat(P3matches[1]);
+    const g = parseFloat(P3matches[2]);
+    const b = parseFloat(P3matches[3]);
+    return [r, g, b];
+  } else {
     console.error("Invalid display-p3 color format: ", {
-      displayP3Color,
+      displayP3Color: cssVarValue,
       cssVarName,
     });
     return [0, 0, 0]; // Return default black in case of error
   }
-
-  // Convert the extracted values to floats and normalize
-  const r = parseFloat(matches[1]);
-  const g = parseFloat(matches[2]);
-  const b = parseFloat(matches[3]);
-  return [r, g, b];
 }
 
 export function p3ToHex(cssVarName: string) {

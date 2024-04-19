@@ -21,7 +21,7 @@ class DofPointsMaterial extends ShaderMaterial {
         vec4 mvPosition = modelViewMatrix * vec4(pos.xyz, 1.0);
         gl_Position = projectionMatrix * mvPosition;
         gl_Position.xy /= ratio;
-        vDistance = uFocus + sin(uTime * 0.2) + mvPosition.z*2.0;  
+        vDistance = uFocus + sin(uTime * 0.1)*0.5 + mvPosition.z*2.0;  
         vPointSize = min(abs(vDistance * uBlur), 75.0) + 3.0;
 
         gl_PointSize = vPointSize;

@@ -419,7 +419,7 @@ const DebugView = ({
   const material = new MeshBasicMaterial({
     map: texture,
     side: DoubleSide,
-    opacity: resolvedTheme == "light" ? 0.03 : 0.03,
+    opacity: resolvedTheme == "light" ? 0.0 : 0.0,
     transparent: true,
   });
 

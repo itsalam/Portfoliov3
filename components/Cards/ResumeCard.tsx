@@ -1,6 +1,6 @@
 "use client";
 
-import { useResizeCallBack } from "@/lib/clientUtils";
+import { useResizeCallBack } from "@/lib/hooks";
 import { CMSContext } from "@/lib/state";
 import { cn } from "@/lib/utils";
 import { Spinner } from "@radix-ui/themes";
@@ -63,9 +63,9 @@ const DownloadButton: FC<ComponentProps<typeof motion.button>> = (props) => {
         />
       )}
       text={"Download"}
-      className="absolute bottom-4"
+      className="absolute bottom-4 z-50"
       textSize="3"
-      iconSize={30}
+      iconSize={28}
       iconVariants={{
         hover: {},
       }}
