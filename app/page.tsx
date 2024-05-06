@@ -23,7 +23,7 @@ export default function Hero() {
   useResizeGridUpdate(gridApi);
   useCMSStoreInitializer(cmsApi);
 
-  const useThemePanel = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
+  const useThemePanel = process.env.NEXT_PUBLIC_USE_THEME_PANEL;
 
   useEffect(() => {
     let resolvedCount = 0;

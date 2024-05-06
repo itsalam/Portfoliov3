@@ -22,7 +22,7 @@ class DofPointsMaterial extends ShaderMaterial {
         gl_Position = projectionMatrix * mvPosition;
         gl_Position.xy /= ratio;
         vDistance = uFocus + sin(uTime * 0.1)*0.5 + mvPosition.z*2.0;  
-        vPointSize = min(abs(mvPosition.z * 2.0 + uFocus) * uBlur, 75.0);
+        vPointSize = min(abs(mvPosition.z * 1.5 + uFocus) * uBlur, 75.0);
 
         gl_PointSize = vPointSize;
       }`,

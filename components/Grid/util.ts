@@ -167,7 +167,7 @@ export const moveCursorEffect = (canvas: HTMLElement | SVGSVGElement) => {
   const radius = parseInt(canvas.getAttribute("data-circle-radius") ?? "0");
   const x = parseInt(canvas.getAttribute("data-circle-x") ?? "0");
   const y = parseInt(canvas.getAttribute("data-circle-y") ?? "0");
-  canvas.style.maskImage = `radial-gradient(circle ${radius}px at ${x - radius / 2}px ${y + yOffset}px, white, transparent),  linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2))`;
+  canvas.style.maskImage = `radial-gradient(circle ${radius}px at ${x - radius / 2}px ${y + yOffset}px, white, transparent),  linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1))`;
 };
 
 export const getDefaultGridElement = (

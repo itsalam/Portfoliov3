@@ -233,7 +233,7 @@ void main() {
     float t = time * SPEED;
     vec4 pos = texture2D(particles, vUv).xyzw; // basic simulation: displays the particles in place.
     vec2 bounds = getBounds(pos);
-    if (pos.x > BOUNDS * bounds.x || pos.x < -(BOUNDS * 1.2) * bounds.x || pos.y > BOUNDS * bounds.y || pos.y < -BOUNDS * bounds.y || pos.z > 3.0 || pos.z < -3.0){
+    if (pos.x > BOUNDS * bounds.x || pos.x < -(BOUNDS * 1.2) * bounds.x || pos.y > BOUNDS * bounds.y || pos.y < -BOUNDS * bounds.y || pos.z > 2.0 || pos.z < -2.0){
         pos.z = rand(pos.yz) - 0.5;
         bounds = getBounds(pos);
         pos.y = (rand(pos.xy)-0.5) * bounds.y;
@@ -244,7 +244,7 @@ void main() {
     vec3 flow = computeFlow(pos.x, pos.y, pos.z, t) * snoise3(vec3(pos.x, pos.y, t*10.0));
     vec3 curl = computeCurl(pos.x, pos.y, pos.z, t)  * snoise3(vec3(pos.z, pos.z, t));
     
-    vec3 forces = (flow * 1.0 + curl*3.5)/1200.0;
+    vec3 forces = (flow * 1.0 + curl*4.0)/1000.0;
     forces.x += 0.06 * SPEED;
     vec3 mouseForces = texture2D(velocity, vec2(clamp((pos.x + bounds.x/2.0)/bounds.x, 0.01, 0.99), clamp((pos.y + bounds.y/2.0)/bounds.y, 0.01, 0.99))).xyz * 0.003; // basic simulation: moves the particles.
     pos.xyz += mouseForces;

@@ -112,7 +112,7 @@ const ParticleScene = () => {
   const accentColor = useMemo(
     () =>
       cssColorToGLSLVec3(
-        resolvedTheme === "light" ? "--accent-3" : "--accent-8"
+        resolvedTheme === "light" ? "--accent-3" : "--accent-12"
       ),
     [resolvedTheme]
   );

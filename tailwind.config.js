@@ -142,7 +142,7 @@ export const theme = {
     ]),
   },
 };
-export const plugins = [addVariablesForColors,];
+export const plugins = [require("tailwindcss-animate"), addVariablesForColors];
 
 function addVariablesForColors({ addBase, theme }: any) {
   let allColors = flattenColorPalette(theme("colors"));

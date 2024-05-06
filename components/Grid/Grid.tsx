@@ -269,7 +269,7 @@ const Grid = () => {
       animate={{
         opacity: [0, 1],
         transition: {
-          duration: 3.0,
+          duration: 0.1,
         },
       }}
     >

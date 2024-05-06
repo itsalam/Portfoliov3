@@ -145,7 +145,7 @@
 }
 
 .dark #theme::before {
-  --accent-gradient: var(--gray-4);
+  --accent-gradient: var(--gray-2);
   --gray-gradient: var(--iris-2);
 }
 
