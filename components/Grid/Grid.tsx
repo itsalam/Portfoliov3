@@ -2,12 +2,7 @@
 "use client";
 
 import { GridContext, GridInfo } from "@/lib/state";
-import {
-  AnimatePresence,
-  motion,
-  useAnimation,
-  useScroll,
-} from "framer-motion";
+import { AnimatePresence, motion, useScroll } from "framer-motion";
 import {
   ComponentProps,
   useCallback,
@@ -21,7 +16,6 @@ import GridBackdrop from "../Backdrop";
 import { TitleCard } from "../Cards/BaseCard";
 import { CARD_TYPES } from "../Cards/types";
 // import ScrollArea from "./ScrollArea";
-import { useScrollMask } from "@/lib/hooks";
 import { ScrollArea } from "@radix-ui/themes";
 import { debounce } from "lodash";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -49,7 +43,7 @@ const Grid = () => {
   const { gridInfo, dimensions } = useStore(context);
   const gridRef = useRef<HTMLDivElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const onScroll = useScrollMask(scrollAreaRef);
+  // const onScroll = useScrollMask(scrollAreaRef);
   const gridInfoRef = useRef(gridInfo);
   const dimensionsRef = useRef(dimensions);
   const [lowestElem, setLowestElem] = useState<GridElement>();
@@ -66,8 +60,6 @@ const Grid = () => {
     container: scrollAreaRef,
     // offset: ["start start", "end start"],
   });
-
-  const animation = useAnimation();
 
   const scrollToGridElement = useCallback(
     debounce(
@@ -274,12 +266,17 @@ const Grid = () => {
       ref={gridRef}
       id="grid"
       className="container relative z-10 h-full"
-      animate={animation}
+      animate={{
+        opacity: [0, 1],
+        transition: {
+          duration: 3.0,
+        },
+      }}
     >
       <ScrollArea
         className="h-full w-full"
         ref={scrollAreaRef}
-        onScroll={onScroll}
+        // onScroll={onScroll}
       >
         <TracingBeam
           scrollYProgress={scrollYProgress}

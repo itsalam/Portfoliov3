@@ -1,5 +1,6 @@
 "use client";
 
+import { CMSContext } from "@/lib/state";
 import { cn } from "@/lib/utils";
 import { Separator as BaseSeparator, Text as BaseText } from "@radix-ui/themes";
 import {
@@ -21,33 +22,29 @@ import {
   ComponentPropsWithoutRef,
   ElementRef,
   forwardRef,
+  useContext,
   useState,
 } from "react";
+import { useStore } from "zustand";
 
 const Text = motion(BaseText);
 const Separator = motion(BaseSeparator);
 const ArrowUpRight = motion(ArrowUpRightBase);
-const Email = motion(EmailIcon);
-const Github = motion(GithubIcon);
-const Linkedin = motion(LinkedinIcon);
-const MessageCircleQuestion = motion(MessageCircleQuestionIcon);
+const email = motion(EmailIcon);
+const github = motion(GithubIcon);
+const linkedin = motion(LinkedinIcon);
+const defaultIcon = motion(MessageCircleQuestionIcon);
 
 //Add a contact form, linkedin, github, resume, and email/phone section
-const CONTACTS: Record<
-  string,
-  { value: string; Icon: CustomDomComponent<LucideProps> }
-> = {
-  LinkedIn: {
-    value: "https://www.linkedin.com/in/vincent-lam-1a2b3c4d/",
-    Icon: Linkedin,
-  },
-  GitHub: { value: "github.com/vincentlam", Icon: Github },
-  Email: { value: "vincentthanhlam@gmail.com", Icon: Email },
+const CONTACTS: Record<string, CustomDomComponent<LucideProps>> = {
+  linkedin,
+  github,
+  email,
 };
 
 const Link = forwardRef<
   ElementRef<typeof motion.div>,
-  ComponentPropsWithoutRef<typeof motion.div> & { text: string; value: string }
+  ComponentPropsWithoutRef<typeof motion.div> & { text: string; value?: string }
 >((props, ref) => {
   const { text, value, onHoverStart, ...rest } = props;
   const [isHovered, setIsHovered] = useState(false);
@@ -99,7 +96,6 @@ const Link = forwardRef<
         </Text>
         <Separator
           size="3"
-          className="bg-[--gray-11] transition-colors duration-300 group-hover:bg-[--accent-10]"
           variants={{
             initial: {
               width: "100%",
@@ -127,10 +123,13 @@ Link.displayName = "Link";
 export default function ContactCard(props: ComponentProps<typeof motion.div>) {
   const { className, ...rest } = props;
   const [projectsRef] = useAnimate();
-  const [hoveredLink, setHoveredLink] = useState<string>();
-  const Icon = hoveredLink
-    ? CONTACTS[hoveredLink]?.Icon
-    : MessageCircleQuestion;
+  const [hoveredLink, setHoveredInfo] = useState<number>();
+  const cms = useContext(CMSContext)!;
+  const contacts = useStore(cms, (cms) => cms.contact);
+  const Icon =
+    contacts && hoveredLink
+      ? CONTACTS[contacts[hoveredLink].name.toLowerCase()]
+      : defaultIcon;
 
   return (
     <motion.div
@@ -140,7 +139,7 @@ export default function ContactCard(props: ComponentProps<typeof motion.div>) {
         className
       )}
       ref={projectsRef}
-      onMouseLeave={() => setHoveredLink(undefined)}
+      onMouseLeave={() => setHoveredInfo(undefined)}
     >
       <motion.div className="flex h-full w-full flex-1 justify-center rounded-full p-2">
         <motion.div
@@ -185,16 +184,17 @@ export default function ContactCard(props: ComponentProps<typeof motion.div>) {
       </motion.div>
 
       <div className="relative flex flex-1 flex-col justify-center gap-2">
-        {Object.entries(CONTACTS).map(([key, { value }]) => (
-          <Link
-            key={key}
-            text={key}
-            value={value}
-            onHoverStart={() => {
-              setHoveredLink(key);
-            }}
-          />
-        ))}
+        {contacts &&
+          contacts.map(({ name, link }, i) => (
+            <Link
+              key={name}
+              text={name}
+              value={link}
+              onHoverStart={() => {
+                setHoveredInfo(i);
+              }}
+            />
+          ))}
       </div>
     </motion.div>
   );

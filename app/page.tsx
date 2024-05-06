@@ -23,6 +23,8 @@ export default function Hero() {
   useResizeGridUpdate(gridApi);
   useCMSStoreInitializer(cmsApi);
 
+  const useThemePanel = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
+
   useEffect(() => {
     let resolvedCount = 0;
     const updateProgress = () => {
@@ -50,8 +52,12 @@ export default function Hero() {
         <>
           <Grid />
           <Overlay />
-          <MenuCard className="bottom-g-4/8 left-1/2 z-50 -translate-x-1/2" />
-          <ThemePanel defaultOpen={false} />
+          <MenuCard
+            className={
+              "bottom-g-4/8 left-1/2 z-50 -translate-x-1/2 transition-bg"
+            }
+          />
+          {useThemePanel && <ThemePanel defaultOpen={false} />}
         </>
       )}
       <ParticlesCanvas />

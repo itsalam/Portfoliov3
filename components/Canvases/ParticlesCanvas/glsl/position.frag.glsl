@@ -9,9 +9,9 @@ uniform float time;
 
 const float PI = 3.14159265359;
 const float EPI = 0.05;
-const float STEP = 100.0;
+const float STEP = 10.0;
 const float FLUID_STEP = 1.0;
-const float SPEED = 0.0075;
+const float SPEED = 0.005;
 
 float rand(vec2 co){
     return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
@@ -233,7 +233,7 @@ void main() {
     float t = time * SPEED;
     vec4 pos = texture2D(particles, vUv).xyzw; // basic simulation: displays the particles in place.
     vec2 bounds = getBounds(pos);
-    if (pos.x > BOUNDS * bounds.x || pos.x < -(BOUNDS * 1.2) * bounds.x || pos.y > BOUNDS * bounds.y || pos.y < -BOUNDS * bounds.y || pos.z > 2.0 || pos.z < -2.0){
+    if (pos.x > BOUNDS * bounds.x || pos.x < -(BOUNDS * 1.2) * bounds.x || pos.y > BOUNDS * bounds.y || pos.y < -BOUNDS * bounds.y || pos.z > 3.0 || pos.z < -3.0){
         pos.z = rand(pos.yz) - 0.5;
         bounds = getBounds(pos);
         pos.y = (rand(pos.xy)-0.5) * bounds.y;
@@ -244,10 +244,11 @@ void main() {
     vec3 flow = computeFlow(pos.x, pos.y, pos.z, t) * snoise3(vec3(pos.x, pos.y, t*10.0));
     vec3 curl = computeCurl(pos.x, pos.y, pos.z, t)  * snoise3(vec3(pos.z, pos.z, t));
     
-    vec3 forces = (flow * 1.0 + curl*3.5)/800.0;
-    forces.x += 0.1 * SPEED;
-    vec3 mouseForces = texture2D(velocity, vec2(clamp((pos.x + bounds.x/2.0)/bounds.x, 0.01, 0.99), clamp((pos.y + bounds.y/2.0)/bounds.y, 0.01, 0.99))).xyz * 0.0015; // basic simulation: moves the particles.
-    pos.xyz += mouseForces;forces *= mix(pos.z, mix(0.1, 0.3, (pos.z - 0.8) * 5.0), step(0.8, pos.z));
+    vec3 forces = (flow * 1.0 + curl*3.5)/1200.0;
+    forces.x += 0.06 * SPEED;
+    vec3 mouseForces = texture2D(velocity, vec2(clamp((pos.x + bounds.x/2.0)/bounds.x, 0.01, 0.99), clamp((pos.y + bounds.y/2.0)/bounds.y, 0.01, 0.99))).xyz * 0.003; // basic simulation: moves the particles.
+    pos.xyz += mouseForces;
+    forces *= mix(1.0, mix(0.3, 0.1, smoothstep(0.0, 1.0, (0.8-pos.z) * 5.0)), step(0.8, pos.z));
 
     gl_FragColor = vec4(pos.xyz + forces, pos.w);
 }

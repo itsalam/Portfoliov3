@@ -63,15 +63,15 @@ export const DEFAULT_GRID_ELEMENTS: Record<CARD_TYPES, DefaultGridElement> = {
     initialCoords: DEFAULT_COORDS,
     initialDimensions: {
       width: 550,
-      height: 350,
+      height: 325,
     },
     mobileDimensions: {
       width: 550,
-      height: 350,
+      height: 325,
     },
     wideDimensions: {
       width: 750,
-      height: 350,
+      height: 325,
     },
   },
   Experience: {

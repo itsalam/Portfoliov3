@@ -9,9 +9,13 @@ import { BaseRolloutButton } from "./BaseRolloutButton";
 const Link = motion(BaseLink);
 const MoveDownLeft = motion(BaseMoveDownLeft);
 
-export const LinkButton: FC<ComponentProps<typeof motion.button>> = (props) => {
+export const LinkButton: FC<
+  ComponentProps<typeof motion.a> &
+    Partial<ComponentProps<typeof BaseRolloutButton>>
+> = (props) => {
   return (
     <BaseRolloutButton
+      isLink
       ComponentA={(props) => <Link {...props} />}
       ComponentB={(props) => <MoveDownLeft {...props} />}
       text={"Link"}

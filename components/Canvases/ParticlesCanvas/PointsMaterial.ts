@@ -22,7 +22,7 @@ class DofPointsMaterial extends ShaderMaterial {
         gl_Position = projectionMatrix * mvPosition;
         gl_Position.xy /= ratio;
         vDistance = uFocus + sin(uTime * 0.1)*0.5 + mvPosition.z*2.0;  
-        vPointSize = min(abs(vDistance * uBlur), 75.0) + 3.0;
+        vPointSize = min(abs(mvPosition.z * 2.0 + uFocus) * uBlur, 75.0);
 
         gl_PointSize = vPointSize;
       }`,
@@ -36,9 +36,10 @@ class DofPointsMaterial extends ShaderMaterial {
         vec2 cxy = 2.0 * gl_PointCoord - 1.0;
         float dist = dot(cxy, cxy);
         if (dist > 1.0) discard;
-        float alpha = clamp(uTime/ 10.0, 0.0, 1.0) * mix(0.3 - clamp(vDistance, 0.0 , 0.3), 1.0, 0.1);
-        alpha *= (1.0-dist) * 0.4 + 0.02; 
-        gl_FragColor = vec4(uAccent, alpha);
+        float alpha = mix(0.6, 1.0, clamp(vDistance, -3.0 , 3.0));
+        alpha *= mix((1.0-dist) * 0.2 + 0.1, 1.0, 0.5*smoothstep(0.0, 1.0, 7.0-vPointSize)); 
+        alpha *= clamp(uTime * 0.01, 0.0, 1.0);
+        gl_FragColor = vec4(mix(uAccent, uColor, 1.0*smoothstep(0.0, 2.0, 12.0-vPointSize)), alpha);
       }`,
       uniforms: {
         positions: { value: null },

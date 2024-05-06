@@ -28,6 +28,7 @@ export type Social = Partial<SanityDocument> & {
   value: string;
   thumbnail: SanitySvgSrc;
   link?: string;
+  name: string;
   [key: string]: unknown;
 };
 

@@ -103,7 +103,7 @@ const Track = (
   const trackChildren = Children.map(children as ReactNode, (child, index) =>
     isValidElement(child) && typeof child.type !== "string"
       ? cloneElement(child, {
-          onClick: panToElement(index, child.props.onClick),
+          onTap: panToElement(index, child.props.onClick),
         } as HTMLAttributes<HTMLElement>)
       : child
   );
@@ -145,7 +145,7 @@ const Track = (
       <motion.div
         {...restProps}
         className={cn(
-          "track-container relative my-auto flex w-full overflow-visible",
+          "track-container relative flex w-full overflow-visible",
           className,
           {
             "cursor-grabbing": startDrag.current,

@@ -128,6 +128,9 @@ export const theme = {
     fontSize: {
       grid: ["var(--cell-size)", "var(--cell-size)"],
     },
+    transitionProperty: {
+      "bg": "background, background-color",
+    },
     ...propertyUtilities([
       "padding",
       "margin",
@@ -139,8 +142,7 @@ export const theme = {
     ]),
   },
 };
-export const plugins = [require("tailwindcss-animate"), 
-addVariablesForColors,];
+export const plugins = [addVariablesForColors,];
 
 function addVariablesForColors({ addBase, theme }: any) {
   let allColors = flattenColorPalette(theme("colors"));

@@ -8,6 +8,7 @@ import { urlForImage } from "@/sanity/lib/image";
 import { Badge } from "@radix-ui/themes";
 import { AnimatePresence, motion, useAnimationControls } from "framer-motion";
 import { debounce } from "lodash";
+import { Github } from "lucide-react";
 import Image from "next/image";
 import {
   ComponentProps,
@@ -24,6 +25,7 @@ import { LinkButton } from "../Buttons/LinkButton";
 import Track from "../Track";
 
 const MotionBadge = motion(Badge);
+const GithubBadge = motion(Github);
 
 export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
   const { ...rest } = props;
@@ -125,7 +127,7 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
       }
     >
       <Track
-        className={cn("h-4/5 gap-g-2/8")}
+        className={cn("h-3/5 gap-g-2/8")}
         dragRef={dragRef}
         animate={trackControls}
         clickedIndex={clickedProject}
@@ -134,7 +136,7 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
             height: [null, "90%"],
           },
           deselected: {
-            height: [null, "80%"],
+            height: [null, "90%"],
           },
         }}
       >
@@ -183,15 +185,29 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
           <AnimatePresence>
             {selectedProject && (
               <div className="flex items-center gap-4">
-                <LinkButton
-                  animate={{
-                    opacity: 1,
-                  }}
-                  exit={{
-                    opacity: 0,
-                  }}
-                  onClick={() => changeSelectedProject()}
-                />
+                {selectedProject.link && (
+                  <LinkButton
+                    animate={{
+                      opacity: 1,
+                    }}
+                    exit={{
+                      opacity: 0,
+                    }}
+                    href={selectedProject.link}
+                  />
+                )}
+                {selectedProject.githublink && (
+                  <LinkButton
+                    animate={{
+                      opacity: 1,
+                    }}
+                    exit={{
+                      opacity: 0,
+                    }}
+                    ComponentA={(props) => <GithubBadge {...props} />}
+                    href={selectedProject.githublink}
+                  />
+                )}
                 <BackButton
                   animate={{
                     opacity: 1,

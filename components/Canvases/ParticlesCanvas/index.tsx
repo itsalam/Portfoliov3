@@ -2,10 +2,12 @@
 
 import { p3ColorToArr } from "@/lib/clientUtils";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
+// import { GUI } from "dat.gui";
 import { useTheme } from "next-themes";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import {
   Camera,
+  Color,
   DataTexture,
   DoubleSide,
   FloatType,
@@ -91,7 +93,7 @@ function cssColorToGLSLVec3(cssVarName: string) {
 
 const ParticleScene = () => {
   const coords = useRef({ x: 0, y: 0 });
-  const particleLength = 75;
+  const particleLength = 60;
   const { gl, size, camera } = useThree();
   const renderRef = useRef<DofPointsMaterial>(null!);
   const sceneRef = useRef<Scene>(null);
@@ -110,24 +112,24 @@ const ParticleScene = () => {
   const accentColor = useMemo(
     () =>
       cssColorToGLSLVec3(
-        resolvedTheme === "light" ? "--accent-6" : "--accent-9"
+        resolvedTheme === "light" ? "--accent-3" : "--accent-8"
       ),
     [resolvedTheme]
   );
   const grayColor = useMemo(
     () =>
-      cssColorToGLSLVec3(resolvedTheme === "light" ? "--gray-6" : "--gray-10"),
+      cssColorToGLSLVec3(resolvedTheme === "light" ? "--gray-3" : "--gray-12"),
     [resolvedTheme]
   );
 
   // SHADER CONFIGURATION
   const options = useRef({
-    dt: 0.001,
-    cursorSize: 0.035,
-    mouseForce: 75,
+    dt: 0.002,
+    cursorSize: 0.03,
+    mouseForce: 4.0,
     resolution: 1.0,
     viscous: 200,
-    iterations: 3,
+    iterations: 4,
     isViscous: true,
     aperture: 40.0,
     fov: 3.5,
@@ -169,7 +171,8 @@ const ParticleScene = () => {
   //   const gui = new GUI();
   //   gui.add(optionsCur, "dt", 0, 0.3);
   //   gui.add(optionsCur, "cursorSize", 0, 0.3);
-  //   gui.add(optionsCur, "focus", 0, 40);
+  //   gui.add(optionsCur, "mouseForce", 0, 20);
+  //   gui.add(optionsCur, "focus", 0, 4);
   //   gui.add(optionsCur, "aperture", 0, 40);
   //   gui.add(optionsCur, "fov", 0, 0);
   //   return () => {
@@ -239,6 +242,7 @@ const ParticleScene = () => {
     ...defaultProps,
     dst: fluidFbos.current.vel_1,
     cursorSize: options.current.cursorSize,
+    factor: options.current.mouseForce,
   });
 
   const viscous = new Viscous({
@@ -305,7 +309,7 @@ const ParticleScene = () => {
     externalForce.update({
       pointer: new Vector2(coords.current.x, coords.current.y),
       cursorSize: options.current.cursorSize,
-      mouseForce: options.current.mouseForce,
+      factor: options.current.mouseForce,
       cellScale: cellScale.current,
       time: clock.getElapsedTime(),
     });
@@ -397,7 +401,7 @@ const ParticleScene = () => {
           </bufferGeometry>
         </points>
         <DebugView
-          texture={fluidFbos.current.vel_0.texture}
+          texture={fluidFbos.current.vel_1.texture}
           camera={camera as PerspectiveCamera}
           resolvedTheme={resolvedTheme}
         />
@@ -419,8 +423,9 @@ const DebugView = ({
   const material = new MeshBasicMaterial({
     map: texture,
     side: DoubleSide,
-    opacity: resolvedTheme == "light" ? 0.0 : 0.0,
+    opacity: resolvedTheme == "light" ? 0.1 : 0.1,
     transparent: true,
+    color: new Color(0x145750),
   });
 
   const { width, height } = calculateVisibleDimensions(camera);
@@ -434,7 +439,7 @@ const ParticleCanvas = () => {
     <Canvas
       id="particle-canvas"
       style={{ position: "absolute" }}
-      className="left-0 z-0 opacity-100"
+      className="left-0 z-0 opacity-80"
       gl={{ antialias: true, alpha: true, autoClear: false }}
       camera={{
         position: [0, 0, 1],

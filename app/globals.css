@@ -87,16 +87,18 @@
   }
 
   .card-bg {
-    --card-background-color: var(--white-a9);
+    @apply backdrop-brightness-110 backdrop-blur;
+    --card-background-color: var(--gray-a2);
     background-color: var(--card-background-color);
   }
 
   .dark .card-bg {
-    --card-background-color: var(--black-a9);
+    @apply backdrop-brightness-50;
+    --card-background-color: var(--gray-a2);
   }
 
   .menu-bg {
-    @apply sm:bg-[--gray-a4] bg-[--gray-1] group-hover:bg-[--gray-a2] backdrop-brightness-75;
+    @apply sm:bg-[--gray-a6] bg-[--gray-1] group-hover:bg-[--gray-a2] backdrop-brightness-110 transition-colors duration-500;
   }
 
   .dark .menu-bg {
@@ -195,7 +197,7 @@ body {
 }
 
 .track-card {
-  --card-width: 4.0;
+  --card-width: 3.0;
   min-width: 288px;
   width: calc(var(--cell-size) * var(--card-width))
 }

@@ -7,17 +7,17 @@ import { ComponentProps, ComponentType, FC } from "react";
 const Text = motion(BaseText);
 
 export type BaseRolloutProps = {
+  className?: string;
   ComponentA: ComponentType<ComponentProps<LucideIcon> & MotionProps>;
   ComponentB: ComponentType<ComponentProps<LucideIcon> & MotionProps>;
   text: string;
   iconVariants?: Variants;
   iconSize?: ComponentProps<LucideIcon>["size"];
+  isLink?: boolean;
   textSize?: ComponentProps<typeof Text>["size"];
 };
 
-export const BaseRolloutButton: FC<
-  ComponentProps<typeof motion.button> & BaseRolloutProps
-> = (props) => {
+export const BaseRolloutButton: FC<BaseRolloutProps> = (props) => {
   const {
     className,
     ComponentA,
@@ -25,12 +25,15 @@ export const BaseRolloutButton: FC<
     text,
     iconVariants,
     iconSize,
+    isLink,
     textSize,
     ...buttonProps
   } = props;
 
+  const Component = isLink ? motion.a : motion.button;
+
   return (
-    <motion.button
+    <Component
       whileHover="hover"
       className={cn(
         "flex items-center rounded-full border border-foreground bg-background",
@@ -102,6 +105,6 @@ export const BaseRolloutButton: FC<
       >
         {text}
       </Text>
-    </motion.button>
+    </Component>
   );
 };

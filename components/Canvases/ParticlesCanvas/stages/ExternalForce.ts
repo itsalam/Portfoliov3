@@ -6,12 +6,13 @@ import BasePass, { BasePassProps } from "./BasePass";
 type ExternalForceProps = {
   cellScale: Vector2;
   cursorSize: number;
+  factor: number;
 } & Omit<BasePassProps, "material">;
 
 type UpdateProps = {
   pointer: Vector2;
   cursorSize: number;
-  mouseForce: number;
+  factor: number;
   cellScale: Vector2;
   time: number;
 };
@@ -20,7 +21,7 @@ export default class ExternalForce extends BasePass<UpdateProps> {
   oldMousePos: Vector2;
 
   constructor(simProps: ExternalForceProps) {
-    const { cellScale, cursorSize, ...baseProps } = simProps;
+    const { cellScale, cursorSize, factor, ...baseProps } = simProps;
     super({
       ...baseProps,
       geometry: new PlaneGeometry(1, 1),
@@ -30,14 +31,17 @@ export default class ExternalForce extends BasePass<UpdateProps> {
         fragmentShader: externalForceGlsl,
         uniforms: {
           px: { value: cellScale },
-          force: {
-            value: new Vector2(0.0, 0.0),
-          },
           center: {
             value: new Vector2(0.0, 0.0),
           },
+          oldCenter: {
+            value: new Vector2(-2.0, -2.0),
+          },
           scale: {
             value: cursorSize,
+          },
+          factor: {
+            value: factor,
           },
           time: {
             value: 0.0,
@@ -48,25 +52,27 @@ export default class ExternalForce extends BasePass<UpdateProps> {
     this.oldMousePos = new Vector2(0, 0);
   }
 
-  update({ pointer, cursorSize, mouseForce, cellScale, time }: UpdateProps) {
-    const velocity = new Vector2().subVectors(
-      pointer.clone(),
-      this.oldMousePos
-    );
+  update({ pointer, cursorSize, factor, cellScale, time }: UpdateProps) {
+    // const velocity = new Vector2().subVectors(
+    //   pointer.clone(),
+    //   this.oldMousePos
+    // );
 
-    const forceX = (velocity.x / 2) * mouseForce;
-    const forceY = (velocity.y / 2) * mouseForce;
+    // const forceX = (velocity.x / 2) * mouseForce;
+    // const forceY = (velocity.y / 2) * mouseForce;
     const centerX = Math.min(
-      Math.max(pointer.x, -1 + 0 + cellScale.x * 2),
-      1 - 0 - cellScale.x * 2
+      Math.max(pointer.x, -1 + cellScale.x * 2),
+      1 - cellScale.x * 2
     );
     const centerY = Math.min(
-      Math.max(pointer.y, -1 + 0 + cellScale.y * 2),
-      1 - 0 - cellScale.y * 2
+      Math.max(pointer.y, -1 + cellScale.y * 2),
+      1 - cellScale.y * 2
     );
-    this.material.uniforms["force"].value.set(forceX, forceY);
+    // this.material.uniforms["force"].value.set(forceX, forceY);
     this.material.uniforms["center"].value.set(centerX, centerY);
+    this.material.uniforms["oldCenter"].value.set(...this.oldMousePos);
     this.material.uniforms["scale"].value = cursorSize;
+    this.material.uniforms["factor"].value = factor;
     this.material.uniforms["time"].value = time;
     this.oldMousePos = pointer.clone();
     super.update();
