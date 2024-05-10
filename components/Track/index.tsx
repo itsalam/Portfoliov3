@@ -81,8 +81,8 @@ const Track = (
     [dist, maxDist]
   );
 
-  const panToElement =
-    (index: number, priorOnClick?: MouseEventHandler) => (e?: MouseEvent) => {
+  const panToElement = (index: number, priorOnClick?: MouseEventHandler) =>
+    (e?: MouseEvent) => {
       const track = trackRef.current;
       const elem = track?.children[index];
       const container = containerRef.current;
@@ -103,10 +103,9 @@ const Track = (
   const trackChildren = Children.map(children as ReactNode, (child, index) =>
     isValidElement(child) && typeof child.type !== "string"
       ? cloneElement(child, {
-          onTap: panToElement(index, child.props.onClick),
+          onTap: panToElement(index, child.props.onTap),
         } as HTMLAttributes<HTMLElement>)
-      : child
-  );
+      : child);
 
   useEffect(() => {
     const containerElement = containerRef.current;
@@ -167,7 +166,10 @@ const Track = (
           style={{
             x: dist,
           }}
-          className={cn("track relative flex items-start gap-g-2/8", {})}
+          className={cn(
+            "track relative flex items-start gap-g-2/8",
+            {}
+          )}
           suppressHydrationWarning
           id="track"
           dragConstraints={{
@@ -177,10 +179,10 @@ const Track = (
           // dragTransition={{ power: 0.1 }}
           variants={{
             selected: {
-              "--mask-height": 0.4,
+              "--mask-height": 0.1,
             } as Variant,
             deselected: {
-              "--mask-height": -0.1,
+              "--mask-height": 0.0,
             } as Variant,
           }}
         >

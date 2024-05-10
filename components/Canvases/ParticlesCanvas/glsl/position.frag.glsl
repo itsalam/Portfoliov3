@@ -9,9 +9,10 @@ uniform float time;
 
 const float PI = 3.14159265359;
 const float EPI = 0.05;
-const float STEP = 10.0;
-const float FLUID_STEP = 1.0;
-const float SPEED = 0.005;
+const float STEP = 7.0; // Larger steps makes less curl patterns
+const float FLUID_STEP = 0.1;
+const float SPEED = 0.001;
+const float MAX_SPEED = 0.0003;
 
 float rand(vec2 co){
     return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
@@ -203,7 +204,6 @@ vec3 deltaNoise3D(float x, float y, float z, float t) {
 
 vec3 computeCurl(float x, float y, float z, float t){
   vec3 p0 = normalize(deltaNoise3D(x/ STEP, y/STEP, z/STEP, t));
-
   vec3 p1 = normalize(deltaNoise3D((x + 10.5)/STEP, (y + 10.5)/STEP, (z + 10.5)/STEP, t));
 
   return normalize(cross(p0, p1));
@@ -231,22 +231,26 @@ float BOUNDS = 0.6;
 
 void main() {
     float t = time * SPEED;
-    vec4 pos = texture2D(particles, vUv).xyzw; // basic simulation: displays the particles in place.
+    vec4 pos = texture2D(particles, vUv).xyzw;
     vec2 bounds = getBounds(pos);
     if (pos.x > BOUNDS * bounds.x || pos.x < -(BOUNDS * 1.2) * bounds.x || pos.y > BOUNDS * bounds.y || pos.y < -BOUNDS * bounds.y || pos.z > 2.0 || pos.z < -2.0){
-        pos.z = rand(pos.yz) - 0.5;
+        pos.z = (rand(pos.yz) - 0.5) * 2.0;
         bounds = getBounds(pos);
         pos.y = (rand(pos.xy)-0.5) * bounds.y;
         pos.x = (-0.5 - rand(pos.xz) * 0.1) * bounds.x;
         pos.w = 1.0;
     }
-    vec2 adjustedUv = (vUv - 0.5) * 2.0;
     vec3 flow = computeFlow(pos.x, pos.y, pos.z, t) * snoise3(vec3(pos.x, pos.y, t*10.0));
-    vec3 curl = computeCurl(pos.x, pos.y, pos.z, t)  * snoise3(vec3(pos.z, pos.z, t));
-    
-    vec3 forces = (flow * 1.0 + curl*4.0)/1000.0;
-    forces.x += 0.06 * SPEED;
-    vec3 mouseForces = texture2D(velocity, vec2(clamp((pos.x + bounds.x/2.0)/bounds.x, 0.01, 0.99), clamp((pos.y + bounds.y/2.0)/bounds.y, 0.01, 0.99))).xyz * 0.003; // basic simulation: moves the particles.
+    vec3 curl = computeCurl(pos.x, pos.y, pos.z, t) * snoise3(vec3(pos.z, pos.z, t*10.0));
+    flow.xy *= 3.0;
+    curl *= 10.0;
+    vec3 forces = (flow * 0.2 + curl*4.0)/1200.0;
+    forces.x = clamp(forces.x, -MAX_SPEED, MAX_SPEED);
+    forces.y = clamp(forces.y, -MAX_SPEED, MAX_SPEED);
+    forces.z = clamp(forces.z, -MAX_SPEED, MAX_SPEED);
+    forces.x += 3.0 * SPEED*(MAX_SPEED-forces.x)* step(0.0, forces.x);
+    // Increased horizontal force
+    vec3 mouseForces = texture2D(velocity, vec2(clamp((pos.x + bounds.x/2.0)/bounds.x, 0.01, 0.99), clamp((pos.y + bounds.y/2.0)/bounds.y, 0.01, 0.99))).xyz * 0.0015; // Reduced influence of velocity
     pos.xyz += mouseForces;
     forces *= mix(1.0, mix(0.3, 0.1, smoothstep(0.0, 1.0, (0.8-pos.z) * 5.0)), step(0.8, pos.z));
 

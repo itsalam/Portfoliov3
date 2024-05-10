@@ -32,7 +32,7 @@ export default class ExternalForce extends BasePass<UpdateProps> {
         uniforms: {
           px: { value: cellScale },
           center: {
-            value: new Vector2(0.0, 0.0),
+            value: new Vector2(-2.0, -2.0),
           },
           oldCenter: {
             value: new Vector2(-2.0, -2.0),
@@ -53,13 +53,6 @@ export default class ExternalForce extends BasePass<UpdateProps> {
   }
 
   update({ pointer, cursorSize, factor, cellScale, time }: UpdateProps) {
-    // const velocity = new Vector2().subVectors(
-    //   pointer.clone(),
-    //   this.oldMousePos
-    // );
-
-    // const forceX = (velocity.x / 2) * mouseForce;
-    // const forceY = (velocity.y / 2) * mouseForce;
     const centerX = Math.min(
       Math.max(pointer.x, -1 + cellScale.x * 2),
       1 - cellScale.x * 2

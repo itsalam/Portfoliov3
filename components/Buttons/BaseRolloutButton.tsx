@@ -36,13 +36,15 @@ export const BaseRolloutButton: FC<BaseRolloutProps> = (props) => {
     <Component
       whileHover="hover"
       className={cn(
-        "flex items-center rounded-full border border-foreground bg-background",
+        "border",
+        "flex items-center rounded-full border-[--gray-12]", // sizing, layout, border
+        "bg-[--gray-a2] backdrop-blur-md", // outlineEffects
         className
       )}
       {...buttonProps}
     >
       <motion.div
-        className="relative aspect-square overflow-hidden p-0.5 "
+        className="relative aspect-square overflow-hidden p-0.5"
         variants={{
           initial: {
             rotateZ: "-90deg",
@@ -69,7 +71,7 @@ export const BaseRolloutButton: FC<BaseRolloutProps> = (props) => {
           {...{ size: iconSize }}
         />
         <ComponentB
-          className="absolute left-0.5 top-0.5 aspect-square p-1"
+          className="absolute top-0.5 left-0.5 aspect-square p-1"
           initial={{
             opacity: 0,
           }}

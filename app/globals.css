@@ -94,11 +94,12 @@
 
   .dark .card-bg {
     @apply backdrop-brightness-50;
+    background-color: var(--black-a5);
     --card-background-color: var(--gray-a2);
   }
 
   .menu-bg {
-    @apply sm:bg-[--gray-a6] bg-[--gray-1] group-hover:bg-[--gray-a2] backdrop-brightness-110 transition-colors duration-500;
+    @apply sm:bg-[--gray-a6] bg-[--gray-1] group-hover:bg-[--gray-a2] backdrop-brightness-125 transition-colors duration-500;
   }
 
   .dark .menu-bg {
@@ -116,10 +117,13 @@
   }
 }
 
-#particle-canvas {
-  mix-blend-mode: color-dodge;
+.dark #particle-canvas {
+  mix-blend-mode: plus-lighter;
 }
 
+.dark #particle-canvas {
+  mix-blend-mode: color-dodge;
+}
 
 #theme {
   z-index: 0;
@@ -128,7 +132,7 @@
 
 #theme::before {
   --accent-gradient: var(--gray-8);
-  --gray-gradient: var(--accent-4);
+  --gray-gradient: var(--accent-a2);
   content: '';
   position: absolute;
   width: 140vmax;
@@ -138,15 +142,15 @@
   z-index: 0;
   transform: translate(-50%, -50%) rotate(20deg);
   transform-origin: center;
-  background: linear-gradient(90deg, var(--gray-gradient) 0%, var(--accent-gradient) 25%, var(--gray-gradient) 50%, var(--accent-gradient) 75%, var(--gray-gradient) 100%);
-  animation: Scroll 20s linear infinite;
+  background: linear-gradient(90deg, var(--gray-gradient) 0%, var(--accent-gradient) 15%, var(--accent-gradient) 35%, var(--gray-gradient) 50%, var(--accent-gradient) 65%, var(--accent-gradient) 85%, var(--gray-gradient) 100%);
+  animation: Scroll 100s linear infinite;
   background-size: 200% 200%;
   background-position: 50% 50%;
 }
 
 .dark #theme::before {
   --accent-gradient: var(--gray-2);
-  --gray-gradient: var(--iris-2);
+  --gray-gradient: var(--iris-3);
 }
 
 body {
@@ -218,7 +222,7 @@ body {
 }
 
 .rt-TooltipText {
-  color: hsl(var(--foreground)) !important;
+  color: hsl(var(--gray-12)) !important;
 }
 
 @media (min-width: 1920px){

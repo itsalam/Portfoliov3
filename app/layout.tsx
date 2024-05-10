@@ -59,7 +59,7 @@ export default function RootLayout({
         <Providers>
           <Theme
             grayColor="sage"
-            accentColor="grass"
+            accentColor="teal"
             id="theme"
             className="overflow-hidden"
           >

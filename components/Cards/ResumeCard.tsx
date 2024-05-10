@@ -34,7 +34,6 @@ const DownloadButton: FC<ComponentProps<typeof motion.button>> = (props) => {
     <BaseRolloutButton
       ComponentA={(props) => (
         <DownloadIcon
-          size={42}
           {...props}
           initial={{
             y: 0,
@@ -48,7 +47,6 @@ const DownloadButton: FC<ComponentProps<typeof motion.button>> = (props) => {
       )}
       ComponentB={(props) => (
         <ArrowDownIcon
-          size={42}
           {...props}
           initial={{
             opacity: 1,
@@ -63,9 +61,11 @@ const DownloadButton: FC<ComponentProps<typeof motion.button>> = (props) => {
         />
       )}
       text={"Download"}
-      className="absolute bottom-4 z-50"
+      className={
+        "absolute bottom-4 z-50 border-[--accent-11] p-2 text-[--accent-11]"
+      }
       textSize="3"
-      iconSize={28}
+      iconSize={32}
       iconVariants={{
         hover: {},
       }}
@@ -111,10 +111,19 @@ export default function ResumeCard(props: ComponentProps<typeof motion.div>) {
         <>
           <Document
             file={resume.url}
-            className="relative h-full w-full "
-            loading={<Spinner className="m-auto" size={"3"} />}
+            className="relative h-full w-full"
+            loading={
+              <Spinner
+                className="m-auto"
+                size={"3"}
+              />
+            }
           >
-            <Page pageNumber={1} className="w-full" width={cardWidth} />
+            <Page
+              pageNumber={1}
+              className="w-full"
+              width={cardWidth}
+            />
           </Document>
           <DownloadButton onClick={handleDownload} />
         </>

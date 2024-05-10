@@ -41,40 +41,44 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
   const projects = useStore(cms, (cms) => cms.projects ?? []);
 
   const DEFAULT_TEXT = "Scroll or drag to navigate.";
-  const ProjectTitle = useCallback(
-    (props: Omit<ComponentProps<typeof AnimatedText>, "textChild">) => {
-      const Title: FC<{ className?: string; text: string }> = ({
-        className,
-        text,
-      }) => (
-        <AnimateText
-          size={"8"}
-          className={cn("w-min font-bold", className)}
-          text={text}
-        />
-      );
+  const ProjectTitle = useCallback((
+    props: Omit<ComponentProps<typeof AnimatedText>, "textChild">
+  ) => {
+    const Title: FC<{ className?: string; text: string }> = ({
+      className,
+      text,
+    }) => (
+      <AnimateText
+        size={"8"}
+        className={cn(
+          "w-min font-bold",
+          className
+        )}
+        text={text}
+      />
+    );
 
-      return <AnimatedText {...props} textChild={Title} />;
-    },
-    []
-  );
+    return <AnimatedText {...props} textChild={Title} />;
+  }, []);
 
-  const ProjectDescription = useCallback(
-    (props: Omit<ComponentProps<typeof AnimatedText>, "textChild">) => {
-      const Text: FC<{ className?: string; text: string }> = ({
-        className,
-        text,
-      }) => (
-        <AnimateText
-          className={cn("w-inherit whitespace-normal", className)}
-          size={"3"}
-          text={text}
-        />
-      );
-      return <AnimatedText {...props} textChild={Text} />;
-    },
-    []
-  );
+  const ProjectDescription = useCallback((
+    props: Omit<ComponentProps<typeof AnimatedText>, "textChild">
+  ) => {
+    const Text: FC<{ className?: string; text: string }> = ({
+      className,
+      text,
+    }) => (
+      <AnimateText
+        className={cn(
+          "w-inherit whitespace-normal",
+          className
+        )}
+        size={"3"}
+        text={text}
+      />
+    );
+    return <AnimatedText {...props} textChild={Text} />;
+  }, []);
 
   const changeFocusTitle = debounce(
     (project?: Project) => {
@@ -127,16 +131,18 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
       }
     >
       <Track
-        className={cn("h-3/5 gap-g-2/8")}
+        className={cn(
+          "gap-g-2/8"
+        )}
         dragRef={dragRef}
         animate={trackControls}
         clickedIndex={clickedProject}
         variants={{
           selected: {
-            height: [null, "90%"],
+            height: [null, "65%"],
           },
           deselected: {
-            height: [null, "90%"],
+            height: [null, "65%"],
           },
         }}
       >
@@ -145,17 +151,24 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
             key={index}
             custom={index}
             className={cn(
-              "track-card group relative h-full cursor-pointer overflow-hidden rounded-sm p-0 duration-300"
+              "track-card group",
+              "relative h-full cursor-pointer", // basicStyles, sizing, interactions
+              "overflow-hidden rounded-sm p-0", // overflowControl, border, padding
+              "duration-300" // transitionsAnimations
             )}
             onHoverStart={handleProjectHover(project)}
-            onTap={() => !dragRef.current && changeSelectedProject(project)}
+            onTap={() => changeSelectedProject(project)}
           >
             <Image
               className={cn(
                 "track-img h-full w-full object-cover",
-                "opacity-50 blur-sm brightness-75 contrast-75 saturate-150 transition-all duration-300 hover:opacity-75 group-hover:blur-none dark:hover:opacity-100",
+                "opacity-50 hover:opacity-100", // transparency
+                "dark:brightness-90 dark:hover:brightness-100", // shadowFilterEffects // transparency
+                "blur-sm group-hover:blur-none brightness-75 contrast-75", // shadowFilterEffects
+                "saturate-150",
+                "transition-all duration-300", // transitionsAnimations
                 {
-                  "blur-none brightness-125 dark:opacity-100 dark:brightness-90":
+                  "opacity-100 blur-none brightness-100":
                     project.name == focusedProject?.name ||
                     project.name == selectedProject?.name,
                 }
@@ -173,9 +186,11 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
         key={"body"}
         animate={textBodyControls}
         className={cn(
-          "absolute left-0 top-1/2 flex h-1/2 flex-col px-12",
+          "absolute bottom-0 left-0 flex w-full flex-col py-4 px-12",
           props.className
         )}
+        layout
+        layoutRoot
       >
         <motion.div className="flex justify-between gap-2 pr-4">
           <ProjectTitle
@@ -225,8 +240,11 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
           text={selectedProject?.description ?? DEFAULT_TEXT}
           reverse={!selectedProject}
         />
-        <div className="flex gap-2 p-4">
-          <AnimatePresence mode="wait">
+        <AnimatePresence mode="wait">
+          <motion.div
+            layout
+            className="relative flex gap-2 p-4"
+          >
             {selectedProject &&
               selectedProject.stack.map((tech) => {
                 return (
@@ -251,8 +269,8 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
                   </MotionBadge>
                 );
               })}
-          </AnimatePresence>
-        </div>
+          </motion.div>
+        </AnimatePresence>
       </motion.div>
     </motion.div>
   );

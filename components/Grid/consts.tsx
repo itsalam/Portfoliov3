@@ -47,7 +47,7 @@ export const DEFAULT_GRID_ELEMENTS: Record<CARD_TYPES, DefaultGridElement> = {
     initialCoords: DEFAULT_COORDS,
     initialDimensions: {
       width: 550,
-      height: 225,
+      height: 250,
     },
     mobileDimensions: {
       width: 550,
@@ -55,7 +55,7 @@ export const DEFAULT_GRID_ELEMENTS: Record<CARD_TYPES, DefaultGridElement> = {
     },
     wideDimensions: {
       width: 550,
-      height: 350,
+      height: 300,
     },
   },
   Projects: {
@@ -63,7 +63,7 @@ export const DEFAULT_GRID_ELEMENTS: Record<CARD_TYPES, DefaultGridElement> = {
     initialCoords: DEFAULT_COORDS,
     initialDimensions: {
       width: 550,
-      height: 325,
+      height: 350,
     },
     mobileDimensions: {
       width: 550,
@@ -71,7 +71,7 @@ export const DEFAULT_GRID_ELEMENTS: Record<CARD_TYPES, DefaultGridElement> = {
     },
     wideDimensions: {
       width: 750,
-      height: 325,
+      height: 450,
     },
   },
   Experience: {

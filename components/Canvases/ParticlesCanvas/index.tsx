@@ -1,6 +1,6 @@
 "use client";
 
-import { p3ColorToArr } from "@/lib/clientUtils";
+import { cssVarToRGB } from "@/lib/clientUtils";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 // import { GUI } from "dat.gui";
 import { useTheme } from "next-themes";
@@ -88,12 +88,12 @@ function initializePoints(count: number, size: number, bounds: Vector2) {
 }
 
 function cssColorToGLSLVec3(cssVarName: string) {
-  return new Vector3(...p3ColorToArr(cssVarName));
+  return new Vector3(...cssVarToRGB(cssVarName));
 }
 
 const ParticleScene = () => {
   const coords = useRef({ x: 0, y: 0 });
-  const particleLength = 60;
+  const particleLength = 100;
   const { gl, size, camera } = useThree();
   const renderRef = useRef<DofPointsMaterial>(null!);
   const sceneRef = useRef<Scene>(null);
@@ -124,12 +124,12 @@ const ParticleScene = () => {
 
   // SHADER CONFIGURATION
   const options = useRef({
-    dt: 0.002,
+    dt: 0.001,
     cursorSize: 0.03,
     mouseForce: 4.0,
-    resolution: 1.0,
+    resolution: 0.5,
     viscous: 200,
-    iterations: 4,
+    iterations: 2,
     isViscous: true,
     aperture: 40.0,
     fov: 3.5,
@@ -401,7 +401,7 @@ const ParticleScene = () => {
           </bufferGeometry>
         </points>
         <DebugView
-          texture={fluidFbos.current.vel_1.texture}
+          texture={fluidFbos.current.vel_0.texture}
           camera={camera as PerspectiveCamera}
           resolvedTheme={resolvedTheme}
         />
@@ -423,7 +423,7 @@ const DebugView = ({
   const material = new MeshBasicMaterial({
     map: texture,
     side: DoubleSide,
-    opacity: resolvedTheme == "light" ? 0.1 : 0.1,
+    opacity: resolvedTheme == "light" ? 0.1 : 0.2,
     transparent: true,
     color: new Color(0x145750),
   });
@@ -439,11 +439,11 @@ const ParticleCanvas = () => {
     <Canvas
       id="particle-canvas"
       style={{ position: "absolute" }}
-      className="left-0 z-0 opacity-80"
+      className="left-0 z-0 opacity-50"
       gl={{ antialias: true, alpha: true, autoClear: false }}
       camera={{
         position: [0, 0, 1],
-        fov: 75,
+        // fov: 75,
       }}
     >
       <ParticleScene />

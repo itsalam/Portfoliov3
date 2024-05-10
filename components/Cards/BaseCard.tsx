@@ -178,7 +178,7 @@ export const TitleCard: FC<ComponentProps<typeof Card>> = (props) => {
         onPointerDown={startDrag}
         draggable={false}
         className={cn(
-          "relative z-10 flex h-8 flex-col justify-center bg-[--gray-a3] px-3 py-1 opacity-100 transition-opacity"
+          "relative z-10 flex h-8 flex-col justify-center bg-[--gray-a3] px-3 py-1 opacity-100 transition-opacity dark:backdrop-brightness-75"
         )}
       >
         <Text

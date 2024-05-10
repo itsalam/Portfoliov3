@@ -66,7 +66,7 @@ export function getCSSVarColor(cssVarName: string): string {
   return style.getPropertyValue(cssVarName).trim();
 }
 
-export function p3ColorToArr(cssVarName: string): [number, number, number] {
+export function cssVarToRGB(cssVarName: string): [number, number, number] {
   const cssVarValue = getCSSVarColor(cssVarName);
   const hexRegex = /#([a-fA-F0-9]{2})([a-fA-F0-9]{2})([a-fA-F0-9]{2})/;
   const hexMatches = cssVarValue.match(hexRegex);
@@ -74,11 +74,13 @@ export function p3ColorToArr(cssVarName: string): [number, number, number] {
   const P3matches = cssVarValue.match(p3Regex);
   if (hexMatches) {
     const [, r, g, b] = hexMatches.map((match) => parseInt(match, 16) / 255);
+    console.log({ r, g, b, cssVarName });
     return [r, g, b];
   } else if (P3matches) {
     const r = parseFloat(P3matches[1]);
     const g = parseFloat(P3matches[2]);
     const b = parseFloat(P3matches[3]);
+    console.log({ r, g, b, cssVarName });
     return [r, g, b];
   } else {
     console.error("Invalid display-p3 color format: ", {
@@ -90,8 +92,6 @@ export function p3ColorToArr(cssVarName: string): [number, number, number] {
 }
 
 export function p3ToHex(cssVarName: string) {
-  const [r, g, b] = p3ColorToArr(cssVarName).map((val) =>
-    Math.round(val * 255)
-  );
+  const [r, g, b] = cssVarToRGB(cssVarName).map((val) => Math.round(val * 255));
   return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
 }
