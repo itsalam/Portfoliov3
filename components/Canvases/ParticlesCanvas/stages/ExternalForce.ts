@@ -61,13 +61,13 @@ export default class ExternalForce extends BasePass<UpdateProps> {
       Math.max(pointer.y, -1 + cellScale.y * 2),
       1 - cellScale.y * 2
     );
-    // this.material.uniforms["force"].value.set(forceX, forceY);
+
     this.material.uniforms["center"].value.set(centerX, centerY);
     this.material.uniforms["oldCenter"].value.set(...this.oldMousePos);
     this.material.uniforms["scale"].value = cursorSize;
     this.material.uniforms["factor"].value = factor;
     this.material.uniforms["time"].value = time;
-    this.oldMousePos = pointer.clone();
+    this.oldMousePos = this.material.uniforms["center"].value.clone();
     super.update();
   }
 }

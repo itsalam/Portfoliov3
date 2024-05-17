@@ -1,6 +1,7 @@
 "use client";
 
 import { GridContext } from "@/lib/state";
+import { cn } from "@/lib/utils";
 import { Separator, Text } from "@radix-ui/themes";
 import { throttle } from "lodash";
 import { ArrowBigRight } from "lucide-react";
@@ -64,7 +65,14 @@ const Overlay: React.FC = () => {
   };
 
   return (
-    <div className="absolute bottom-g-2/8 right-g-2/8 z-50 hidden flex-col gap-x-1 gap-y-0.5 font-overlay text-[--accent-12] xs:flex md:flex-row ">
+    <div
+      className={cn(
+        "xs:flex md:flex-row",
+        "absolute bottom-g-2/8 right-g-2/8", // basicStyles, positioning
+        "z-50 hidden flex-col gap-x-1 gap-y-0.5", // layoutControl, sizing, layout
+        "font-overlay text-[--accent-12]" // textStyles
+      )}
+    >
       <div className="flex flex-col gap-0.5">
         <Text className="flex w-full justify-center text-right" size={"2"}>
           {currentDate}

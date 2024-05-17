@@ -40,7 +40,11 @@ export default function HeroCard(props: ComponentProps<typeof motion.div>) {
 
   const TextRotateBody = useCallback(
     () => (
-      <motion.div className="relative flex flex-col gap-1" key="intro">
+      <motion.div
+        animate={controls}
+        className="relative flex flex-col gap-1 py-8"
+        key="intro"
+      >
         <MText size={"7"} className="relative top-1 mb-1 flex overflow-hidden">
           <AnimateText
             size={"4"}
@@ -56,7 +60,13 @@ export default function HeroCard(props: ComponentProps<typeof motion.div>) {
             text="(a)"
           />
         </MText>
-        <div className="my-gap-y relative flex flex-col gap-0 overflow-hidden pr-0 font-bold">
+        <div
+          className={cn(
+            "my-gap-y",
+            "relative flex flex-col gap-0", // basicStyles, sizing, layout
+            "overflow-hidden pr-0 font-bold" // overflowControl, padding, textStyles
+          )}
+        >
           {/* <div className="absolute top-0 flex h-full flex-row gap-0"> */}
           <div className="absolute flex flex-col flex-wrap gap-x-4 xs:flex-row">
             <div className="relative overflow-hidden">
@@ -79,7 +89,9 @@ export default function HeroCard(props: ComponentProps<typeof motion.div>) {
             </div>
           </div>
 
-          <div className="relative flex flex-col flex-wrap gap-x-4  xs:flex-row">
+          <div
+            className={"relative flex flex-col flex-wrap gap-x-4 xs:flex-row"}
+          >
             <div className="relative overflow-hidden">
               <RotateText
                 size={"9"}
@@ -110,7 +122,12 @@ export default function HeroCard(props: ComponentProps<typeof motion.div>) {
           <span className="relative w-4"> </span>
           {/* </div> */}
         </div>
-        <Text asChild key="body" size={"3"} className="min-w-g-3 z-30 py-0">
+        <Text
+          asChild
+          key="body"
+          size={"3"}
+          className="z-30 min-w-g-3 max-w-g-5 py-0"
+        >
           <span>
             I build services for businesses professionally and enjoy creating
             web projects in my free time. I&apos;m keen on JavaScript, web
@@ -119,17 +136,17 @@ export default function HeroCard(props: ComponentProps<typeof motion.div>) {
         </Text>
       </motion.div>
     ),
-    []
+    [controls]
   );
 
   return (
     <motion.div
       className={cn(
-        "relative mx-g-2/8 flex h-full flex-col justify-center p-4 xs:p-0"
+        "xs:p-0",
+        "relative mx-g-2/8 flex h-full",
+        "flex-col justify-end p-4" // basicStyles, margin, sizing // layout, padding
       )}
-      animate={controls}
       ref={heroRef}
-      initial="initial"
       {...props}
     >
       <TextRotateBody />

@@ -1,7 +1,13 @@
 import { maskScrollArea } from "@/lib/clientUtils";
 import { useResizeCallBack } from "@/lib/hooks";
 import { cn } from "@/lib/utils";
-import { Variant, animate, motion, useMotionValue } from "framer-motion";
+import {
+  animate,
+  motion,
+  useMotionTemplate,
+  useMotionValue,
+  useTransform,
+} from "framer-motion";
 import {
   Children,
   ComponentPropsWithRef,
@@ -28,6 +34,7 @@ const Track = (
 ) => {
   const { className, children, dragRef, clickedIndex, ...restProps } = props;
   const [maxDist, setMaxDist] = useState(0);
+  const [maxPercentage, setMaxPercentage] = useState(1);
   const containerRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const startDrag = useRef(0);
@@ -37,6 +44,10 @@ const Track = (
     [children]
   );
   const [itemWidth, setItemWidth] = useState<number>(0);
+  const distPercent = useTransform(
+    dist,
+    (x) => -((x / maxDist) * maxPercentage) * 100
+  );
 
   useEffect(() => {
     const unsubscribe = dist.on("change", (value) => {
@@ -54,7 +65,10 @@ const Track = (
   const handleResize = useCallback(() => {
     const trackSize = trackRef.current?.getBoundingClientRect().width || 0,
       containerSize = containerRef.current?.getBoundingClientRect().width || 0;
+
+    console.log({ containerSize, trackSize });
     setMaxDist(containerSize - trackSize);
+    setMaxPercentage(Math.abs((containerSize - trackSize) / trackSize));
     setItemWidth(
       (trackRef.current?.children[0] as HTMLDivElement)?.offsetWidth ?? 0
     );
@@ -81,8 +95,8 @@ const Track = (
     [dist, maxDist]
   );
 
-  const panToElement = (index: number, priorOnClick?: MouseEventHandler) =>
-    (e?: MouseEvent) => {
+  const panToElement =
+    (index: number, priorOnClick?: MouseEventHandler) => (e?: MouseEvent) => {
       const track = trackRef.current;
       const elem = track?.children[index];
       const container = containerRef.current;
@@ -105,7 +119,8 @@ const Track = (
       ? cloneElement(child, {
           onTap: panToElement(index, child.props.onTap),
         } as HTMLAttributes<HTMLElement>)
-      : child);
+      : child
+  );
 
   useEffect(() => {
     const containerElement = containerRef.current;
@@ -164,12 +179,10 @@ const Track = (
           ref={trackRef}
           drag="x"
           style={{
-            x: dist,
+            x: useMotionTemplate`${distPercent}%`,
+            // x: dist,
           }}
-          className={cn(
-            "track relative flex items-start gap-g-2/8",
-            {}
-          )}
+          className={cn("track relative flex items-start gap-g-2/8", {})}
           suppressHydrationWarning
           id="track"
           dragConstraints={{
@@ -177,14 +190,6 @@ const Track = (
             right: 0,
           }}
           // dragTransition={{ power: 0.1 }}
-          variants={{
-            selected: {
-              "--mask-height": 0.1,
-            } as Variant,
-            deselected: {
-              "--mask-height": 0.0,
-            } as Variant,
-          }}
         >
           {trackChildren}
         </motion.div>

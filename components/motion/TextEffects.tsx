@@ -43,8 +43,7 @@ export const RotateText: React.FC<
   const y: string[] = Array(length)
     .fill(hide)
     .map((val, index) =>
-      index === enterIdx ? enter : index === leaveIdx ? leave : val
-    )
+      index === enterIdx ? enter : index === leaveIdx ? leave : val)
     .map((val, i) => (i > enterIdx && i < leaveIdx ? show : val))
     .flat(1)
     .map((val) => `${val * distance}%`);
@@ -87,7 +86,9 @@ export const AnimateText: React.FC<
     <MText
       key={text}
       className={cn(
-        "relative my-auto flex origin-[50%_50%_4rem] overflow-y-hidden whitespace-nowrap",
+        "relative", // basicStyles
+        "my-auto flex origin-[50%_50%_4rem]", // margin, sizing, transforms
+        "overflow-y-hidden whitespace-nowrap", // overflowControl, textWrapping
         className
       )}
       variants={variants}
@@ -156,7 +157,10 @@ export const AnimatedText = (props: {
 
   return (
     <motion.div
-      className={cn("relative overflow-hidden", className)}
+      className={cn(
+        "relative overflow-hidden",
+        className
+      )}
       {...others}
     >
       <AnimatePresence mode="sync" initial={false} custom={reverse}>
@@ -171,7 +175,10 @@ export const AnimatedText = (props: {
           </PresenceText>
         )}
       </AnimatePresence>
-      <Text className="relative opacity-0" text={currText} />
+      <Text
+        className="relative opacity-0"
+        text={currText}
+      />
     </motion.div>
   );
 };

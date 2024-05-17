@@ -21,7 +21,7 @@ void main() {
     color.g = texture2D(positions, vPos.xy).g;  // Green channel central
     color.b = texture2D(positions, vPos.xy - chromaDir * vec2(1, 0)).b;  // Blue channel offset
     float alpha = mix(0.6, 1.0, clamp(vDistance, -3.0 , 3.0));
-    alpha *= mix((1.0-dist) * 0.1, 1.0, smoothstep(0.0, 1.0, 3.0-vPointSize)); // Points smaller than 5.0 have a fixed opacity 
+    alpha *= mix((1.0-dist) * 0.1, 1.0, smoothstep(0.0, 1.0, 4.0-vPointSize)); // Points smaller than 5.0 have a fixed opacity 
     alpha *= clamp(uTime * 0.05, 0.0, 1.0);
     alpha *= 1.0 - smoothstep(0.2, 0.9, vPointSize / 150.0);
     gl_FragColor = vec4(mix(uAccent, uColor, 1.75-smoothstep(0.0, 0.1, vPointSize/150.0)), alpha);

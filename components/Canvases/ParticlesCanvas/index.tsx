@@ -112,13 +112,13 @@ const ParticleScene = () => {
   const accentColor = useMemo(
     () =>
       cssColorToGLSLVec3(
-        resolvedTheme === "light" ? "--accent-3" : "--accent-12"
+        resolvedTheme === "light" ? "--accent-1" : "--accent-12"
       ),
     [resolvedTheme]
   );
   const grayColor = useMemo(
     () =>
-      cssColorToGLSLVec3(resolvedTheme === "light" ? "--gray-3" : "--gray-12"),
+      cssColorToGLSLVec3(resolvedTheme === "light" ? "--gray-1" : "--gray-12"),
     [resolvedTheme]
   );
 
@@ -439,7 +439,7 @@ const ParticleCanvas = () => {
     <Canvas
       id="particle-canvas"
       style={{ position: "absolute" }}
-      className="left-0 z-0 opacity-50"
+      className="left-0 z-0 opacity-80"
       gl={{ antialias: true, alpha: true, autoClear: false }}
       camera={{
         position: [0, 0, 1],

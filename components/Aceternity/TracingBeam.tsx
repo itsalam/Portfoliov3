@@ -1,10 +1,13 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import { p3ToHex } from "@/lib/clientUtils";
+import { GridContext } from "@/lib/state";
 import { cn } from "@/lib/utils";
 import { MotionValue, motion, useSpring, useTransform } from "framer-motion";
 import { useTheme } from "next-themes";
-import { ComponentProps, ReactNode, useMemo, useRef } from "react";
+import { ComponentProps, ReactNode, useContext, useMemo, useRef } from "react";
+import { useStore } from "zustand";
+import { BackButton } from "../Buttons/BackButton";
 
 export const TracingBeam: React.FC<
   ComponentProps<typeof motion.div> & {
@@ -22,6 +25,8 @@ export const TracingBeam: React.FC<
     offset,
     ...otherProps
   } = props;
+  const store = useContext(GridContext)!;
+  const { activeCard, toggleCard } = useStore(store);
   const { resolvedTheme } = useTheme();
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -56,38 +61,57 @@ export const TracingBeam: React.FC<
   return (
     <motion.div
       className={cn("relative h-full w-full", className)}
-      animate={{
-        height,
-      }}
+      style={
+        {
+          // height,
+        }
+      }
       {...otherProps}
     >
-      <motion.div className="absolute right-2 top-2 sm:right-g-2/8 sm:top-g-2/8">
-        <motion.div
-          transition={{
-            duration: 0.2,
-            delay: 0.5,
-          }}
-          animate={{
-            boxShadow:
-              scrollYProgress.get() > 0
-                ? "rgba(0, 0, 0, 0.0) 0px 0px 0px"
-                : "rgba(0, 0, 0, 0.24) 0px 3px 8px",
-            borderColor: "#ECEEED",
-          }}
-          className="ml-[27px] flex h-4 w-4 items-center justify-center rounded-full border shadow-sm"
-        >
+      <motion.div
+        className={"absolute right-2 top-2 z-10 sm:right-g-2/8 sm:top-g-2/8"}
+      >
+        {activeCard ? (
+          <BackButton
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="right-g-x-1/8 absolute z-50 -translate-x-1/4"
+            onClick={() => toggleCard(undefined)}
+          />
+        ) : (
           <motion.div
+            initial={{ opacity: 0 }}
             transition={{
               duration: 0.2,
               delay: 0.5,
             }}
-            style={{
-              backgroundColor,
-              borderColor,
+            animate={{
+              opacity: 1,
+              boxShadow:
+                scrollYProgress.get() > 0
+                  ? "rgba(0, 0, 0, 0.0) 0px 0px 0px"
+                  : "rgba(0, 0, 0, 0.24) 0px 3px 8px",
+              borderColor: "#ECEEED",
             }}
-            className={cn("h-2 w-2 rounded-full border")}
-          />
-        </motion.div>
+            className={cn(
+              "border shadow-sm",
+              "ml-[27px] flex h-4 w-4 items-center justify-center", // margin, sizing, layout
+              "rounded-full" // border
+            )}
+          >
+            <motion.div
+              transition={{
+                duration: 0.2,
+                delay: 0.5,
+              }}
+              style={{
+                backgroundColor,
+                borderColor,
+              }}
+              className={cn("h-2 w-2 rounded-full border")}
+            />
+          </motion.div>
+        )}
         <motion.svg
           viewBox={`0 0 20 ${height - offset}`}
           width="20"
@@ -135,9 +159,9 @@ export const TracingBeam: React.FC<
           </defs>
         </motion.svg>
       </motion.div>
-      <div className="relative h-full w-full" ref={contentRef}>
+      <motion.div className="relative z-0 h-full w-full" ref={contentRef}>
         {children}
-      </div>
+      </motion.div>
     </motion.div>
   );
 };

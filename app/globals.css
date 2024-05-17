@@ -1,14 +1,9 @@
-
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-
 @layer base {
-  
   :root {
-
     --grid-size: 96px;
     --background: 0 0% 100%;
     --foreground: 224 71.4% 4.1%;
@@ -71,8 +66,6 @@
     --ring: 216 12.2% 83.9%;
   }
 
-
-
   /* .dark .rt-TooltipText {
     color: white;
   } */
@@ -87,23 +80,28 @@
   }
 
   .card-bg {
-    @apply backdrop-brightness-110 backdrop-blur;
+    @apply backdrop-blur backdrop-filter;
+    --tw-backdrop-blur: blur(var(--backdrop-blur, --blur-fallback));
+    --tw-backdrop-brightness: brightness(
+      var(--backdrop-brightness, --brightness-fallback)
+    );
+    --brightness-fallback: 1.25;
+    --blur-fallback: 8px;
     --card-background-color: var(--gray-a2);
     background-color: var(--card-background-color);
   }
 
   .dark .card-bg {
-    @apply backdrop-brightness-50;
-    background-color: var(--black-a5);
-    --card-background-color: var(--gray-a2);
+    --brightness-fallback: 0.5;
+    --card-background-color: var(--black-a5);
   }
 
   .menu-bg {
-    @apply sm:bg-[--gray-a6] bg-[--gray-1] group-hover:bg-[--gray-a2] backdrop-brightness-125 transition-colors duration-500;
+    @apply bg-[--gray-1] backdrop-brightness-125 transition-colors duration-500 group-hover:bg-[--gray-a2] sm:bg-[--gray-a6];
   }
 
   .dark .menu-bg {
-    @apply sm:bg-[--gray-a1] backdrop-brightness-50;
+    @apply backdrop-brightness-50 sm:bg-[--gray-a1];
   }
 
   .card {
@@ -128,12 +126,12 @@
 #theme {
   z-index: 0;
   --default-font-family: var(--font-space);
+  --accent-gradient: var(--gray-8);
+  --gray-gradient: var(--accent-2);
 }
 
 #theme::before {
-  --accent-gradient: var(--gray-8);
-  --gray-gradient: var(--accent-a2);
-  content: '';
+  content: "";
   position: absolute;
   width: 140vmax;
   height: 140vmax;
@@ -142,15 +140,34 @@
   z-index: 0;
   transform: translate(-50%, -50%) rotate(20deg);
   transform-origin: center;
-  background: linear-gradient(90deg, var(--gray-gradient) 0%, var(--accent-gradient) 15%, var(--accent-gradient) 35%, var(--gray-gradient) 50%, var(--accent-gradient) 65%, var(--accent-gradient) 85%, var(--gray-gradient) 100%);
+  background: linear-gradient(
+    90deg,
+    var(--gray-gradient) 0%,
+    var(--accent-gradient) 15%,
+    var(--accent-gradient) 35%,
+    var(--gray-gradient) 50%,
+    var(--accent-gradient) 65%,
+    var(--accent-gradient) 85%,
+    var(--gray-gradient) 100%
+  );
   animation: Scroll 100s linear infinite;
   background-size: 200% 200%;
   background-position: 50% 50%;
 }
 
-.dark #theme::before {
+.dark #theme {
   --accent-gradient: var(--gray-2);
   --gray-gradient: var(--iris-3);
+}
+
+#theme.focus {
+  --accent-gradient: var(--gray-1);
+  --gray-gradient: var(--accent-a2);
+}
+
+.dark #theme.focus {
+  --accent-gradient: var(--gray-1);
+  --gray-gradient: var(--iris-2);
 }
 
 body {
@@ -169,7 +186,7 @@ body {
   }
 
   100% {
-    background-position: 100% 50%; 
+    background-position: 100% 50%;
   }
 }
 
@@ -192,8 +209,12 @@ body {
 
 .track {
   --x-Pos: 50%;
-  --mask-height: -0.1;
-  mask-image: linear-gradient(to top, rgba(0, 0, 0, 0) calc(var(--mask-height) * 100%), rgba(0, 0, 0) calc((var(--mask-height) + 0.15) * 100%), rgba(0, 0, 0) 100%);
+  mask-image: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0) calc(var(--mask-height) * 100%),
+    rgba(0, 0, 0) calc((var(--mask-height) + 0.15) * 100%),
+    rgba(0, 0, 0) 100%
+  );
 }
 
 .track-img {
@@ -201,9 +222,9 @@ body {
 }
 
 .track-card {
-  --card-width: 3.0;
+  /* --card-width: 3.5; */
   min-width: 288px;
-  width: calc(var(--cell-size) * var(--card-width))
+  width: calc(var(--cell-size) * var(--card-width));
 }
 
 .mapboxgl-ctrl-logo {
@@ -225,7 +246,7 @@ body {
   color: hsl(var(--gray-12)) !important;
 }
 
-@media (min-width: 1920px){
+@media (min-width: 1920px) {
   .container {
     max-width: 1920px;
   }

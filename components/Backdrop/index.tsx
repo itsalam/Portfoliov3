@@ -180,7 +180,12 @@ const GridBackdrop: FC<{ scrollY: MotionValue<number> }> = ({
   };
 
   return (
-    <motion.div className="absolute left-0 top-0 -z-50 h-full w-full">
+    <motion.div
+      style={{ height: containerHeight }}
+      className={
+        "absolute left-0 top-0 -z-50 h-full w-full" // basicStyles // positioning, layoutControl, sizing
+      }
+    >
       <motion.svg
         id={"mask"}
         initial={{

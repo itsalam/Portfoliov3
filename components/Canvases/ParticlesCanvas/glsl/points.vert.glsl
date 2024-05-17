@@ -18,6 +18,6 @@ void main() {
   gl_Position = projectionMatrix * mvPosition;
   gl_Position.xy /= ratio;
   vDistance = uFocus + sin(uTime * 0.1)*0.5 + mvPosition.z*2.0;  
-  vPointSize = min(abs((mvPosition.z) + -(length(position.xy) * 3.0) + uFocus) * uBlur, 150.0) * (0.4 + 0.6 * sin(position.x * position.y));
+  vPointSize = min(abs((mvPosition.z) + -(length(position.xy) * 3.0) + uFocus) * uBlur, 200.0) * (0.4 + 0.6 * sin(position.x * position.y));
   gl_PointSize = vPointSize;
 }

@@ -50,15 +50,21 @@ export const DigitSpinner: React.FC<DigitSpinnerProps> = ({
   }, [digit]);
   return (
     <motion.div className="relative overflow-hidden">
-      <Text {...textProps} className="opacity-0">
+      <Text
+        {...textProps}
+        className="opacity-0"
+      >
         0
       </Text>
       <motion.div
         key={digit}
-        className={cn("absolute flex", {
-          "bottom-0 flex-col-reverse ": direction === DIRECTION.DOWN,
-          "top-0 flex-col ": direction === DIRECTION.UP,
-        })}
+        className={cn(
+          "absolute flex",
+          {
+            "bottom-0 flex-col-reverse ": direction === DIRECTION.DOWN,
+            "top-0 flex-col ": direction === DIRECTION.UP,
+          }
+        )}
         animate={{
           y: getDigitCoords(),
         }}

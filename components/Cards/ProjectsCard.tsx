@@ -6,7 +6,13 @@ import { CMSContext } from "@/lib/state";
 import { cn } from "@/lib/utils";
 import { urlForImage } from "@/sanity/lib/image";
 import { Badge } from "@radix-ui/themes";
-import { AnimatePresence, motion, useAnimationControls } from "framer-motion";
+import {
+  AnimatePresence,
+  MotionStyle,
+  Variants,
+  motion,
+  useAnimationControls,
+} from "framer-motion";
 import { debounce } from "lodash";
 import { Github } from "lucide-react";
 import Image from "next/image";
@@ -30,7 +36,6 @@ const GithubBadge = motion(Github);
 export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
   const { ...rest } = props;
   const projectsRef = useRef(null);
-  const textBodyControls = useAnimationControls();
   const trackControls = useAnimationControls();
   const prevFocusedProject = useRef<Project>();
   const [focusedProject, setFocusedProject] = useState<Project>();
@@ -41,44 +46,40 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
   const projects = useStore(cms, (cms) => cms.projects ?? []);
 
   const DEFAULT_TEXT = "Scroll or drag to navigate.";
-  const ProjectTitle = useCallback((
-    props: Omit<ComponentProps<typeof AnimatedText>, "textChild">
-  ) => {
-    const Title: FC<{ className?: string; text: string }> = ({
-      className,
-      text,
-    }) => (
-      <AnimateText
-        size={"8"}
-        className={cn(
-          "w-min font-bold",
-          className
-        )}
-        text={text}
-      />
-    );
+  const ProjectTitle = useCallback(
+    (props: Omit<ComponentProps<typeof AnimatedText>, "textChild">) => {
+      const Title: FC<{ className?: string; text: string }> = ({
+        className,
+        text,
+      }) => (
+        <AnimateText
+          size={"8"}
+          className={cn("w-min font-bold", className)}
+          text={text}
+        />
+      );
 
-    return <AnimatedText {...props} textChild={Title} />;
-  }, []);
+      return <AnimatedText {...props} textChild={Title} />;
+    },
+    []
+  );
 
-  const ProjectDescription = useCallback((
-    props: Omit<ComponentProps<typeof AnimatedText>, "textChild">
-  ) => {
-    const Text: FC<{ className?: string; text: string }> = ({
-      className,
-      text,
-    }) => (
-      <AnimateText
-        className={cn(
-          "w-inherit whitespace-normal",
-          className
-        )}
-        size={"3"}
-        text={text}
-      />
-    );
-    return <AnimatedText {...props} textChild={Text} />;
-  }, []);
+  const ProjectDescription = useCallback(
+    (props: Omit<ComponentProps<typeof AnimatedText>, "textChild">) => {
+      const Text: FC<{ className?: string; text: string }> = ({
+        className,
+        text,
+      }) => (
+        <AnimateText
+          className={cn("w-inherit whitespace-normal", className)}
+          size={"3"}
+          text={text}
+        />
+      );
+      return <AnimatedText {...props} textChild={Text} />;
+    },
+    []
+  );
 
   const changeFocusTitle = debounce(
     (project?: Project) => {
@@ -93,14 +94,9 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
 
   useEffect(() => {
     if (!selectedProject) {
-      trackControls.start("deselected");
-      textBodyControls.start("deselected");
       setFocusedProject(undefined);
-    } else {
-      trackControls.start("selected");
-      textBodyControls.start("selected");
     }
-  }, [selectedProject, textBodyControls, trackControls]);
+  }, [selectedProject]);
 
   const changeSelectedProject = useCallback(
     (project?: Project) => {
@@ -129,22 +125,29 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
       onHoverEnd={() =>
         setTimeout(() => handleProjectHover(selectedProject)(), 1000)
       }
+      variants={
+        {
+          expand: {
+            "--card-width": [null, 6.0, 6.0],
+            opacity: [null, 0, 1],
+          },
+          minimize: {
+            "--card-width": [null, 3.5],
+          },
+        } as Variants
+      }
+      style={
+        {
+          "--card-width": 3.5,
+          "--mask-height": selectedProject ? 0.1 : 0.0,
+        } as MotionStyle
+      }
     >
       <Track
-        className={cn(
-          "gap-g-2/8"
-        )}
+        className={cn("h-2/3 gap-g-2/8")}
         dragRef={dragRef}
         animate={trackControls}
         clickedIndex={clickedProject}
-        variants={{
-          selected: {
-            height: [null, "65%"],
-          },
-          deselected: {
-            height: [null, "65%"],
-          },
-        }}
       >
         {projects.map((project, index) => (
           <motion.div
@@ -158,13 +161,22 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
             )}
             onHoverStart={handleProjectHover(project)}
             onTap={() => changeSelectedProject(project)}
+            variants={{
+              expand: {
+                opacity: 0.25,
+              },
+              minimize: {
+                opacity: 1.0,
+              },
+            }}
           >
             <Image
               className={cn(
-                "track-img h-full w-full object-cover",
+                "track-img",
+                "h-full w-full object-cover", // sizing, object
                 "opacity-50 hover:opacity-100", // transparency
-                "dark:brightness-90 dark:hover:brightness-100", // shadowFilterEffects // transparency
-                "blur-sm group-hover:blur-none brightness-75 contrast-75", // shadowFilterEffects
+                "blur-sm group-hover:blur-none dark:brightness-90", // filters
+                "brightness-75 contrast-75 dark:hover:brightness-100",
                 "saturate-150",
                 "transition-all duration-300", // transitionsAnimations
                 {
@@ -184,9 +196,8 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
       </Track>
       <motion.div
         key={"body"}
-        animate={textBodyControls}
         className={cn(
-          "absolute bottom-0 left-0 flex w-full flex-col py-4 px-12",
+          "absolute bottom-0 left-0 flex w-full flex-col px-12 py-4",
           props.className
         )}
         layout
@@ -241,10 +252,7 @@ export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
           reverse={!selectedProject}
         />
         <AnimatePresence mode="wait">
-          <motion.div
-            layout
-            className="relative flex gap-2 p-4"
-          >
+          <motion.div layout className="relative flex gap-2 p-4">
             {selectedProject &&
               selectedProject.stack.map((tech) => {
                 return (

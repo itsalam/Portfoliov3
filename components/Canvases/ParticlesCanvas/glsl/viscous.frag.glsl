@@ -16,7 +16,11 @@ void main(){
     vec2 new3 = texture2D(velocity_new, uv - vec2(0, px.y * 2.0)).xy;
 
     vec2 new = 4.0 * old + v * dt * (new0 + new1 + new2 + new3);
-    new /= 4.0 * (1.0 + v * dt);
+    float vel = (1.0 + v * dt);
+    if (vel < 0.01) {
+        vel += 0.01;
+    }
+    new /= 4.0 * vel;
     
     gl_FragColor = vec4(new, 0.0, 0.0);
 }

@@ -37,7 +37,10 @@ const Clock: React.FC = () => {
     >
       <DigitSpinner digit={~~(hours / 10)} textProps={{ size: "7" }} />
       <DigitSpinner digit={~~(hours % 10)} textProps={{ size: "7" }} />
-      <Text className="relative bottom-0" size={"3"}>
+      <Text
+        className="relative bottom-0"
+        size={"3"}
+      >
         :
       </Text>
       <DigitSpinner digit={~~(minutes / 10)} textProps={{ size: "7" }} />
@@ -47,17 +50,23 @@ const Clock: React.FC = () => {
       {/* {currentTime} */}
       <div className="flex flex-col">
         <Text
-          className={cn("block w-full text-right leading-4", {
-            "text-[--gray-a6]": isAm,
-          })}
+          className={cn(
+            "block w-full text-right leading-4",
+            {
+              "text-[--gray-a6]": isAm,
+            }
+          )}
           size={"2"}
         >
           AM
         </Text>
         <Text
-          className={cn("block w-full text-right leading-4", {
-            "text-[--gray-a6]": !isAm,
-          })}
+          className={cn(
+            "block w-full text-right leading-4",
+            {
+              "text-[--gray-a6]": !isAm,
+            }
+          )}
           size={"2"}
         >
           PM

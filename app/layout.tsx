@@ -65,7 +65,10 @@ export default function RootLayout({
           >
             <main
               id="main"
-              className="container flex h-screen max-h-[100dvh] flex-col overflow-hidden"
+              className={cn(
+                "container flex h-screen max-h-[100dvh]", // sizing
+                "flex-col overflow-hidden" // layout, overflowControl
+              )}
             >
               {children}
             </main>

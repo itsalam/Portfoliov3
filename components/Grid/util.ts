@@ -1,33 +1,19 @@
 import { GridInfo } from "@/lib/state";
-import { ReadonlyURLSearchParams } from "next/dist/client/components/navigation";
+import {
+  ReadonlyURLSearchParams,
+  usePathname,
+  useRouter,
+} from "next/dist/client/components/navigation";
+import { useEffect } from "react";
 import { CARD_TYPES } from "../Cards/types";
 import {
   DEFAULT_GRID_ELEMENTS,
   DEFAULT_INIT_ELEMS,
+  DefaultGridElement,
   GRID_QUERY_KEY,
+  GridElement,
   GridElements,
 } from "./consts";
-
-type GridElemDimensions = {
-  width: number;
-  height: number;
-};
-
-export type DefaultGridElement = {
-  id: CARD_TYPES;
-  initialCoords: [number, number];
-  initialDimensions: GridElemDimensions;
-  mobileDimensions?: GridElemDimensions;
-  wideDimensions?: GridElemDimensions;
-};
-
-export type GridElement = {
-  id: CARD_TYPES;
-  coords: [number, number];
-  hasPositioned?: boolean;
-  width: number;
-  height: number;
-};
 
 export const isIntersecting = (
   rectA: GridElement,
@@ -121,8 +107,7 @@ const placeNewPosition = (
 
     const vertConflicting = elemArrs.filter((conflictingRect) =>
       // conflictingRect.coords[1] <= element.coords[1] &&
-      isIntersecting(element, conflictingRect, gridInfo)
-    );
+      isIntersecting(element, conflictingRect, gridInfo));
     // console.log(vertConflicting);
     if (vertConflicting.length) {
       const tallest = vertConflicting.reduce((lowest, current) => {
@@ -256,4 +241,25 @@ export const getDefaultGridElementDimensions = (
     : isWide && defaultElem.wideDimensions !== undefined
       ? defaultElem.wideDimensions
       : defaultElem.initialDimensions;
+};
+
+export const useNavigation = (
+  searchParams: ReadonlyURLSearchParams,
+  gridElements: GridElements
+) => {
+  const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    const queryStr = gridElements.size
+      ? createQueryString(
+          GRID_QUERY_KEY,
+          [...gridElements.keys()].join(","),
+          searchParams
+        )
+      : "";
+    router.push(pathname + "?" + queryStr);
+  }, [gridElements, pathname, router, searchParams]);
+
+  return searchParams;
 };

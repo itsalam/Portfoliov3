@@ -54,7 +54,7 @@ export default function Hero() {
           <Overlay />
           <MenuCard
             className={
-              "bottom-g-4/8 left-1/2 z-50 -translate-x-1/2 transition-bg"
+              "bottom-g-2/8 left-1/2 z-50 -translate-x-1/2 transition-bg"
             }
           />
           {useThemePanel && <ThemePanel defaultOpen={false} />}

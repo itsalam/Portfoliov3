@@ -1,5 +1,6 @@
 "use client";
 import { useDebounce } from "@/lib/clientUtils";
+import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import {
   ComponentPropsWithoutRef,
@@ -51,7 +52,12 @@ const Loading = forwardRef<
   return (
     <motion.div
       ref={ref}
-      className="absolute bottom-4 right-10 flex h-36 items-start justify-center gap-1 overflow-hidden font-favorit text-8xl text-[--gray-a7]"
+      className={cn(
+        "absolute", // basicStyles
+        "bottom-4 right-10 flex h-36", // positioning, sizing
+        "items-start justify-center gap-1 overflow-hidden", // layout, overflowControl
+        "font-favorit text-8xl text-[--gray-a7]" // textStyles
+      )}
       {...motionProps}
     >
       <Spinner />

@@ -82,7 +82,6 @@ const Item = (props: {
       delayDuration={100}
       content={
         <Text
-          className=""
           size="3"
           initial={{
             y: -10,
@@ -102,7 +101,14 @@ const Item = (props: {
         style={{
           width,
         }}
-        className="relative z-[1000] flex aspect-square w-g-5/8 items-end justify-end rounded-full bg-[--gray-5] text-[--gray-11] brightness-100 transition-all hover:bg-[--gray-2] hover:text-[--accent-11]"
+        className={cn(
+          "relative", // basicStyles
+          "z-[1000] flex aspect-square w-g-5/8", // layoutControl, sizing
+          "items-end justify-end rounded-full", // layout, border
+          "bg-[--gray-5] hover:bg-[--gray-2]", // background
+          "text-[--gray-11] brightness-100 hover:text-[--accent-11]", // textStyles, filters
+          "transition-all" // transitionsAnimations
+        )}
         variants={{
           initial: {
             width: [null, size * minSize],
@@ -171,7 +177,12 @@ export default function MenuCard(props: ComponentProps<typeof motion.div>) {
         variants={{
           initial: { height: 64 },
         }}
-        className="menu-bg absolute bottom-0 left-1/2 z-[1000] flex -translate-x-1/2 items-end gap-4 overflow-visible rounded-full p-2 transition-all"
+        className={cn(
+          "menu-bg items-between -translate-x-1/2",
+          "absolute bottom-0 left-1/2 z-[1000]", // basicStyles, positioning, layoutControl
+          "flex gap-4 overflow-visible", // sizing, layout, overflowControl
+          "rounded-full p-2 transition-all" // border, padding, transitionsAnimations
+        )}
       >
         {Object.entries(items).map(([key, { icon: Icon, cards }]) => (
           <Item

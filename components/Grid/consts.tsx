@@ -3,7 +3,31 @@ import dynamic from "next/dynamic";
 import { ComponentProps, ComponentType } from "react";
 import LoadingCard from "../Cards/LoadingCard";
 import { CARD_TYPES } from "../Cards/types";
-import { DefaultGridElement, GridElement } from "./util";
+
+export const SCROLL_TO_CARD_DELAY = 200;
+export const DRAG_TIMEOUT = 0;
+type GridElemDimensions = {
+  width: number;
+  height: number;
+};
+
+export type DefaultGridElement = {
+  id: CARD_TYPES;
+  initialCoords: [number, number];
+  initialDimensions: GridElemDimensions;
+  mobileDimensions?: GridElemDimensions;
+  wideDimensions?: GridElemDimensions;
+  canExpand?: boolean;
+};
+
+export type GridElement = {
+  id: CARD_TYPES;
+  coords: [number, number];
+  hasPositioned?: boolean;
+  width: number;
+  height: number;
+  canExpand?: boolean;
+};
 
 export type GridElements = Map<CARD_TYPES, GridElement>;
 
@@ -44,6 +68,7 @@ export const ELEMENT_MAP: Record<
 export const DEFAULT_GRID_ELEMENTS: Record<CARD_TYPES, DefaultGridElement> = {
   Home: {
     id: CARD_TYPES.Home,
+    canExpand: true,
     initialCoords: DEFAULT_COORDS,
     initialDimensions: {
       width: 550,
@@ -60,6 +85,7 @@ export const DEFAULT_GRID_ELEMENTS: Record<CARD_TYPES, DefaultGridElement> = {
   },
   Projects: {
     id: CARD_TYPES.Projects,
+    canExpand: true,
     initialCoords: DEFAULT_COORDS,
     initialDimensions: {
       width: 550,
@@ -76,6 +102,7 @@ export const DEFAULT_GRID_ELEMENTS: Record<CARD_TYPES, DefaultGridElement> = {
   },
   Experience: {
     id: CARD_TYPES.Experience,
+    canExpand: true,
     initialCoords: DEFAULT_COORDS,
     initialDimensions: {
       width: 550,

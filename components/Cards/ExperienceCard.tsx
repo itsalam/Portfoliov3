@@ -58,7 +58,13 @@ export default function ExperienceCard(
                   <span className="text-xs text-[--gray-10]">
                     {formatDate(tenure.from)} - {formatDate(tenure.to)}
                   </span>
-                  <ul className="flex list-disc flex-col gap-1 pl-4 pt-1 leading-loose">
+                  <ul
+                    className={cn(
+                      "flex", // sizing
+                      "list-disc flex-col gap-1 pl-4 pt-1", // listStyles, layout, padding
+                      "leading-loose" // textStyles
+                    )}
+                  >
                     {tenure.descriptions.map(
                       (description: string, k: number) => (
                         <li key={k} className="text-sm text-[--gray-12]">

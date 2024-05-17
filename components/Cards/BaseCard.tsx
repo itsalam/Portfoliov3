@@ -11,7 +11,7 @@ import {
   useDragControls,
 } from "framer-motion";
 import { debounce } from "lodash";
-import { X } from "lucide-react";
+import { Maximize, X } from "lucide-react";
 import {
   CSSProperties,
   ComponentProps,
@@ -27,6 +27,7 @@ import { CARD_TYPES } from "./types";
 
 const Card: FC<
   ComponentProps<typeof motion.div> & {
+    canExpand?: boolean;
     width?: number;
     height?: number;
     x: number;
@@ -47,15 +48,6 @@ const Card: FC<
         height: [32, height],
       } as DOMKeyframesDefinition);
       initialLoad.current = false;
-    } else {
-      animate(
-        ref.current,
-        {
-          width: [null, width],
-          height: [null, height],
-        } as DOMKeyframesDefinition,
-        { duration: 0.001, type: "tween" }
-      );
     }
   }, 10);
 
@@ -65,14 +57,20 @@ const Card: FC<
 
   return (
     <motion.div
+      onAnimationStart={console.log}
       onMouseDown={(e) => {
         e.stopPropagation();
         e.preventDefault();
       }}
       initial={{
-        width: 0,
-        height: 0,
+        width: 32,
+        height: 32,
         opacity: 0,
+      }}
+      animate={{
+        width,
+        height,
+        opacity: 1,
       }}
       style={{
         x,
@@ -90,6 +88,7 @@ const Card: FC<
 
 export const TitleCard: FC<ComponentProps<typeof Card>> = (props) => {
   const {
+    canExpand,
     className,
     id,
     children,
@@ -102,7 +101,7 @@ export const TitleCard: FC<ComponentProps<typeof Card>> = (props) => {
     ...rest
   } = props;
   const dragControls = useDragControls();
-  const { closeElements } = useContext(GridContext)!.getState();
+  const { closeElements, toggleCard } = useContext(GridContext)!.getState();
 
   function startDrag(event: PointerEvent) {
     let target = event.target as HTMLElement;
@@ -123,51 +122,17 @@ export const TitleCard: FC<ComponentProps<typeof Card>> = (props) => {
     onDragEnd?.(event, info);
   }
 
-  const Button = forwardRef<
-    HTMLButtonElement,
-    ComponentPropsWithoutRef<typeof motion.button>
-  >(({ className, onClick, ...props }, ref) => {
-    return (
-      <motion.button
-        ref={ref}
-        data-button="true"
-        whileTap={{ scale: 1.05, y: -6 }}
-        onClick={(e) => {
-          e.stopPropagation();
-          onClick?.(e);
-        }}
-        style={{
-          aspectRatio: "1 / 1",
-        }}
-        className={cn(
-          className,
-          "z-50 flex aspect-square w-5 items-center justify-center rounded-full border-[1px] border-[--gray-a7] transition-all hover:border-[--accent-a10] hover:text-[--accent-a10]"
-        )}
-        {...props}
-      />
-    );
-  });
-  Button.displayName = "Button";
-
   return (
     <Card
       className={cn(
-        "h-0 w-0",
-        "group/card flex flex-col overflow-hidden",
-        "border-[1px] border-[--gray-a3]",
-        "hover:border-[--gray-a7] hover:shadow-xl"
+        "group/card border-[1px] hover:shadow-xl dark:hover:shadow-none",
+        "flex h-0 w-0 flex-col overflow-hidden", // sizing, layout, overflowControl
+        "border-[--gray-a3] hover:border-[--gray-a7]" // border
       )}
       dragControls={dragControls}
       dragListener={false}
       onDragEnd={endDrag}
       id={id}
-      variants={{
-        exit: {
-          opacity: 0,
-          width: 0,
-          height: 0,
-        },
-      }}
       width={width}
       height={height}
       x={x}
@@ -178,37 +143,83 @@ export const TitleCard: FC<ComponentProps<typeof Card>> = (props) => {
         onPointerDown={startDrag}
         draggable={false}
         className={cn(
-          "relative z-10 flex h-8 flex-col justify-center bg-[--gray-a3] px-3 py-1 opacity-100 transition-opacity dark:backdrop-brightness-75"
+          "relative", // basicStyles
+          "z-10 flex h-8 flex-col justify-center", // layoutControl, sizing, layout
+          "bg-[--gray-a3] opacity-100", // background, transparency
+          "transition-opacity dark:backdrop-brightness-75" // filters, transitionsAnimations
         )}
+        variants={{
+          expand: {
+            opacity: [null, 0],
+            height: [null, 0],
+          },
+          minimize: {
+            opacity: [null, 1],
+            height: [null, "32px"],
+          },
+        }}
       >
         <Text
           size="2"
-          className="color-[--gray-a4] user-select-none pointer-events-none w-fit select-none font-light transition-colors group-hover/card:text-[--accent-11]"
+          className={cn(
+            "color-[--gray-a4] user-select-none select-none",
+            "pointer-events-none w-fit px-3 py-1", // basicStyles, sizing, padding
+            "font-light group-hover/card:text-[--accent-11]", // textStyles
+            "transition-colors" // transitionsAnimations
+          )}
           style={{ ["--letter-spacing"]: "0.02em" } as CSSProperties}
         >
           {title}
         </Text>
         <Separator
-          className="absolute bottom-0 left-0 w-full bg-[--gray-a3] transition-all group-hover/card:bg-[--gray-a7]"
+          className={cn(
+            "absolute", // basicStyles
+            "bottom-0 left-0 w-full", // positioning, sizing
+            "bg-[--gray-a3] group-hover/card:bg-[--gray-a7]", // background
+            "transition-all" // transitionsAnimations
+          )}
           size="4"
         />
 
-        <div className="absolute right-1 z-50 flex h-2/3 gap-1">
+        <div className="absolute right-1 z-50 flex h-5 gap-1">
+          {canExpand && (
+            <Button
+              onClick={() => {
+                id && toggleCard(id as CARD_TYPES);
+              }}
+            >
+              <Maximize size={10} />
+            </Button>
+          )}
           <Button onClick={() => id && closeElements([id as CARD_TYPES])}>
-            <X size={9} />
+            <X size={10} />
           </Button>
         </div>
       </motion.div>
       <motion.div
         className={cn(
-          className,
-          "card-bg z-30 h-full overflow-hidden opacity-0"
+          "card-bg z-30 h-full overflow-hidden opacity-0",
+          className
         )}
         animate={{
           opacity: [0, 1],
           transition: {
             duration: 0.5,
             delay: 1.25,
+          },
+        }}
+        variants={{
+          expand: {
+            backgroundColor: [null, "transparent"],
+            "--backdrop-blur": [null, 0],
+            "--backdrop-brightness": [null, 1.0],
+            opacity: [null, 0.2, 1],
+          },
+          minimize: {
+            "--backdrop-blur": [null, "var(--blur-fallback)"],
+            "--backdrop-brightness": [null, "var(--brightness-fallback)"],
+            backgroundColor: [null, "var(--card-background-color)"],
+            opacity: [null, 0.2, 1],
           },
         }}
       >
@@ -219,5 +230,35 @@ export const TitleCard: FC<ComponentProps<typeof Card>> = (props) => {
 };
 
 TitleCard.displayName = "TitleCard";
+
+const Button = forwardRef<
+  HTMLButtonElement,
+  ComponentPropsWithoutRef<typeof motion.button>
+>(({ className, onClick, ...props }, ref) => {
+  return (
+    <motion.button
+      ref={ref}
+      data-button="true"
+      whileTap={{ scale: 1.05, y: -6 }}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick?.(e);
+      }}
+      style={{
+        aspectRatio: "1 / 1",
+      }}
+      className={cn(
+        "border-[1px]",
+        "z-50 flex aspect-square w-5", // layoutControl, sizing
+        "items-center justify-center", // layout
+        "rounded-full border-[--gray-a7] hover:border-[--accent-a10]", // border
+        "transition-all hover:text-[--accent-a10]", // textStyles, transitionsAnimations
+        className
+      )}
+      {...props}
+    />
+  );
+});
+Button.displayName = "Button";
 
 export default Card;

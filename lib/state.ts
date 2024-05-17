@@ -62,6 +62,7 @@ type GridElementListener = {
 };
 
 export type GridStore = {
+  activeCard?: CARD_TYPES | null;
   dimensions: Dimensions;
   listener: GridElementListener | null;
   addListener: (dispatch: GridElementListener) => () => void;
@@ -70,6 +71,7 @@ export type GridStore = {
   setDimensions: (update: Partial<Dimensions>) => void;
   closeElements: (ids: CARD_TYPES[]) => void;
   updateDimensions: () => void;
+  toggleCard: (id?: CARD_TYPES | null) => void;
 };
 
 export const GridContext = createContext<typeof useGridStore | null>(null);
@@ -122,6 +124,10 @@ export const useGridStore = createStore<GridStore>()((set, get) => {
     },
     updateDimensions: () => {
       get().setDimensions(updateDimensions());
+    },
+    toggleCard: (id) => {
+      const { activeCard } = get();
+      set(() => ({ activeCard: activeCard !== id ? id : null }));
     },
     setDimensions: (dimensions: Partial<Dimensions>) => {
       const oldDimensions = get().dimensions;

@@ -38,7 +38,7 @@ export const BaseRolloutButton: FC<BaseRolloutProps> = (props) => {
       className={cn(
         "border",
         "flex items-center rounded-full border-[--gray-12]", // sizing, layout, border
-        "bg-[--gray-a2] backdrop-blur-md", // outlineEffects
+        "bg-[--gray-a2] backdrop-blur-md", // background, filters
         className
       )}
       {...buttonProps}

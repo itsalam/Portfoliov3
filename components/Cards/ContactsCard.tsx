@@ -64,14 +64,17 @@ const Link = forwardRef<
     >
       <a
         href={value}
-        className=" relative w-min overflow-hidden"
+        className="relative w-min overflow-hidden"
         target="_blank"
         rel="noreferrer"
       >
         <Text
           size="2"
           className={cn(
-            "flex items-center overflow-hidden text-[--gray-11] transition-colors duration-300 group-hover:text-[--accent-10]"
+            "flex", // sizing
+            "items-center overflow-hidden", // layout, overflowControl
+            "text-[--gray-11] group-hover:text-[--accent-10]", // textStyles
+            "transition-colors duration-300" // transitionsAnimations
           )}
         >
           {text}
@@ -141,14 +144,25 @@ export default function ContactCard(props: ComponentProps<typeof motion.div>) {
       ref={projectsRef}
       onMouseLeave={() => setHoveredInfo(undefined)}
     >
-      <motion.div className="flex h-full w-full flex-1 justify-center rounded-full p-2">
+      <motion.div
+        className={"flex h-full w-full flex-1 justify-center rounded-full p-2"}
+      >
         <motion.div
-          className="bg-blur-xl relative aspect-square max-h-full max-w-full overflow-hidden rounded-full bg-[--gray-a5]"
+          className={cn(
+            "bg-blur-xl",
+            "relative aspect-square max-h-full max-w-full", // basicStyles, sizing
+            "overflow-hidden rounded-full", // overflowControl, border
+            "bg-[--gray-a5]" // background
+          )}
           variants={{}}
         >
           <AnimatePresence mode="wait">
             <Icon
-              className="absolute left-0 top-0 h-full w-full p-4 text-[--accent-9]"
+              className={cn(
+                "absolute", // basicStyles
+                "left-0 top-0 h-full w-full p-4", // positioning, sizing, padding
+                "text-[--accent-9]" // textStyles
+              )}
               key={hoveredLink}
               initial={{
                 opacity: 1,

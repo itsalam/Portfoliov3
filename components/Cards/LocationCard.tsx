@@ -39,7 +39,10 @@ export default function LocationCard(props: ComponentProps<typeof motion.div>) {
 
   return (
     <motion.div
-      className={cn("relative flex h-full w-full gap-4", className)}
+      className={cn(
+        "relative flex h-full w-full gap-4",
+        className
+      )}
       ref={locationRef}
       onAnimationComplete={resizeMap}
       {...rest}
