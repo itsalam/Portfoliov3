@@ -1,152 +1,61 @@
 "use client";
 
-import { GridContext } from "@/lib/state";
+import { useBreakpoints } from "@/lib/providers/breakpoint";
 import { cn } from "@/lib/utils";
 import { Separator, Text } from "@radix-ui/themes";
-import {
-  DOMKeyframesDefinition,
-  PanInfo,
-  animate,
-  motion,
-  useDragControls,
-} from "framer-motion";
-import { debounce } from "lodash";
-import { Maximize, X } from "lucide-react";
+import { Variants, m } from "framer-motion";
+import { LucideIcon } from "lucide-react";
 import {
   CSSProperties,
   ComponentProps,
-  ComponentPropsWithoutRef,
   FC,
-  PointerEvent,
-  forwardRef,
-  useContext,
-  useEffect,
-  useRef,
+  MouseEventHandler,
+  ReactNode,
 } from "react";
-import { CARD_TYPES } from "./types";
+import { Button } from "../Buttons/Button";
 
-const Card: FC<
-  ComponentProps<typeof motion.div> & {
-    canExpand?: boolean;
-    width?: number;
-    height?: number;
-    x: number;
-    y: number;
-    close?: () => void;
+type ButtonArgs = {
+  Icon: LucideIcon;
+  disabled?: boolean;
+  onClick?: MouseEventHandler<HTMLButtonElement>;
+};
+
+const BaseCard: FC<
+  ComponentProps<typeof m.div> & {
+    title?: string | ReactNode;
+    buttons?: ButtonArgs[];
   }
-> = (props) => {
-  const { x, y, className, children, id, height, width, ...rest } = props;
-  const ref = useRef<HTMLDivElement>(null);
-  const initialLoad = useRef(true);
-
-  const animation = debounce(() => {
-    if (!ref.current) return;
-    if (initialLoad.current) {
-      animate(ref.current, {
-        opacity: [null, 1],
-        width: [32, width],
-        height: [32, height],
-      } as DOMKeyframesDefinition);
-      initialLoad.current = false;
-    }
-  }, 10);
-
-  useEffect(() => {
-    animation();
-  }, [animation]);
-
+> = ({ className, children, title, buttons, ...rest }) => {
+  const breakpoint = useBreakpoints();
+  const isSmall = breakpoint === "xs" || breakpoint === "sm";
   return (
-    <motion.div
-      onAnimationStart={console.log}
+    <m.div
       onMouseDown={(e) => {
         e.stopPropagation();
         e.preventDefault();
       }}
-      initial={{
-        width: 32,
-        height: 32,
-        opacity: 0,
-      }}
-      animate={{
-        width,
-        height,
-        opacity: 1,
-      }}
-      style={{
-        x,
-        y,
-      }}
-      className={cn("card absolute origin-top-left transition-all", className)}
-      ref={ref}
-      id={id}
-      {...rest}
-    >
-      {children}
-    </motion.div>
-  );
-};
-
-export const TitleCard: FC<ComponentProps<typeof Card>> = (props) => {
-  const {
-    canExpand,
-    className,
-    id,
-    children,
-    title,
-    onDragEnd,
-    width,
-    height,
-    x,
-    y,
-    ...rest
-  } = props;
-  const dragControls = useDragControls();
-  const { closeElements, toggleCard } = useContext(GridContext)!.getState();
-
-  function startDrag(event: PointerEvent) {
-    let target = event.target as HTMLElement;
-    if (target.tagName !== "BUTTON") {
-      // Find the button parent of the SVG or other target elements
-      target = target.closest("button") as HTMLElement;
-      if (target && target.getAttribute("data-button") === "true") {
-        return;
-      }
-    }
-    dragControls.start(event);
-  }
-
-  function endDrag(
-    event: MouseEvent | TouchEvent | globalThis.PointerEvent,
-    info: PanInfo
-  ) {
-    onDragEnd?.(event, info);
-  }
-
-  return (
-    <Card
       className={cn(
-        "group/card border-[1px] hover:shadow-xl dark:hover:shadow-none",
-        "flex h-0 w-0 flex-col overflow-hidden", // sizing, layout, overflowControl
-        "border-[--gray-a3] hover:border-[--gray-a7]" // border
+        "card group/card border-[1px]",
+        "flex origin-top-left flex-col", // sizing, transforms, layout
+        "overflow-hidden", // overflowControl
+        "border-[--accent-a3] hover:border-[--accent-10] dark:hover:border-[--accent-a7]", // border
+        className
       )}
-      dragControls={dragControls}
-      dragListener={false}
-      onDragEnd={endDrag}
-      id={id}
-      width={width}
-      height={height}
-      x={x}
-      y={y}
+      initial={{ originX: 0, originY: 0 }}
       {...rest}
     >
-      <motion.div
-        onPointerDown={startDrag}
+      <m.div
         draggable={false}
         className={cn(
-          "relative", // basicStyles
-          "z-10 flex h-8 flex-col justify-center", // layoutControl, sizing, layout
-          "bg-[--gray-a3] opacity-100", // background, transparency
-          "transition-opacity dark:backdrop-brightness-75" // filters, transitionsAnimations
+          "glass",
+          "relative z-10 flex", // basicStyles, layoutControl, sizing
+          "flex-col justify-center", // layout
+          "group-hover/card:dark:bg-[--accent-a3]", // background
+          "group-hover/card:bg-[--accent-a7] bg-[--gray-surface]",
+          "font-light group-hover/card:text-[--gray-contrast]", // textStyles
+          "group-hover/card:dark:text-[--accent-11]",
+          "opacity-100 transition-opacity", // transparency, transitionsAnimations
+          isSmall ? "h-12" : "h-8"
         )}
         variants={{
           expand: {
@@ -160,11 +69,11 @@ export const TitleCard: FC<ComponentProps<typeof Card>> = (props) => {
         }}
       >
         <Text
-          size="2"
+          size={isSmall ? "4" : "2"}
           className={cn(
             "color-[--gray-a4] user-select-none select-none",
-            "pointer-events-none w-fit px-3 py-1", // basicStyles, sizing, padding
-            "font-light group-hover/card:text-[--accent-11]", // textStyles
+            "pointer-events-none w-fit", // basicStyles, sizing
+            "text-ellipsis text-nowrap py-1 px-3", // textWrapping, padding
             "transition-colors" // transitionsAnimations
           )}
           style={{ ["--letter-spacing"]: "0.02em" } as CSSProperties}
@@ -175,90 +84,60 @@ export const TitleCard: FC<ComponentProps<typeof Card>> = (props) => {
           className={cn(
             "absolute", // basicStyles
             "bottom-0 left-0 w-full", // positioning, sizing
-            "bg-[--gray-a3] group-hover/card:bg-[--gray-a7]", // background
+            "bg-[--gray-a3] group-hover/card:bg-[--gray-10]", // background
+            "group-hover/card:dark:bg-[--gray-a7]",
             "transition-all" // transitionsAnimations
           )}
           size="4"
         />
 
         <div className="absolute right-1 z-50 flex h-5 gap-1">
-          {canExpand && (
-            <Button
-              onClick={() => {
-                id && toggleCard(id as CARD_TYPES);
-              }}
-            >
-              <Maximize size={10} />
+          {buttons?.map(({ Icon, ...props }, index) => (
+            <Button {...props} key={`${title}-button-${index}`}>
+              <Icon size={10} />
             </Button>
-          )}
-          <Button onClick={() => id && closeElements([id as CARD_TYPES])}>
-            <X size={10} />
-          </Button>
+          ))}
         </div>
-      </motion.div>
-      <motion.div
+      </m.div>
+      <m.div
         className={cn(
-          "card-bg z-30 h-full overflow-hidden opacity-0",
-          className
+          "card-bg z-30 h-full overflow-hidden transition-colors"
         )}
-        animate={{
-          opacity: [0, 1],
-          transition: {
-            duration: 0.5,
-            delay: 1.25,
-          },
-        }}
-        variants={{
-          expand: {
-            backgroundColor: [null, "transparent"],
-            "--backdrop-blur": [null, 0],
-            "--backdrop-brightness": [null, 1.0],
-            opacity: [null, 0.2, 1],
-          },
-          minimize: {
-            "--backdrop-blur": [null, "var(--blur-fallback)"],
-            "--backdrop-brightness": [null, "var(--brightness-fallback)"],
-            backgroundColor: [null, "var(--card-background-color)"],
-            opacity: [null, 0.2, 1],
-          },
-        }}
+        variants={
+          {
+            expand: {
+              "--backdrop-opacity": [null, 0.0],
+              opacity: [null, 1],
+              overflow: "visible",
+            },
+            minimize: {
+              "--backdrop-opacity": [null, 1.0],
+              opacity: [null, 1],
+              overflow: "hidden",
+            },
+            animate: {
+              opacity: [null, 1],
+              transition: {
+                type: "just",
+              },
+            },
+            focused: {
+              opacity: 1,
+            },
+            open: {
+              opacity: [0, 1],
+              transition: {
+                duration: 0.5,
+                delay: 1.25,
+              },
+            },
+          } as Variants
+        }
       >
         {children}
-      </motion.div>
-    </Card>
+      </m.div>
+    </m.div>
   );
 };
 
-TitleCard.displayName = "TitleCard";
-
-const Button = forwardRef<
-  HTMLButtonElement,
-  ComponentPropsWithoutRef<typeof motion.button>
->(({ className, onClick, ...props }, ref) => {
-  return (
-    <motion.button
-      ref={ref}
-      data-button="true"
-      whileTap={{ scale: 1.05, y: -6 }}
-      onClick={(e) => {
-        e.stopPropagation();
-        onClick?.(e);
-      }}
-      style={{
-        aspectRatio: "1 / 1",
-      }}
-      className={cn(
-        "border-[1px]",
-        "z-50 flex aspect-square w-5", // layoutControl, sizing
-        "items-center justify-center", // layout
-        "rounded-full border-[--gray-a7] hover:border-[--accent-a10]", // border
-        "transition-all hover:text-[--accent-a10]", // textStyles, transitionsAnimations
-        className
-      )}
-      {...props}
-    />
-  );
-});
-Button.displayName = "Button";
-
-export default Card;
+export default BaseCard;

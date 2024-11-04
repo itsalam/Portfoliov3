@@ -1,4 +1,5 @@
 import { client } from "@/sanity/lib/client";
+import { TierResult, getGPUTier } from "detect-gpu";
 import { SanityDocument } from "next-sanity";
 import type { Image } from "sanity";
 import { StoreApi } from "zustand";
@@ -65,10 +66,26 @@ type SchemaTypes = {
   resume: Resume;
 };
 
+function isWebGLSupported() {
+  try {
+    const canvas = document.createElement("canvas");
+    return (
+      (!!window.WebGLRenderingContext &&
+        (canvas.getContext("webgl") ||
+          canvas.getContext("experimental-webgl"))) ??
+      false
+    );
+  } catch (e) {
+    return false;
+  }
+}
+
 export type SchemaStores = {
   [K in keyof typeof Schemas]: SchemaTypes[K];
 } & {
   initialize: () => void;
+  isWebGLSupported: boolean | RenderingContext;
+  gpuTier: TierResult;
 };
 
 // uses GROQ to query content: https://www.sanity.io/docs/groq
@@ -111,6 +128,14 @@ export const createCMSSlices = (
     "resume",
     "[0]{title, icon, 'url': pdf.asset->url}"
   );
+  const gpuTier = async () => {
+    const gpuTier = await getGPUTier();
+    setState((state) => ({
+      ...state,
+      gpuTier,
+      isWebGLSupported: isWebGLSupported(),
+    }));
+  };
 
   return [
     technology(setState),
@@ -118,5 +143,6 @@ export const createCMSSlices = (
     works(setState),
     contact(setState),
     resume(setState),
+    gpuTier(),
   ];
 };

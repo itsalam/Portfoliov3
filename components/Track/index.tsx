@@ -1,57 +1,47 @@
-import { maskScrollArea } from "@/lib/clientUtils";
 import { useResizeCallBack } from "@/lib/hooks";
+import { maskScrollArea } from "@/lib/providers/clientUtils";
 import { cn } from "@/lib/utils";
-import {
-  animate,
-  motion,
-  useMotionTemplate,
-  useMotionValue,
-  useTransform,
-} from "framer-motion";
+import { ScrollArea } from "@radix-ui/themes";
+import { animate, m, useMotionValue } from "framer-motion";
 import {
   Children,
-  ComponentPropsWithRef,
+  ComponentPropsWithoutRef,
   HTMLAttributes,
   MouseEvent,
   MouseEventHandler,
-  MutableRefObject,
   ReactNode,
+  RefObject,
   cloneElement,
+  forwardRef,
   isValidElement,
   useCallback,
   useEffect,
-  useMemo,
+  useImperativeHandle,
   useRef,
   useState,
 } from "react";
-import { TrackBar } from "./Trackbar";
-
-const Track = (
-  props: ComponentPropsWithRef<typeof motion.div> & {
-    dragRef: MutableRefObject<boolean>;
-    clickedIndex: MutableRefObject<number>;
+const Track = forwardRef<
+  HTMLDivElement,
+  ComponentPropsWithoutRef<typeof m.div> & {
+    trackRef: RefObject<HTMLDivElement>;
+    clickedIndex: number;
   }
-) => {
-  const { className, children, dragRef, clickedIndex, ...restProps } = props;
+>((props, containerRef) => {
+  const { className, children, clickedIndex, trackRef, ...restProps } = props;
   const [maxDist, setMaxDist] = useState(0);
-  const [maxPercentage, setMaxPercentage] = useState(1);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
+  const fallBackRef = useRef<HTMLDivElement>(null);
+  // Expose the ref, preferring the passed `ref` if defined, otherwise using `innerRef`
+  useImperativeHandle(
+    containerRef,
+    () => fallBackRef.current as HTMLDivElement
+  );
   const startDrag = useRef(0);
   const dist = useMotionValue(0);
-  const numItems = useMemo(
-    () => Children.count(children as ReactNode),
-    [children]
-  );
-  const [itemWidth, setItemWidth] = useState<number>(0);
-  const distPercent = useTransform(
-    dist,
-    (x) => -((x / maxDist) * maxPercentage) * 100
-  );
 
   useEffect(() => {
     const unsubscribe = dist.on("change", (value) => {
-      const containerElement = containerRef.current;
+      const containerElement = (containerRef as React.RefObject<HTMLDivElement>)
+        ?.current;
       if (containerElement) {
         const middleStepPercent = Math.abs(value / maxDist);
         maskScrollArea("right", containerElement, middleStepPercent);
@@ -64,17 +54,19 @@ const Track = (
 
   const handleResize = useCallback(() => {
     const trackSize = trackRef.current?.getBoundingClientRect().width || 0,
-      containerSize = containerRef.current?.getBoundingClientRect().width || 0;
+      containerSize =
+        (
+          containerRef as RefObject<HTMLDivElement>
+        ).current?.getBoundingClientRect().width || 0;
 
-    console.log({ containerSize, trackSize });
     setMaxDist(containerSize - trackSize);
-    setMaxPercentage(Math.abs((containerSize - trackSize) / trackSize));
-    setItemWidth(
-      (trackRef.current?.children[0] as HTMLDivElement)?.offsetWidth ?? 0
-    );
   }, []);
 
-  useResizeCallBack(handleResize, trackRef, containerRef);
+  useResizeCallBack(
+    handleResize,
+    trackRef,
+    containerRef as React.RefObject<HTMLDivElement>
+  );
 
   const setTrackDist = useCallback(
     (coord: number, threshold?: number, useAnimate?: boolean) => {
@@ -95,12 +87,12 @@ const Track = (
     [dist, maxDist]
   );
 
-  const panToElement =
+  const panToElement = useCallback(
     (index: number, priorOnClick?: MouseEventHandler) => (e?: MouseEvent) => {
       const track = trackRef.current;
       const elem = track?.children[index];
-      const container = containerRef.current;
-      if (elem && track && container && !dragRef.current) {
+      const container = (containerRef as RefObject<HTMLDivElement>).current;
+      if (elem && track && container) {
         setTrackDist(
           track.getBoundingClientRect().x -
             elem.getBoundingClientRect().x +
@@ -112,24 +104,31 @@ const Track = (
         );
       }
       e && priorOnClick?.(e);
-    };
+    },
+    []
+  );
 
   const trackChildren = Children.map(children as ReactNode, (child, index) =>
     isValidElement(child) && typeof child.type !== "string"
       ? cloneElement(child, {
           onTap: panToElement(index, child.props.onTap),
         } as HTMLAttributes<HTMLElement>)
-      : child
-  );
+      : child);
 
   useEffect(() => {
-    const containerElement = containerRef.current;
+    const containerElement = (containerRef as RefObject<HTMLDivElement>)
+      .current;
     if (!containerElement) return;
-    maskScrollArea("right", containerElement, 0);
+    maskScrollArea("bottom", containerElement, 0);
   }, []);
 
   useEffect(() => {
-    const containerElement = containerRef.current;
+    panToElement(clickedIndex)();
+  }, [clickedIndex, panToElement]);
+
+  useEffect(() => {
+    const containerElement = (containerRef as RefObject<HTMLDivElement>)
+      .current;
     const handleWheelMove = (e: WheelEvent) => {
       e.stopPropagation();
       e.preventDefault();
@@ -137,9 +136,9 @@ const Track = (
     };
 
     if (!containerElement) return;
-    containerElement.addEventListener("wheel", handleWheelMove, {
-      passive: false,
-    });
+    // containerElement.addEventListener("wheel", handleWheelMove, {
+    //   passive: false,
+    // });
     return () => {
       containerElement?.removeEventListener("wheel", handleWheelMove);
     };
@@ -147,55 +146,45 @@ const Track = (
 
   return (
     <>
-      <TrackBar
-        dist={dist}
-        trackRef={trackRef}
-        itemWidth={itemWidth}
-        containerWidth={
-          containerRef.current?.getBoundingClientRect().width || 0
-        }
-        numItems={numItems}
-      />
-      <motion.div
+      <m.div
         {...restProps}
+        layout
         className={cn(
-          "track-container relative flex w-full overflow-visible",
+          "track-container overflow-y-auto",
           className,
           {
             "cursor-grabbing": startDrag.current,
             "cursor-grab": !startDrag.current,
           }
         )}
-        // onWheel={handleWheelMove}
         onMouseLeave={() => {
-          if (!startDrag.current && clickedIndex.current !== -1) {
-            panToElement(clickedIndex.current)();
+          if (!startDrag.current && clickedIndex !== -1) {
+            panToElement(clickedIndex)();
           }
         }}
-        ref={containerRef}
+        ref={containerRef || fallBackRef}
         id="container"
       >
-        <motion.div
+        <ScrollArea
+          // layoutScroll
           ref={trackRef}
-          drag="x"
-          style={{
-            x: useMotionTemplate`${distPercent}%`,
-            // x: dist,
-          }}
-          className={cn("track relative flex items-start gap-g-2/8", {})}
-          suppressHydrationWarning
+          // drag="x"
+          // style={{
+          //   x: useMotionTemplate`${distPercent}%`,
+          // }}
+          className={cn(
+            "track",
+            {}
+          )}
           id="track"
-          dragConstraints={{
-            left: maxDist,
-            right: 0,
-          }}
-          // dragTransition={{ power: 0.1 }}
         >
           {trackChildren}
-        </motion.div>
-      </motion.div>
+        </ScrollArea>
+      </m.div>
     </>
   );
-};
+});
+
+Track.displayName = "Track";
 
 export default Track;

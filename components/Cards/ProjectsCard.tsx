@@ -1,24 +1,22 @@
 "use client";
 
 import { AnimateText, AnimatedText } from "@/components/motion/TextEffects";
-import { Project } from "@/lib/fetchData";
-import { CMSContext } from "@/lib/state";
+import { useScrollMask } from "@/lib/hooks";
+import { useBreakpoints } from "@/lib/providers/breakpoint";
+import { GridContext } from "@/lib/providers/clientState";
+import { Project } from "@/lib/providers/fetchData";
+import { CMSContext } from "@/lib/providers/state";
 import { cn } from "@/lib/utils";
 import { urlForImage } from "@/sanity/lib/image";
-import { Badge } from "@radix-ui/themes";
-import {
-  AnimatePresence,
-  MotionStyle,
-  Variants,
-  motion,
-  useAnimationControls,
-} from "framer-motion";
+import { Badge, Separator } from "@radix-ui/themes";
+import { AnimatePresence, m, useScroll } from "framer-motion";
 import { debounce } from "lodash";
-import { Github } from "lucide-react";
+import { ArrowLeft, ArrowRight, Github, Link, X } from "lucide-react";
 import Image from "next/image";
 import {
   ComponentProps,
   FC,
+  ReactNode,
   useCallback,
   useContext,
   useEffect,
@@ -26,260 +24,571 @@ import {
   useState,
 } from "react";
 import { useStore } from "zustand";
-import { BackButton } from "../Buttons/BackButton";
-import { LinkButton } from "../Buttons/LinkButton";
+import { Button } from "../Buttons/Button";
 import Track from "../Track";
+import { TickerText } from "../motion/TickerText";
+import BaseCard from "./BaseCard";
+import { CARD_TYPES } from "./types";
+const MotionBadge = m(Badge);
+const MImage = m(Image);
 
-const MotionBadge = motion(Badge);
-const GithubBadge = motion(Github);
+const DEFAULT_TEXT = "Scroll or drag to navigate.";
 
-export default function ProjectsCard(props: ComponentProps<typeof motion.div>) {
+const ImageComponent = ({
+  src,
+  alt,
+  className,
+  ...props
+}: ComponentProps<typeof MImage>) => {
+  return (
+    <MImage
+      priority
+      className={cn(
+        "track-img data-[loaded=false]:animate-pulse",
+        "data-[loaded=false]:animate-pulse",
+        "aspect-video h-full w-full", // sizing
+        "data-[loaded=false]:bg-gray-100/10 object-cover", // background, object
+        "contrast-75 saturate-150", // filters
+        className
+      )}
+      src={src}
+      alt={alt}
+      width={1600}
+      height={900}
+      data-loaded="false"
+      onLoad={(event) => {
+        event.currentTarget.setAttribute("data-loaded", "true");
+      }}
+      // placeholder="blur"
+      {...props}
+    />
+  );
+};
+
+const ProjectCardComponent = ({
+  project,
+  className,
+  index = 0,
+  ...props
+}: { project: Project; index?: number } & ComponentProps<typeof m.div>) => (
+  <BaseCard
+    title={project.name}
+    animate={"animate"}
+    layoutId={`selected-project-${project._id}-${index}`}
+    layout="preserve-aspect"
+    exit={{
+      opacity: 0,
+      // x: 100,
+    }}
+    className={className}
+    {...props}
+  >
+    <ImageComponent
+      src={urlForImage(project.thumbnails[index])}
+      variants={{
+        focused: {
+          opacity: 1,
+          objectFit: "cover",
+        },
+      }}
+      alt="project image"
+    />
+  </BaseCard>
+);
+
+export default function ProjectsCard(props: ComponentProps<typeof m.div>) {
+  const gridContext = useContext(GridContext);
   const { ...rest } = props;
-  const projectsRef = useRef(null);
-  const trackControls = useAnimationControls();
-  const prevFocusedProject = useRef<Project>();
-  const [focusedProject, setFocusedProject] = useState<Project>();
-  const [selectedProject, setSelectedProject] = useState<Project>();
-  const clickedProject = useRef<number>(-1);
-  const dragRef = useRef(false);
+  const projectsRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const thumbnailContainerRef = useRef<HTMLDivElement>(null);
+  const breakpoint = useBreakpoints();
+  const isSmall = breakpoint === "xs" || breakpoint === "sm";
+
+  useScrollMask(projectsRef, "bottom", false);
+
   const cms = useContext(CMSContext)!;
   const projects = useStore(cms, (cms) => cms.projects ?? []);
+  const { activeCard } = gridContext
+    ? gridContext.getState()
+    : { activeCard: null };
 
-  const DEFAULT_TEXT = "Scroll or drag to navigate.";
-  const ProjectTitle = useCallback(
-    (props: Omit<ComponentProps<typeof AnimatedText>, "textChild">) => {
-      const Title: FC<{ className?: string; text: string }> = ({
-        className,
-        text,
-      }) => (
-        <AnimateText
-          size={"8"}
-          className={cn("w-min font-bold", className)}
-          text={text}
-        />
-      );
+  const prevFocusedProject = useRef<number>();
+  const [focusedProject, setFocusedProject] = useState<number>(-1);
+  const [selectedProject, setSelectedProject] = useState<number>(-1);
+  const [clickedProject, setClickedProject] = useState<number>(-1);
+  const [titleText, setTitleText] = useState<{
+    text: string;
+    reversed: boolean;
+  }>({ text: projects[focusedProject]?.name || "Projects.", reversed: false });
 
-      return <AnimatedText {...props} textChild={Title} />;
-    },
-    []
+  const { scrollYProgress } = useScroll({
+    container: trackRef,
+  });
+
+  scrollYProgress.on("change", (value) => {
+    const index = Math.min(
+      Math.floor(value * projects.length),
+      projects.length - 1
+    );
+    changeFocusTitle.current(index);
+  });
+
+  const changeFocusTitle = useRef(
+    debounce(
+      (projectIdx: number) => {
+        if (focusedProject === projectIdx) return;
+        setFocusedProject((prevProj) => {
+          prevFocusedProject.current = prevProj;
+          return projectIdx;
+        });
+      },
+      10,
+      { trailing: true, leading: true, maxWait: 600 }
+    )
   );
 
-  const ProjectDescription = useCallback(
-    (props: Omit<ComponentProps<typeof AnimatedText>, "textChild">) => {
-      const Text: FC<{ className?: string; text: string }> = ({
-        className,
-        text,
-      }) => (
-        <AnimateText
-          className={cn("w-inherit whitespace-normal", className)}
-          size={"3"}
-          text={text}
-        />
-      );
-      return <AnimatedText {...props} textChild={Text} />;
-    },
-    []
+  const resolveTitle = useRef(
+    debounce(
+      (selectedProject: number, focusedProject: number) => {
+        if (focusedProject >= 0 && focusedProject !== selectedProject) {
+          setTitleText({
+            text: projects[focusedProject]?.name || "Projects.",
+            reversed: focusedProject > selectedProject,
+          });
+        } else if (selectedProject >= 0) {
+          const project = projects[selectedProject];
+          setTitleText({
+            text: project?.name ?? "Projects.",
+            reversed: false,
+          });
+        } else {
+          setTitleText({
+            text: "Projects.",
+            reversed: true,
+          });
+        }
+      },
+      500,
+      { trailing: true, maxWait: 600 }
+    )
   );
 
-  const changeFocusTitle = debounce(
-    (project?: Project) => {
-      setFocusedProject((prevProj) => {
-        prevFocusedProject.current = prevProj;
-        return project;
-      });
-    },
-    600,
-    { trailing: true, leading: true, maxWait: 600 }
-  );
-
-  useEffect(() => {
-    if (!selectedProject) {
-      setFocusedProject(undefined);
-    }
-  }, [selectedProject]);
+  const handleProjectHover = (projectIdx: number) => () => {
+    if (focusedProject >= 0 && focusedProject !== selectedProject)
+      changeFocusTitle.current(projectIdx);
+    else if (!(selectedProject >= 0 && projectIdx === selectedProject))
+      changeFocusTitle.current(projectIdx);
+  };
 
   const changeSelectedProject = useCallback(
-    (project?: Project) => {
-      clickedProject.current = projects.findIndex(
-        (p) => p.name === project?.name
-      );
-      setSelectedProject(project);
+    (projectIdx: number) => {
+      setClickedProject(projectIdx);
+      setSelectedProject(projectIdx);
     },
     [projects]
   );
 
-  const handleProjectHover = (project?: Project) => () => {
-    if (focusedProject && focusedProject !== selectedProject)
-      changeFocusTitle(project);
-    else if (!(selectedProject && project === selectedProject))
-      changeFocusTitle(project);
-  };
+  useEffect(() => {
+    resolveTitle.current(selectedProject, focusedProject);
+  }, [focusedProject, resolveTitle, selectedProject]);
 
-  return (
-    <motion.div
-      {...rest}
-      className={cn(
-        "relative flex h-full flex-1 flex-col justify-start gap-2 p-4"
-      )}
-      ref={projectsRef}
-      onHoverEnd={() =>
-        setTimeout(() => handleProjectHover(selectedProject)(), 1000)
-      }
-      variants={
-        {
-          expand: {
-            "--card-width": [null, 6.0, 6.0],
-            opacity: [null, 0, 1],
-          },
-          minimize: {
-            "--card-width": [null, 3.5],
-          },
-        } as Variants
-      }
-      style={
-        {
-          "--card-width": 3.5,
-          "--mask-height": selectedProject ? 0.1 : 0.0,
-        } as MotionStyle
-      }
-    >
-      <Track
-        className={cn("h-2/3 gap-g-2/8")}
-        dragRef={dragRef}
-        animate={trackControls}
-        clickedIndex={clickedProject}
+  useEffect(() => {
+    activeCard === CARD_TYPES.Projects && changeSelectedProject(-1);
+  }, [activeCard, changeSelectedProject]);
+
+  const ProjectThumbnails = useCallback(
+    ({ project }: { project: Project }) => (
+      <div
+        className={cn(
+          "top-0 bottom-0",
+          isSmall ? "" : "sticky min-w-[25%] h-full",
+          isSmall && project.thumbnails.length > 1 && "w-screen px-8 py-4 relative overflow-x-scroll -left-[5%]"
+        )}
       >
-        {projects.map((project, index) => (
-          <motion.div
-            key={index}
-            custom={index}
-            className={cn(
-              "track-card group",
-              "relative h-full cursor-pointer", // basicStyles, sizing, interactions
-              "overflow-hidden rounded-sm p-0", // overflowControl, border, padding
-              "duration-300" // transitionsAnimations
-            )}
-            onHoverStart={handleProjectHover(project)}
-            onTap={() => changeSelectedProject(project)}
-            variants={{
-              expand: {
-                opacity: 0.25,
-              },
-              minimize: {
-                opacity: 1.0,
-              },
-            }}
-          >
-            <Image
-              className={cn(
-                "track-img",
-                "h-full w-full object-cover", // sizing, object
-                "opacity-50 hover:opacity-100", // transparency
-                "blur-sm group-hover:blur-none dark:brightness-90", // filters
-                "brightness-75 contrast-75 dark:hover:brightness-100",
-                "saturate-150",
-                "transition-all duration-300", // transitionsAnimations
-                {
-                  "opacity-100 blur-none brightness-100":
-                    project.name == focusedProject?.name ||
-                    project.name == selectedProject?.name,
-                }
-              )}
-              src={urlForImage(project.thumbnails[0])}
-              draggable={false}
-              alt="project image"
-              width={500}
-              height={400}
-            />
-          </motion.div>
-        ))}
-      </Track>
-      <motion.div
+        <m.div
+          {...(isSmall
+            ? {
+                animate: { width: `${project.thumbnails.length * 100}%` },
+              }
+            : {})}
+          className={cn(
+            "flex flex-1 justify-center gap-8",
+            isSmall ? "" : "flex-col h-[--card-height]"
+          )}
+        >
+          <AnimatePresence mode="wait">
+            {project.thumbnails.map((thumbnail, index) => (
+              <ProjectCardComponent
+                project={project}
+                index={index}
+                className="md:h-auto flex aspect-video w-full flex-col"
+                title={`${project.name}-${index + 1}`}
+                animate={{ opacity: 1 }}
+                key={`selected-project-image-${project._id}-${index + 1}`}
+                initial={{ opacity: 0 }}
+                exit={{ opacity: 0 }}
+              />
+            ))}
+          </AnimatePresence>
+        </m.div>
+      </div>
+    ),
+    [selectedProject]
+  );
+
+  const ProjectTitle = useCallback((
+    props: Omit<ComponentProps<typeof AnimatedText>, "textChild">
+  ) => {
+    const Title: FC<{ className?: string; text: string }> = ({
+      className,
+      text,
+    }) => (
+      <AnimateText
+        size={"8"}
+        className={cn(
+          "w-full text-balance font-bold",
+          className
+        )}
+        text={text}
+      />
+    );
+
+    return <AnimatedText {...props} textChild={Title} />;
+  }, []);
+
+  const ProjectDescription = useCallback((props: { project: Project }) => {
+    const { project } = props;
+    const Text: FC<{ className?: string; text: string }> = ({ className }) => (
+      <AnimateText
+        className={cn(
+          "w-inherit whitespace-normal",
+          className
+        )}
+        size={"5"}
+        text={project?.description ?? DEFAULT_TEXT}
+      />
+    );
+
+    return (
+      <div
         key={"body"}
         className={cn(
-          "absolute bottom-0 left-0 flex w-full flex-col px-12 py-4",
-          props.className
+          "flex w-full flex-col"
         )}
-        layout
-        layoutRoot
       >
-        <motion.div className="flex justify-between gap-2 pr-4">
-          <ProjectTitle
-            text={focusedProject?.name || selectedProject?.name || "Projects."}
-            reverse={!focusedProject}
-          />
-          <AnimatePresence>
-            {selectedProject && (
-              <div className="flex items-center gap-4">
-                {selectedProject.link && (
-                  <LinkButton
-                    animate={{
-                      opacity: 1,
-                    }}
-                    exit={{
-                      opacity: 0,
-                    }}
-                    href={selectedProject.link}
-                  />
-                )}
-                {selectedProject.githublink && (
-                  <LinkButton
-                    animate={{
-                      opacity: 1,
-                    }}
-                    exit={{
-                      opacity: 0,
-                    }}
-                    ComponentA={(props) => <GithubBadge {...props} />}
-                    href={selectedProject.githublink}
-                  />
-                )}
-                <BackButton
-                  animate={{
-                    opacity: 1,
-                  }}
-                  exit={{
-                    opacity: 0,
-                  }}
-                  onClick={() => changeSelectedProject()}
-                />
-              </div>
-            )}
-          </AnimatePresence>
-        </motion.div>
-        <ProjectDescription
-          text={selectedProject?.description ?? DEFAULT_TEXT}
-          reverse={!selectedProject}
+        <AnimatedText
+          text={project?.description ?? DEFAULT_TEXT}
+          reverse={!project}
+          textChild={Text}
         />
         <AnimatePresence mode="wait">
-          <motion.div layout className="relative flex gap-2 p-4">
-            {selectedProject &&
-              selectedProject.stack.map((tech) => {
+          <div
+            className={
+              cn(
+                "xs:py-2 relative flex flex-wrap gap-2"
+              ) // overflowControl, padding
+            }
+          >
+            {project &&
+              project.stack.map((tech) => {
                 return (
                   <MotionBadge
                     id={tech.name}
                     variant="surface"
                     key={tech.name}
                     color="gray"
+                    initial={{ opacity: 0, x: 20 }}
                     animate={{
-                      opacity: [0, 1],
-                      y: [20, 0],
-                      transition: {
-                        delay: 0.3,
-                      },
+                      opacity: [null, 1],
+                      x: [null, 0],
+                      // transition: {
+                      //   delay: 0.3,
+                      // },
                     }}
                     exit={{
                       opacity: 0,
-                      y: 20,
+                      x: 20,
                     }}
                   >
                     {tech.name}
                   </MotionBadge>
                 );
               })}
-          </motion.div>
+          </div>
+
+          {project?.fullDescription && (
+            <>
+              <Separator size="4" />
+              <m.div
+                className="py-2"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                {project.fullDescription}
+              </m.div>
+            </>
+          )}
         </AnimatePresence>
-      </motion.div>
-    </motion.div>
+      </div>
+    );
+  }, []);
+
+  const ProjectTrack = useCallback(({
+    clickedProject,
+    children,
+  }: {
+    clickedProject: number;
+    children: ReactNode;
+  }) => {
+    return (
+      <Track
+        className={cn(
+          "flex h-full flex-1 gap-g-4/8"
+        )}
+        trackRef={trackRef}
+        clickedIndex={clickedProject}
+        ref={containerRef}
+      >
+        {children}
+      </Track>
+    );
+  }, []);
+
+  const UrlNalBar: FC<{ project: Project; className?: string }> = useCallback(
+    ({ className }) => {
+      const iconSize = isSmall ? 12 : 14;
+      return (
+        <div>
+          <m.div
+            className={cn(
+              "w-min-[100px]",
+              "flex items-center rounded-full", // sizing, layout, border
+              "bg-[--gray-2] p-2", // background, padding
+              isSmall ? "py-0.5 h-10 gap-1 mt-2" : "my-4 h-12 py-2 gap-2",
+              className
+            )}
+            animate={{
+              width: ["0%", "100%"],
+              opacity: [0, 1],
+              transition: { duration: 0.5 },
+            }}
+          >
+            <Button
+              className={cn(
+                "flex-0 w-auto",
+                isSmall ? "p-0.5 h-5" : "h-full p-1"
+              )}
+              disabled={selectedProject === 0}
+              onClick={() => changeSelectedProject(selectedProject - 1)}
+            >
+              <ArrowLeft size={iconSize} />
+            </Button>
+            <Button
+              className={cn(
+                "flex-0 w-auto",
+                isSmall ? "p-0.5 h-5" : "h-full p-1"
+              )}
+              disabled={selectedProject === projects.length - 1}
+              onClick={() => changeSelectedProject(selectedProject + 1)}
+            >
+              <ArrowRight size={iconSize} />
+            </Button>
+            <Button
+              className={cn(
+                "flex-0 w-auto",
+                isSmall ? "p-0.5 h-5" : "h-full p-1"
+              )}
+              onClick={() => changeSelectedProject(-1)}
+            >
+              <X size={iconSize} />
+            </Button>
+            <m.div
+              className={cn(
+                "m-0.5", // margin
+                "flex basis-full items-center", // sizing, flexboxGrid, layout
+                "overflow-x-hidden whitespace-nowrap", // overflowControl, textWrapping
+                "rounded-full bg-[--gray-4] px-2", // border, background, padding
+                isSmall ? "text-xs py-1" : "text-sm py-1"
+              )}
+            >
+              <TickerText className="overflow-x-hidden">
+                {[
+                  projects[selectedProject]?.link,
+                  projects[selectedProject]?.githublink,
+                ]
+                  .filter(Boolean)
+                  .map((link, index) => {
+                    return (
+                      <a
+                        key={index}
+                        href={link}
+                        className={cn(
+                          "flex", // sizing
+                          "items-center gap-1 px-2", // layout, padding
+                          "hover:text-[--accent-10] hover:underline" // textStyles
+                        )}
+                      >
+                        {!(index % 2) ? (
+                          <Link size={12} />
+                        ) : (
+                          <Github size={12} />
+                        )}{" "}
+                        {link}
+                      </a>
+                    );
+                  })}
+              </TickerText>
+            </m.div>
+          </m.div>
+        </div>
+      );
+    },
+    [changeSelectedProject, projects, selectedProject]
+  );
+
+  const Body = useCallback(
+    ({
+      projects,
+      titleText,
+      selectedProject,
+    }: {
+      projects: Project[];
+      titleText: { text: string; reversed: boolean };
+      selectedProject: number;
+    }) => (
+      <>
+        <div
+          
+          // style={{ height: dimensions.height }}
+          key={"body"}
+          className={cn(
+            "top-0 left-0 flex flex-1 flex-col justify-center",
+            isSmall
+              ? "w-full px-4 gap-2"
+              : "sticky max-w-[50%] h-[--card-height] gap-4 pl-8"
+          )}
+        >
+          {selectedProject >= 0 && (
+            <UrlNalBar project={projects[selectedProject]} />
+          )}
+          <div
+            className={cn(
+              "xs:flex-row flex justify-between gap-2 pr-8"
+            )}
+          >
+            <ProjectTitle {...titleText} />
+          </div>
+          <ProjectDescription project={projects[selectedProject]} />
+        </div>
+        {selectedProject >= 0 && (
+          <ProjectThumbnails project={projects[selectedProject]} />
+        )}
+      </>
+    ),
+    [isSmall, UrlNalBar, ProjectTitle, ProjectDescription, ProjectThumbnails]
+  );
+
+  return (
+    <>
+      <m.div
+        {...rest}
+        className={cn(
+          "relative flex h-full w-full flex-1 justify-center"
+        )}
+        ref={projectsRef}
+        onHoverEnd={() =>
+          setTimeout(() => handleProjectHover(selectedProject)(), 1000)
+        }
+      >
+        <ProjectTrack clickedProject={clickedProject}>
+          <div className={cn("flex w-full flex-1 justify-center", isSmall?"" : "gap-8")}>
+            {!isSmall && (
+              <>
+                <Body
+                  projects={projects}
+                  titleText={titleText}
+                  selectedProject={selectedProject}
+                />
+              </>
+            )}
+            <div
+              style={{ perspective: "20cm" }}
+              className={cn(
+                "flex h-max w-full min-w-[20%x]", // sizing
+                "flex-col items-start py-12", // layout, padding
+                isSmall ? "w-[90%] gap-g-1 justify-center" : "max-w-[50%] pr-8 gap-g-4/8"
+              )}
+              ref={thumbnailContainerRef}
+            >
+              {projects.map((project, index) =>
+                isSmall && index === selectedProject ? (
+                  <div
+                    className="flex w-full flex-col-reverse"
+                    key={index}
+                  >
+                    <Body
+                      projects={projects}
+                      titleText={titleText}
+                      selectedProject={selectedProject}
+                    />
+                  </div>
+                ) : (
+                  <ProjectCardComponent
+                    animate={index === focusedProject ? "focused" : "animate"}
+                    whileHover={"focused"}
+                    project={project}
+                    key={`project-${index}`}
+                    className={cn(
+                      "card track-card group/track-card",
+                      "aspect-video w-full origin-center", // sizing, transforms
+                      "cursor-pointer", // interactions,
+                      isSmall ? "mx-g-1/8" : ""
+                    )}
+                    initial={{ opacity: 0, x: "100%", rotateY: -20 }}
+                    variants={{
+                      animate: {
+                        opacity:
+                          index === selectedProject ? 0.2 : isSmall ? 0.5 : 1,
+                        x: -16,
+                        rotateY: -10,
+                        rotateX: 3,
+                      },
+                      focused: {
+                        rotateY: [null, 0],
+                        rotateX: [null, 0],
+                        opacity: [null, 1],
+                        x: [null, -8],
+                      },
+                    }}
+                    transition={{
+                      duration: 0.15,
+                      delay: 0.1 * index,
+                      // x: {
+                      //   type: "spring",
+                      //   stiffness: 300,
+                      //   damping: 30,
+                      //   delay: 0.5 + 0.1 * index,
+                      // },
+                    }}
+                    onMouseEnter={() => handleProjectHover(index)}
+                    onMouseLeave={() =>
+                      prevFocusedProject.current &&
+                      handleProjectHover(prevFocusedProject.current)
+                    }
+                    onClick={() =>
+                      changeSelectedProject(
+                        index === selectedProject ? -1 : index
+                      )
+                    }
+                  />
+                ))}
+            </div>
+          </div>
+        </ProjectTrack>
+      </m.div>
+    </>
   );
 }

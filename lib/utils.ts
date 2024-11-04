@@ -1,4 +1,5 @@
 import { clsx, type ClassValue } from "clsx";
+import { random } from "lodash";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -27,3 +28,34 @@ export function formatDate(dateStr: string): string {
 
   return formattedDate;
 }
+
+export const createThrottleQueue = (
+  func: (...args: unknown[]) => unknown,
+  range = [100, 300]
+) => {
+  const funcQueue: (typeof func)[] = [];
+  let isProcessing = false;
+
+  const processQueue = () => {
+    if (funcQueue.length === 0) {
+      isProcessing = false;
+      return;
+    }
+
+    const waitTime = random(range[0], range[1]); // Random wait time between 500ms and 2000ms
+    const call = funcQueue.shift();
+    setTimeout(() => {
+      call?.();
+      processQueue();
+    }, waitTime);
+  };
+
+  return () => {
+    funcQueue.push(func);
+
+    if (!isProcessing) {
+      isProcessing = true;
+      processQueue();
+    }
+  };
+};

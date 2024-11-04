@@ -22,7 +22,7 @@ type UpdateProps = {
   dt: number;
 };
 
-export default class Advection extends BasePass<UpdateProps> {
+export default class Advection extends BasePass<any, UpdateProps> {
   line: LineSegments = new LineSegments();
   constructor(simProps: SimProps) {
     const { cellScale, src, fboSize, dt, ...baseProps } = simProps;
@@ -32,9 +32,6 @@ export default class Advection extends BasePass<UpdateProps> {
         vertexShader: face_vert,
         fragmentShader: advection_frag,
         uniforms: {
-          boundarySpace: {
-            value: cellScale,
-          },
           px: {
             value: cellScale,
           },
@@ -56,7 +53,7 @@ export default class Advection extends BasePass<UpdateProps> {
 
   createBoundary() {
     const boundaryG = new BufferGeometry();
-    const vertices_boundary = new Float32Array([
+    const vertices_boundary = new Uint16Array([
       // left
       -1, -1, 0, -1, 1, 0,
 
@@ -76,7 +73,10 @@ export default class Advection extends BasePass<UpdateProps> {
     const boundaryM = new RawShaderMaterial({
       vertexShader: line_vert,
       fragmentShader: advection_frag,
-      uniforms: this.material.uniforms,
+      uniforms: {
+        px: this.material.uniforms.px,
+        fboSize: this.material.uniforms.fboSize,
+      },
     });
 
     this.line = new LineSegments(boundaryG, boundaryM);
@@ -84,8 +84,14 @@ export default class Advection extends BasePass<UpdateProps> {
     this.scene.add(this.line);
   }
 
-  update(props: UpdateProps) {
-    this.material.uniforms.dt.value = props.dt;
+  update() {
+    if (!this.material) return;
+    super.update();
+  }
+
+  updateUniforms({ dt }: Pick<UpdateProps, "dt">) {
+    if (!this.material) return;
+    this.material.uniforms["dt"].value = dt;
     super.update();
   }
 }

@@ -1,10 +1,10 @@
 "use client";
 
 import { useResizeCallBack } from "@/lib/hooks";
-import { CMSContext } from "@/lib/state";
+import { CMSContext } from "@/lib/providers/state";
 import { cn } from "@/lib/utils";
 import { Spinner } from "@radix-ui/themes";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { debounce } from "lodash";
 import { ArrowDown, Download } from "lucide-react";
 import {
@@ -26,10 +26,10 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   import.meta.url
 ).toString();
 
-const DownloadIcon = motion(Download);
-const ArrowDownIcon = motion(ArrowDown);
+const DownloadIcon = m(Download);
+const ArrowDownIcon = m(ArrowDown);
 
-const DownloadButton: FC<ComponentProps<typeof motion.button>> = (props) => {
+const DownloadButton: FC<ComponentProps<typeof m.button>> = (props) => {
   return (
     <BaseRolloutButton
       ComponentA={(props) => (
@@ -74,7 +74,7 @@ const DownloadButton: FC<ComponentProps<typeof motion.button>> = (props) => {
   );
 };
 
-export default function ResumeCard(props: ComponentProps<typeof motion.div>) {
+export default function ResumeCard(props: ComponentProps<typeof m.div>) {
   const { className, ...rest } = props;
   const cardRef = useRef(null);
   const cms = useContext(CMSContext)!;
@@ -132,7 +132,7 @@ export default function ResumeCard(props: ComponentProps<typeof motion.div>) {
   }, [resume, cardWidth]);
 
   return (
-    <motion.div
+    <m.div
       {...rest}
       className={cn(
         "relative flex h-full flex-col items-center justify-center",
@@ -142,6 +142,6 @@ export default function ResumeCard(props: ComponentProps<typeof motion.div>) {
       initial="initial"
     >
       <ResumeContent />
-    </motion.div>
+    </m.div>
   );
 }

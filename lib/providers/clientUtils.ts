@@ -1,6 +1,7 @@
 "use client";
 
-import { AnimationControls, motion } from "framer-motion";
+import { AnimationControls, m } from "framer-motion";
+import { random } from "lodash";
 import { ComponentProps, useEffect, useState } from "react";
 
 export function isAnimationControl(obj: object): obj is AnimationControls {
@@ -16,32 +17,36 @@ export const maskScrollArea = (
   threshold = 5
 ) => {
   const maskImageStep1 = percentage > 0 ? "rgba(0, 0, 0, 0) 0%, " : "";
-  const maskImageStep2 = percentage < 100 ? ", rgba(0, 0, 0, 0) 100%" : "";
+  const maskImageStep2 = percentage < 1 ? ", rgba(0, 0, 0, 0) 100%" : "";
   const middleSteps = `rgb(0, 0, 0, 1) ${percentage * threshold}%, rgb(0, 0, 0, 1) ${percentage * threshold + 100 - threshold}%`;
+  element.style.setProperty("--scrollProgress", `${percentage * 100}%`);
   element.style.maskImage = `linear-gradient(to ${direction}, ${maskImageStep1}${middleSteps}${maskImageStep2})`;
 };
 
-export function useDebounce<T>(value: T, delay: number) {
+export function useDebounce<T>(value: T, delay: number, variance = 0) {
   const [debouncedValue, setDebouncedValue] = useState(value);
 
   useEffect(() => {
     // Set debouncedValue to value (passed in) after the specified delay
+    const modifiedDelay = random(-variance, variance) + delay;
     const handler = setTimeout(() => {
-      console.log(value);
       setDebouncedValue(value);
-    }, delay);
+    }, modifiedDelay);
 
     // Cancel the timeout if value changes (also on component unmount), which is the debounce behavior
     return () => {
       clearTimeout(handler);
     };
-  }, [value, delay]);
+  }, [value, delay, variance]);
 
-  return debouncedValue;
+  return [debouncedValue, setDebouncedValue] as [
+    T,
+    React.Dispatch<React.SetStateAction<T>>,
+  ];
 }
 
 export function isAnimationControls(
-  animate: ComponentProps<typeof motion.div>["animate"]
+  animate: ComponentProps<typeof m.div>["animate"]
 ) {
   const animationControls = animate as AnimationControls;
 
@@ -74,13 +79,11 @@ export function cssVarToRGB(cssVarName: string): [number, number, number] {
   const P3matches = cssVarValue.match(p3Regex);
   if (hexMatches) {
     const [, r, g, b] = hexMatches.map((match) => parseInt(match, 16) / 255);
-    console.log({ r, g, b, cssVarName });
     return [r, g, b];
   } else if (P3matches) {
     const r = parseFloat(P3matches[1]);
     const g = parseFloat(P3matches[2]);
     const b = parseFloat(P3matches[3]);
-    console.log({ r, g, b, cssVarName });
     return [r, g, b];
   } else {
     console.error("Invalid display-p3 color format: ", {
@@ -94,4 +97,30 @@ export function cssVarToRGB(cssVarName: string): [number, number, number] {
 export function p3ToHex(cssVarName: string) {
   const [r, g, b] = cssVarToRGB(cssVarName).map((val) => Math.round(val * 255));
   return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+}
+
+export function isTouchDevice() {
+  return "ontouchstart" in window || navigator.maxTouchPoints > 0;
+}
+
+let webGLSupportCache: boolean | null = null;
+
+export function isWebGLSupported() {
+  if (webGLSupportCache !== null) {
+    return webGLSupportCache;
+  }
+
+  try {
+    const canvas = document.createElement("canvas");
+    webGLSupportCache =
+      !!window.WebGLRenderingContext &&
+      (canvas.getContext("webgl") ||
+        canvas.getContext("experimental-webgl")) !== null;
+    canvas.remove();
+    return webGLSupportCache;
+  } catch (e) {
+    console.log({ e });
+    webGLSupportCache = false;
+    return false;
+  }
 }

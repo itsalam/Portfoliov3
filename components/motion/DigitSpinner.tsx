@@ -1,83 +1,82 @@
 import { cn } from "@/lib/utils";
 import { Text } from "@radix-ui/themes";
-import { motion } from "framer-motion";
-import React, { ComponentProps, useCallback, useEffect, useRef } from "react";
+import { m, useMotionTemplate, useSpring } from "framer-motion";
+import React, { useCallback, useEffect, useRef } from "react";
+import { DigitSpinnerProps, DIRECTION } from "./consts";
 
-export enum DIRECTION {
-  UP = -1,
-  DOWN = 1,
-}
+const MText = m(Text);
 
-type DigitSpinnerProps = ComponentProps<typeof motion.div> & {
-  textProps?: ComponentProps<typeof Text>;
-  digit: number;
-  direction?: DIRECTION;
-};
-
-export const DigitSpinner: React.FC<DigitSpinnerProps> = ({
+const DigitSpinner: React.FC<DigitSpinnerProps> = ({
   digit,
   direction = DIRECTION.DOWN,
   textProps,
+  springOptions,
   ...motionProps
 }) => {
-  const currDigit = useRef(digit);
   const lastDigit = useRef(digit);
+  const yBase = useSpring(0, {
+    stiffness: 100,
+    damping: 30,
+    ...springOptions,
+  });
 
   const getDigitCoord = useCallback(
     (digit: number) => {
-      return `${(direction * digit * 100) / 11}%`;
+      return (direction * digit * 100) / 10;
     },
     [direction]
   );
 
-  const getDigitCoords = useCallback(() => {
-    if (currDigit.current === lastDigit.current)
-      return getDigitCoord(currDigit.current);
-    if (lastDigit.current === 9 && currDigit.current === 0) {
-      return [
-        getDigitCoord(lastDigit.current),
-        getDigitCoord(lastDigit.current + 1),
-      ];
-    }
-    return [getDigitCoord(lastDigit.current), getDigitCoord(currDigit.current)];
-  }, [getDigitCoord]);
-
   useEffect(() => {
-    currDigit.current = digit;
-    return () => {
-      lastDigit.current = digit;
-    };
-  }, [digit]);
+    lastDigit.current = digit;
+    yBase.set(getDigitCoord(digit));
+  }, [digit, getDigitCoord, yBase]);
+
   return (
-    <motion.div className="relative overflow-hidden">
-      <Text
+    <m.div
+      className="relative overflow-visible leading-none"
+      style={{
+        maskImage:
+          "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)",
+        WebkitMaskImage:
+          "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)",
+      }}
+    >
+      <MText
         {...textProps}
-        className="opacity-0"
+        className="!leading-[inherit] opacity-0"
       >
         0
-      </Text>
-      <motion.div
-        key={digit}
+      </MText>
+      <m.div
         className={cn(
           "absolute flex",
           {
-            "bottom-0 flex-col-reverse ": direction === DIRECTION.DOWN,
-            "top-0 flex-col ": direction === DIRECTION.UP,
+            "bottom-[2px] flex-col-reverse ": direction === DIRECTION.DOWN,
+            "top-[2px] flex-col ": direction === DIRECTION.UP,
           }
         )}
-        animate={{
-          y: getDigitCoords(),
+        transition={{
+          duration: 0.8,
+          ease: [0.85, 0, 0.15, 1],
+        }}
+        style={{
+          y: useMotionTemplate`${yBase}%`,
         }}
         {...motionProps}
       >
-        {Array.from({ length: 11 }).map((_, i: number) => (
-          <Text {...textProps} key={i}>
-            {i % 10}
-          </Text>
+        {Array.from({ length: 10 }).map((_, i: number) => (
+          <MText
+            className="!leading-[inherit]"
+            {...textProps}
+            key={i}
+          >
+            {i}
+          </MText>
         ))}
-      </motion.div>
-    </motion.div>
+      </m.div>
+    </m.div>
   );
 };
 
-export default DigitSpinner;
+export default React.memo(DigitSpinner);

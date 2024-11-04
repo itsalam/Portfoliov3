@@ -2,13 +2,13 @@
 
 import {
   MotionValue,
-  motion,
+  m,
   useMotionValue,
   useMotionValueEvent,
   useSpring,
 } from "framer-motion";
 
-import { GridContext } from "@/lib/state";
+import { GridContext } from "@/lib/providers/clientState";
 import { FC, useCallback, useContext, useEffect, useRef } from "react";
 import { useStore } from "zustand";
 import { moveCursorEffect } from "../Grid/util";
@@ -54,24 +54,25 @@ const GridBackdrop: FC<{ scrollY: MotionValue<number> }> = ({
   useMotionValueEvent(x, "change", updateAttribute("data-circle-x"));
   useMotionValueEvent(y, "change", updateAttribute("data-circle-y"));
 
-  useEffect(() => {
-    const canvasElem = canvas.current?.getBoundingClientRect();
-    const followMouse = (e: { clientX: number; clientY: number }) => {
-      baseX.set(e.clientX - (canvasElem?.left ?? 0));
-      baseY.set(e.clientY - (canvasElem?.top ?? 0));
-    };
-    const followTouch = (e: TouchEvent) => {
-      followMouse(e.touches[0]);
-    };
+  // useEffect(() => {
+  //   const canvasElem = canvas.current?.getBoundingClientRect();
+  //   const followMouse = (e: { clientX: number; clientY: number }) => {
+  //     baseX.set(e.clientX - (canvasElem?.left ?? 0));
+  //     baseY.set(e.clientY - (canvasElem?.top ?? 0));
+  //   };
 
-    window.addEventListener("mousemove", followMouse);
-    window.addEventListener("touchmove", followTouch);
+  //   const followTouch = (e: TouchEvent) => {
+  //     followMouse(e.touches[0]);
+  //   };
 
-    return () => {
-      window.removeEventListener("mousemove", followMouse);
-      window.removeEventListener("touchmove", followTouch);
-    };
-  });
+  //   window.addEventListener("mousemove", followMouse);
+  //   window.addEventListener("touchmove", followTouch);
+
+  //   return () => {
+  //     window.removeEventListener("mousemove", followMouse);
+  //     window.removeEventListener("touchmove", followTouch);
+  //   };
+  // });
 
   useEffect(() => {
     updateAttribute("data-circle-radius")("64");
@@ -175,31 +176,30 @@ const GridBackdrop: FC<{ scrollY: MotionValue<number> }> = ({
                 : "var(--accent-a6)"
           }
         />
-      ))
-    );
+      )));
   };
 
   return (
-    <motion.div
+    <m.div
       style={{ height: containerHeight }}
       className={
-        "absolute left-0 top-0 -z-50 h-full w-full" // basicStyles // positioning, layoutControl, sizing
+        "absolute top-0 left-0 -z-50 h-full w-full pointer-events-none"
       }
     >
-      <motion.svg
+      <m.svg
         id={"mask"}
         initial={{
           maskImage: "linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1))",
         }}
         {...props}
         ref={canvas}
-        className={"mask absolute left-0 top-0 -z-50 h-full w-full opacity-100"}
+        className={"mask absolute top-0 left-0 -z-50 h-full w-full opacity-100"}
       >
         <VerticalLines />
         <HorizontalLines />
         <Vertexs />
-      </motion.svg>
-    </motion.div>
+      </m.svg>
+    </m.div>
   );
 };
 

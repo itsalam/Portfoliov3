@@ -1,16 +1,7 @@
 "use client";
 
-import { GridContext } from "@/lib/state";
-import { cn } from "@/lib/utils";
-import { Text as BaseText, Separator, Tooltip } from "@radix-ui/themes";
-import {
-  AnimatePresence,
-  MotionValue,
-  motion,
-  useMotionValue,
-  useSpring,
-  useTransform,
-} from "framer-motion";
+import { GridContext } from "@/lib/providers/clientState";
+import { m } from "framer-motion";
 import {
   Briefcase,
   FlaskRound,
@@ -18,234 +9,57 @@ import {
   LucideIcon,
   Moon,
   Sun,
-  Users,
 } from "lucide-react";
-import {
-  ComponentProps,
-  MouseEvent,
-  ReactNode,
-  useContext,
-  useLayoutEffect,
-  useRef,
-} from "react";
+import { useContext } from "react";
 
 import { useTheme } from "next-themes";
-import { useStore } from "zustand";
-import { CARD_TYPES } from "./types";
+import { Dock, DockItem } from "../Aceternity/Dock";
+import { CARD_MENU_GROUP } from "../Grid/consts";
 
-const MoonIcon = motion(Moon);
-const SunIcon = motion(Sun);
-const Text = motion(BaseText);
+const MoonIcon = m(Moon);
+const SunIcon = m(Sun);
 
-const Item = (props: {
-  x: MotionValue<number>;
-  size: number;
-  minSize: number;
-  maxSize: number;
-  children: ReactNode;
-  text: string;
-  onClick: (event: MouseEvent) => void;
-}) => {
-  const { children, text, x, onClick, minSize, maxSize, size } = props;
-  const ref = useRef<HTMLButtonElement>(null);
-  const domRect = useMotionValue<DOMRect | null>(null);
-  const dist = useTransform(() => {
-    const domVals = domRect.get();
-    if (domVals === null) return size * maxSize;
-    const { left, width } = domVals;
-    const centerX = left + width / 2;
-    return Math.abs(x.get() - centerX);
-  });
-
-  useLayoutEffect(() => {
-    domRect.set((ref.current as HTMLElement).getBoundingClientRect());
-  });
-
-  const width = useTransform(
-    dist,
-    [0, size * maxSize * 1.25],
-    [size * maxSize, size * minSize]
-  );
-
-  const iconScale = useSpring(
-    useTransform(
-      width,
-      [size * minSize, size * maxSize],
-      [1, 1 + (maxSize - minSize)]
-    )
-  );
-
-  return (
-    <Tooltip
-      sideOffset={10}
-      side="top"
-      delayDuration={100}
-      content={
-        <Text
-          size="3"
-          initial={{
-            y: -10,
-            opacity: 0,
-          }}
-          animate={{
-            y: 0,
-            opacity: 1,
-          }}
-        >
-          {text}
-        </Text>
-      }
-    >
-      <motion.button
-        ref={ref}
-        style={{
-          width,
-        }}
-        className={cn(
-          "relative", // basicStyles
-          "z-[1000] flex aspect-square w-g-5/8", // layoutControl, sizing
-          "items-end justify-end rounded-full", // layout, border
-          "bg-[--gray-5] hover:bg-[--gray-2]", // background
-          "text-[--gray-11] brightness-100 hover:text-[--accent-11]", // textStyles, filters
-          "transition-all" // transitionsAnimations
-        )}
-        variants={{
-          initial: {
-            width: [null, size * minSize],
-            transition: { stiffness: 650 },
-          },
-        }}
-        onClick={onClick}
-      >
-        <motion.div className="m-auto" style={{ scale: iconScale }}>
-          {children}
-        </motion.div>
-      </motion.button>
-    </Tooltip>
-  );
+const MENU_CARD_ICONS: Record<keyof typeof CARD_MENU_GROUP, LucideIcon> = {
+  home: Home,
+  projects: FlaskRound,
+  experience: Briefcase,
 };
 
-export default function MenuCard(props: ComponentProps<typeof motion.div>) {
-  const { className, ...rest } = props;
+export default function Menu() {
   const { themes, resolvedTheme, setTheme } = useTheme();
   const store = useContext(GridContext)!;
-  const pushElements = store.getInitialState().pushElements;
-  const { gridCellSize } = useStore(store).gridInfo;
-  const x = useMotionValue(0);
+  const pushElements = store.getState().pushElements;
 
-  const trackMouse = (ev: MouseEvent) => {
-    x.set(ev.clientX);
-  };
+  const DOCK_ITEMS = Object.entries(MENU_CARD_ICONS).map(([title, Icon]) => {
+    return {
+      title,
+      Icon: m(Icon),
+      onClick: () => pushElements(CARD_MENU_GROUP[title]),
+    };
+  });
 
-  const items: Record<string, { icon: LucideIcon; cards: CARD_TYPES[] }> = {
-    Home: { icon: Home, cards: [CARD_TYPES.Home] },
-    Projects: { icon: FlaskRound, cards: [CARD_TYPES.Projects] },
-    Work: { icon: Briefcase, cards: [CARD_TYPES.Experience] },
-    Info: {
-      icon: Users,
-      cards: [CARD_TYPES.Resume, CARD_TYPES.Location, CARD_TYPES.Contacts],
+  const toggleThemeIcon: DockItem = {
+    onClick: () => {
+      setTheme(
+        themes[themes.findIndex((theme) => theme === resolvedTheme) ^ 1]
+      );
+    },
+    Icon: resolvedTheme === themes[0] ? MoonIcon : SunIcon,
+    title: "toggle theme",
+    motionProps: {
+      id: resolvedTheme === themes[0] ? "MoonIcon" : "SunIcon",
+      initial: { rotate: 25, y: -5, opacity: 0.5 },
+      animate: { rotate: 0, y: 0, opacity: 1 },
+      exit: { rotate: 25, y: -5, opacity: 0.5 },
+      transition: { duration: 0.2 },
     },
   };
 
   return (
-    <motion.div
-      {...rest}
-      className={cn("safe-pb group absolute z-50 overflow-visible", className)}
-      initial="initial"
-      animate="animate"
-      id={"Menu"}
-      key={"Menu"}
-      whileHover={"hover"}
-      onMouseMove={trackMouse}
-      onMouseLeave={() => {
-        // controls.start("leave");
-        x.set(0);
-      }}
-      variants={{
-        animate: {
-          width: [null, 350],
-          height: [null, Math.max(64, gridCellSize * 1)],
-          transition: {
-            duration: 0.1,
-          },
-        },
-        hover: {},
-      }}
-    >
-      <motion.div
-        // animate={controls}
-        variants={{
-          initial: { height: 64 },
-        }}
-        className={cn(
-          "menu-bg items-between -translate-x-1/2",
-          "absolute bottom-0 left-1/2 z-[1000]", // basicStyles, positioning, layoutControl
-          "flex gap-4 overflow-visible", // sizing, layout, overflowControl
-          "rounded-full p-2 transition-all" // border, padding, transitionsAnimations
-        )}
-      >
-        {Object.entries(items).map(([key, { icon: Icon, cards }]) => (
-          <Item
-            key={key}
-            text={key}
-            {...{ x }}
-            minSize={0.5}
-            maxSize={0.85}
-            size={96}
-            onClick={() => pushElements(cards)}
-          >
-            <Icon
-              className="m-auto"
-              size={"20"}
-              absoluteStrokeWidth
-              strokeWidth={2}
-            />
-          </Item>
-        ))}
-        <Separator orientation="vertical" size="4" className="h-full py-1" />
-        <Item
-          text={"Toggle Theme"}
-          {...{ x }}
-          minSize={0.5}
-          maxSize={0.85}
-          size={96}
-          onClick={() => {
-            setTheme(
-              themes[themes.findIndex((theme) => theme === resolvedTheme) ^ 1]
-            );
-          }}
-        >
-          <AnimatePresence mode="wait">
-            {resolvedTheme === themes[0] && (
-              <MoonIcon
-                className="m-auto"
-                size={"20"}
-                key="moon"
-                absoluteStrokeWidth
-                strokeWidth={2}
-                initial={{ rotate: -20, y: -5, opacity: 0.5 }}
-                animate={{ rotate: 0, y: 0, opacity: 1 }}
-                exit={{ rotate: -20, y: -5, opacity: 0.5 }}
-                transition={{ duration: 0.1 }}
-              />
-            )}
-            {resolvedTheme === themes[1] && (
-              <SunIcon
-                className="m-auto"
-                size={"20"}
-                key="sun"
-                absoluteStrokeWidth
-                strokeWidth={2}
-                initial={{ rotate: 20, y: -5, opacity: 0.5 }}
-                animate={{ rotate: 0, y: 0, opacity: 1 }}
-                exit={{ rotate: 20, y: -5, opacity: 0.5 }}
-                transition={{ duration: 0.1 }}
-              />
-            )}
-          </AnimatePresence>
-        </Item>
-        <motion.div className="absolute" />
-      </motion.div>
-    </motion.div>
+    <Dock
+      items={[...DOCK_ITEMS, toggleThemeIcon]}
+      desktopClassName="fixed z-50 w-fit"
+      mobileClassName="fixed z-50 right-[12px]"
+    />
   );
 }

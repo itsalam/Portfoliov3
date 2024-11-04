@@ -1,12 +1,12 @@
 "use client";
 
-import { CMSContext } from "@/lib/state";
+import { CMSContext } from "@/lib/providers/state";
 import { cn } from "@/lib/utils";
 import { Separator as BaseSeparator, Text as BaseText } from "@radix-ui/themes";
 import {
   AnimatePresence,
   CustomDomComponent,
-  motion,
+  m,
   useAnimate,
 } from "framer-motion";
 import {
@@ -27,13 +27,13 @@ import {
 } from "react";
 import { useStore } from "zustand";
 
-const Text = motion(BaseText);
-const Separator = motion(BaseSeparator);
-const ArrowUpRight = motion(ArrowUpRightBase);
-const email = motion(EmailIcon);
-const github = motion(GithubIcon);
-const linkedin = motion(LinkedinIcon);
-const defaultIcon = motion(MessageCircleQuestionIcon);
+const Text = m(BaseText);
+const Separator = m(BaseSeparator);
+const ArrowUpRight = m(ArrowUpRightBase);
+const email = m(EmailIcon);
+const github = m(GithubIcon);
+const linkedin = m(LinkedinIcon);
+const defaultIcon = m(MessageCircleQuestionIcon);
 
 //Add a contact form, linkedin, github, resume, and email/phone section
 const CONTACTS: Record<string, CustomDomComponent<LucideProps>> = {
@@ -43,22 +43,20 @@ const CONTACTS: Record<string, CustomDomComponent<LucideProps>> = {
 };
 
 const Link = forwardRef<
-  ElementRef<typeof motion.div>,
-  ComponentPropsWithoutRef<typeof motion.div> & { text: string; value?: string }
+  ElementRef<typeof m.div>,
+  ComponentPropsWithoutRef<typeof m.div> & { text: string; value?: string }
 >((props, ref) => {
   const { text, value, onHoverStart, ...rest } = props;
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <motion.div
+    <m.div
       initial="initial"
       onHoverStart={(e, i) => {
         onHoverStart?.(e, i);
-        setIsHovered(true);
       }}
       onHoverEnd={() => setIsHovered(false)}
       className="group flex flex-col gap-y-1"
-      animate={isHovered ? "hover" : "exit"}
       ref={ref}
       {...rest}
     >
@@ -117,13 +115,13 @@ const Link = forwardRef<
           }}
         />
       </a>
-    </motion.div>
+    </m.div>
   );
 });
 
 Link.displayName = "Link";
 
-export default function ContactCard(props: ComponentProps<typeof motion.div>) {
+export default function ContactCard(props: ComponentProps<typeof m.div>) {
   const { className, ...rest } = props;
   const [projectsRef] = useAnimate();
   const [hoveredLink, setHoveredInfo] = useState<number>();
@@ -135,7 +133,7 @@ export default function ContactCard(props: ComponentProps<typeof motion.div>) {
       : defaultIcon;
 
   return (
-    <motion.div
+    <m.div
       {...rest}
       className={cn(
         "relative flex h-full flex-1 items-center gap-3 p-3",
@@ -144,12 +142,12 @@ export default function ContactCard(props: ComponentProps<typeof motion.div>) {
       ref={projectsRef}
       onMouseLeave={() => setHoveredInfo(undefined)}
     >
-      <motion.div
+      <m.div
         className={"flex h-full w-full flex-1 justify-center rounded-full p-2"}
       >
-        <motion.div
+        <m.div
           className={cn(
-            "bg-blur-xl",
+            "bg-blur-md",
             "relative aspect-square max-h-full max-w-full", // basicStyles, sizing
             "overflow-hidden rounded-full", // overflowControl, border
             "bg-[--gray-a5]" // background
@@ -160,7 +158,7 @@ export default function ContactCard(props: ComponentProps<typeof motion.div>) {
             <Icon
               className={cn(
                 "absolute", // basicStyles
-                "left-0 top-0 h-full w-full p-4", // positioning, sizing, padding
+                "top-0 left-0 h-full w-full p-4", // positioning, sizing, padding
                 "text-[--accent-9]" // textStyles
               )}
               key={hoveredLink}
@@ -194,8 +192,8 @@ export default function ContactCard(props: ComponentProps<typeof motion.div>) {
               }}
             />
           </AnimatePresence>
-        </motion.div>
-      </motion.div>
+        </m.div>
+      </m.div>
 
       <div className="relative flex flex-1 flex-col justify-center gap-2">
         {contacts &&
@@ -210,6 +208,6 @@ export default function ContactCard(props: ComponentProps<typeof motion.div>) {
             />
           ))}
       </div>
-    </motion.div>
+    </m.div>
   );
 }

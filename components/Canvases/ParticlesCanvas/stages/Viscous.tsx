@@ -4,6 +4,7 @@ import viscousFrag from "../glsl/viscous.frag.glsl";
 import BasePass, { BasePassProps } from "./BasePass";
 
 type ViscousProps = {
+  iterations: number;
   boundarySpace: Vector2;
   velocity: WebGLRenderTarget;
   dst1: WebGLRenderTarget;
@@ -18,19 +19,21 @@ type UpdateProps = {
   dt: number;
 };
 
-export default class Viscous extends BasePass<UpdateProps> {
+export default class Viscous extends BasePass<any, UpdateProps> {
   output0: WebGLRenderTarget;
   output1: WebGLRenderTarget;
-  constructor(simProps: ViscousProps) {
-    const {
-      boundarySpace,
-      velocity,
-      dst1: output1,
-      v,
-      cellScale: px,
-      dt,
-      ...baseProps
-    } = simProps;
+  iterations: number;
+
+  constructor({
+    iterations,
+    boundarySpace,
+    velocity,
+    dst1: output1,
+    v,
+    cellScale: px,
+    dt,
+    ...baseProps
+  }: ViscousProps) {
     super({
       ...baseProps,
       material: {
@@ -60,13 +63,13 @@ export default class Viscous extends BasePass<UpdateProps> {
     });
     this.output0 = output1;
     this.output1 = this.dst;
+    this.iterations = iterations;
   }
 
-  update({ viscous, iterations, dt }: UpdateProps) {
+  update() {
     let fbo_in = this.output0,
       fbo_out = this.output1;
-    this.material.uniforms.v.value = viscous;
-    for (let i = 0; i < iterations; i++) {
+    for (let i = 0; i < this.iterations; i++) {
       if (i % 2 == 0) {
         fbo_in = this.output0;
         fbo_out = this.output1;
@@ -75,13 +78,23 @@ export default class Viscous extends BasePass<UpdateProps> {
         fbo_out = this.output0;
       }
 
-      this.material.uniforms.velocity_new.value = fbo_in.texture;
+      this.material!.uniforms.velocity_new.value = fbo_in.texture;
       this.dst = fbo_out;
-      this.material.uniforms.dt.value = dt;
 
       super.update();
     }
 
     return fbo_out;
+  }
+
+  updateUniforms({
+    viscous,
+    iterations,
+    dt,
+  }: Pick<UpdateProps, "dt" | "iterations" | "viscous">) {
+    this.material.uniforms.v.value = viscous;
+    this.material.uniforms.dt.value = dt;
+    this.iterations = iterations;
+    super.update();
   }
 }

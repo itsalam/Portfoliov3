@@ -43,7 +43,7 @@ export const theme = {
   },
   fontFamily: {
     overlay: ["var(--font-favorit)"],
-    sans: ["var(--font-outward)"],
+    sans: ["var(--font-danh-da)"],
     display: ["NeueMontreal"],
     favorit: ["var(--font-favorit)"],
   },

@@ -1,10 +1,10 @@
 import { cn } from "@/lib/utils";
 import { Text as BaseText } from "@radix-ui/themes";
-import { MotionProps, Variants, motion } from "framer-motion";
+import { MotionProps, Variants, m } from "framer-motion";
 import { LucideIcon } from "lucide-react";
 import { ComponentProps, ComponentType, FC } from "react";
 
-const Text = motion(BaseText);
+const Text = m(BaseText);
 
 export type BaseRolloutProps = {
   className?: string;
@@ -30,7 +30,7 @@ export const BaseRolloutButton: FC<BaseRolloutProps> = (props) => {
     ...buttonProps
   } = props;
 
-  const Component = isLink ? motion.a : motion.button;
+  const Component = isLink ? m.a : m.button;
 
   return (
     <Component
@@ -43,7 +43,7 @@ export const BaseRolloutButton: FC<BaseRolloutProps> = (props) => {
       )}
       {...buttonProps}
     >
-      <motion.div
+      <m.div
         className="relative aspect-square overflow-hidden p-0.5"
         variants={{
           initial: {
@@ -85,7 +85,7 @@ export const BaseRolloutButton: FC<BaseRolloutProps> = (props) => {
           }}
           {...{ size: iconSize }}
         />
-      </motion.div>
+      </m.div>
 
       <Text
         size={textSize || "2"}

@@ -1,16 +1,11 @@
-import { GridInfo } from "@/lib/state";
-import {
-  ReadonlyURLSearchParams,
-  usePathname,
-  useRouter,
-} from "next/dist/client/components/navigation";
-import { useEffect } from "react";
+import { GridInfo } from "@/lib/providers/clientState";
+import { ReadonlyURLSearchParams } from "next/dist/client/components/navigation";
 import { CARD_TYPES } from "../Cards/types";
 import {
+  CARD_MENU_GROUP,
   DEFAULT_GRID_ELEMENTS,
   DEFAULT_INIT_ELEMS,
   DefaultGridElement,
-  GRID_QUERY_KEY,
   GridElement,
   GridElements,
 } from "./consts";
@@ -48,7 +43,7 @@ export const resolveIntersections = (
   gridElements: GridElements,
   gridInfo: GridInfo,
   swap?: boolean
-) => {
+): GridElement => {
   const elemArrs = Array.from(gridElements.values());
   const elems: GridElement[] = elemArrs.filter(
     (e) => e.id !== elem.id && e.hasPositioned
@@ -127,23 +122,27 @@ const placeNewPosition = (
 
 export const initializeGridElements = (
   gridInfo: GridInfo,
-  searchParams: ReadonlyURLSearchParams
+  initialCards?: CARD_TYPES[],
+  webgl?: boolean
 ) => {
-  const searchParamElems = searchParams
-    .get(GRID_QUERY_KEY)
-    ?.split(",") as CARD_TYPES[];
-  const initElements =
-    searchParamElems && searchParamElems.every((elem) => CARD_TYPES[elem])
-      ? searchParamElems
-      : DEFAULT_INIT_ELEMS;
-
+  const initElements = initialCards?.length ? initialCards : DEFAULT_INIT_ELEMS;
   const gridElements = new Map<CARD_TYPES, GridElement>();
-  initElements.forEach((id) => {
+  const otherElements = webgl
+    ? [
+        ...Object.values(CARD_MENU_GROUP)
+          .flat()
+          .filter(
+            (e: CARD_TYPES) =>
+              (webgl && CARD_MENU_GROUP.info.includes(e)) ||
+              (!initElements.includes(e) && e !== CARD_TYPES.Contacts)
+          ),
+      ]
+    : [];
+  [...initElements, ...otherElements].forEach((id) => {
     let gridElem = getDefaultGridElement(id, gridInfo);
     gridElem = resolveIntersections(gridElem, gridElements, gridInfo);
     gridElements.set(id, gridElem);
   });
-
   return gridElements;
 };
 
@@ -199,6 +198,7 @@ export const updateDraggedElement = (
     element.coords = [translateX, translateY];
     gridElements.set(element.id, element);
   }
+  return element;
 };
 
 export const binpackElements = (
@@ -241,25 +241,4 @@ export const getDefaultGridElementDimensions = (
     : isWide && defaultElem.wideDimensions !== undefined
       ? defaultElem.wideDimensions
       : defaultElem.initialDimensions;
-};
-
-export const useNavigation = (
-  searchParams: ReadonlyURLSearchParams,
-  gridElements: GridElements
-) => {
-  const router = useRouter();
-  const pathname = usePathname();
-
-  useEffect(() => {
-    const queryStr = gridElements.size
-      ? createQueryString(
-          GRID_QUERY_KEY,
-          [...gridElements.keys()].join(","),
-          searchParams
-        )
-      : "";
-    router.push(pathname + "?" + queryStr);
-  }, [gridElements, pathname, router, searchParams]);
-
-  return searchParams;
 };

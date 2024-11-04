@@ -1,7 +1,7 @@
-import { motion, useAnimation } from "framer-motion";
+import { useAnimation } from "framer-motion";
 import React, { useEffect } from "react";
 
-type VertexProps = Parameters<typeof motion.rect>[0] & {
+type VertexProps = Parameters<typeof m.rect>[0] & {
   position: [number, number];
   height: number;
   width?: number;
@@ -23,7 +23,7 @@ const Section: React.FC<VertexProps> = (props) => {
   }, [controls]);
 
   return (
-    <motion.rect
+    <m.rect
       animate={controls}
       initial={"initial"}
       variants={{
@@ -44,7 +44,7 @@ const Section: React.FC<VertexProps> = (props) => {
       height={height}
       fill={fill}
       {...otherProps}
-    ></motion.rect>
+    ></m.rect>
   );
 };
 

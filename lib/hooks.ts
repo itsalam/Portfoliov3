@@ -1,13 +1,12 @@
 "use client";
 
-import { useLoading } from "@/app/providers";
-import { useMotionValue } from "framer-motion";
+import { useMotionValue, useSpring } from "framer-motion";
 import { debounce } from "lodash";
-import { RefObject, UIEventHandler, useEffect } from "react";
-import { StoreApi, useStore } from "zustand";
-import { Direction, maskScrollArea } from "./clientUtils";
-import { SchemaStores } from "./fetchData";
-import { Dimensions, GridStore } from "./state";
+import { RefObject, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { StoreApi } from "zustand";
+import { GridStore } from "./providers/clientState";
+import { Direction, maskScrollArea } from "./providers/clientUtils";
+import { SchemaStores } from "./providers/fetchData";
 
 export const useResizeCallBack = (
   cb: ResizeObserverCallback,
@@ -47,52 +46,28 @@ export const useCMSStoreInitializer = (
   }, [initialLoad, initialize]);
 };
 
-export function useResizeGridUpdate(store: StoreApi<GridStore>) {
-  const initialLoad = useMotionValue(true);
-  const [, setLoadingPromises] = useLoading();
-  const updateDimensions = () => {
-    const mainGrid = document
-      ?.querySelector("#main")
-      ?.getBoundingClientRect() as DOMRect;
+export function useResizeGridUpdateRef<T extends HTMLElement>(
+  store: StoreApi<GridStore>
+) {
+  const ref = useRef<T>(null);
+  const { setDimensions } = store.getInitialState();
 
-    const dimensions = (
-      mainGrid
-        ? { width: mainGrid.width, height: mainGrid.height }
-        : {
-            width: typeof window !== "undefined" ? window.innerWidth : 0,
-            height: typeof window !== "undefined" ? window.innerHeight : 0,
-          }
-    ) as Dimensions;
-    return dimensions;
-  };
-  const setDimensions = useStore(store).setDimensions;
-  const handleResize = debounce(
-    () => {
-      setDimensions(updateDimensions());
-      if (initialLoad) {
-        initialLoad.set(false);
-        return;
+  useLayoutEffect(() => {
+    const handleResize = debounce(
+      () => {
+        setDimensions(ref);
+      },
+      50,
+      {
+        trailing: true,
       }
-    },
-    50,
-    {
-      trailing: true,
-    }
-  );
-
-  useEffect(() => {
-    const loadPromise = new Promise<void>((resolve) => {
-      initialLoad.on("change", (initialLoad) => {
-        !initialLoad.valueOf() && resolve();
-      });
-    });
-    if (initialLoad.get()) {
-      setLoadingPromises((curr) => curr.concat([loadPromise]));
-      handleResize();
-    }
+    );
     window.addEventListener("resize", handleResize);
+    setDimensions(ref);
     return () => window.removeEventListener("resize", handleResize);
-  }, [handleResize, initialLoad, setLoadingPromises]);
+  }, [setDimensions]);
+
+  return ref;
 }
 
 export const animateTransition = {
@@ -118,19 +93,129 @@ export const animateTransition = {
 
 export const useScrollMask = (
   ref: RefObject<HTMLElement>,
-  direction: Direction = "bottom"
+  direction: Direction = "bottom",
+  spring?: boolean,
+  targetRef?: RefObject<HTMLElement>
 ) => {
-  const handleScroll: UIEventHandler<HTMLDivElement> = (e) => {
-    const h = e.target as HTMLElement;
-    const st = h.scrollTop || document.body.scrollTop;
-    const sh = h.scrollHeight || document.body.scrollHeight;
-    const percent = st / (sh - h.clientHeight);
-    maskScrollArea(direction, ref.current as HTMLElement, percent, 10);
+  const [offset, setOffset] = useState(0);
+
+  // A spring that will control the "bounce-back" effect
+  const bounceSpring = useSpring(offset, {
+    stiffness: 200,
+    damping: 10,
+  });
+
+  const handleScroll: EventListener = () => {
+    if (ref.current) {
+      const scrollTop = ref.current.scrollTop;
+      const maxScroll = ref.current.scrollHeight - ref.current.clientHeight;
+      const percent = scrollTop / maxScroll;
+      maskScrollArea(
+        direction,
+        (targetRef ?? ref).current as HTMLElement,
+        percent,
+        10
+      );
+      if (!spring) return;
+
+      // If the user scrolls beyond the top or bottom boundaries
+      if (scrollTop < 0) {
+        setOffset(-scrollTop); // Set offset to create bounce-back effect
+      } else if (scrollTop > maxScroll) {
+        setOffset(maxScroll - scrollTop);
+      } else {
+        setOffset(0); // Reset offset when within bounds
+      }
+    }
   };
 
   useEffect(() => {
     maskScrollArea(direction, ref.current as HTMLElement, 0, 10);
+
+    const container = ref.current;
+    container?.addEventListener("wheel", handleScroll);
+
+    return () => {
+      container?.removeEventListener("wheel", handleScroll);
+    };
   });
 
-  return handleScroll;
+  return bounceSpring;
 };
+
+export function useCSSVars() {
+  const ref = useRef<HTMLElement>();
+
+  const getCSSVar = (variableName: string) =>
+    ref.current
+      ? getComputedStyle(ref.current).getPropertyValue(variableName).trim()
+      : null;
+
+  return { ref, getCSSVar };
+}
+
+export const useOutsideClick = (
+  ref: React.RefObject<HTMLDivElement>,
+  callback: (e: MouseEvent | TouchEvent) => void
+) => {
+  useEffect(() => {
+    const listener = (event: MouseEvent | TouchEvent) => {
+      if (!ref.current || ref.current.contains(event.target as Node)) {
+        return;
+      }
+      callback(event);
+    };
+
+    document.addEventListener("mousedown", listener);
+    document.addEventListener("touchstart", listener);
+
+    return () => {
+      document.removeEventListener("mousedown", listener);
+      document.removeEventListener("touchstart", listener);
+    };
+  }, [ref, callback]);
+};
+
+let cachedWebGLSupport: boolean | null = null;
+
+export const useWebGLSupport = () => {
+  const [isWebGLSupported, setIsWebGLSupported] = useState(false);
+
+  useEffect(() => {
+    // Check if WebGL support is cached in localStorage
+    const cachedResult = localStorage.getItem("webglSupport");
+    if (cachedWebGLSupport) {
+      setIsWebGLSupported(cachedResult === "true");
+      return;
+    }
+
+    // Function to check WebGL support
+    const checkWebGL = () => {
+      try {
+        const canvas =
+          document.querySelectorAll("canvas")[0] ??
+          document.createElement("canvas");
+        const context =
+          canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+        return !!(window.WebGLRenderingContext && context);
+      } catch (e) {
+        console.error(e);
+        return false;
+      }
+    };
+
+    // Perform the check and cache the result
+    const support = checkWebGL();
+    setIsWebGLSupported(support);
+    cachedWebGLSupport = support;
+    localStorage.setItem("webglSupport", `${support}`);
+  }, []);
+
+  return isWebGLSupported;
+};
+
+// I recommend to declare breakpoints somewhere outside the component
+// to prevent unnecessary re-renders.
+//
+// Otherwise don't forget to wrap it around React.useMemo:
+// useBreakpoints(React.useMemo({ sm: 640, md: 768, ... }))

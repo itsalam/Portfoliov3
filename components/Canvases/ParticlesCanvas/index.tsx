@@ -1,11 +1,14 @@
 "use client";
 
-import { cssVarToRGB } from "@/lib/clientUtils";
+import { cssVarToRGB } from "@/lib/providers/clientUtils";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 // import { GUI } from "dat.gui";
+import { useWebGLSupport } from "@/lib/hooks";
+import { TierResult, getGPUTier } from "detect-gpu";
 import { useTheme } from "next-themes";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  AdditiveBlending,
   Camera,
   Color,
   DataTexture,
@@ -16,6 +19,7 @@ import {
   Mesh,
   MeshBasicMaterial,
   NearestFilter,
+  NormalBlending,
   PerspectiveCamera,
   PlaneGeometry,
   RGBAFormat,
@@ -27,11 +31,11 @@ import {
   Vector3,
   Vector4,
   WebGLRenderTarget,
-  WebGLRenderer,
 } from "three";
 import "./PointsMaterial";
 import DofPointsMaterial from "./PointsMaterial";
 import Advection from "./stages/Advection";
+import Bloom from "./stages/Bloom";
 import Divergence from "./stages/Divergence";
 import ExternalForce from "./stages/ExternalForce";
 import Poisson from "./stages/Poisson";
@@ -65,13 +69,12 @@ function calculateVisibleDimensions(
 
 function getPoint(
   v: Vector4,
-  size: number,
   data: Float32Array,
   offset: number,
   bounds: Vector2
 ) {
   v.set(
-    (Math.random() - 0.5) * bounds.x,
+    (-0.45 - Math.random() * 0.049) * bounds.x,
     (Math.random() - 0.5) * bounds.y,
     Math.random() - 0.5,
     1000
@@ -80,21 +83,27 @@ function getPoint(
   return v.toArray(data, offset);
 }
 
-function initializePoints(count: number, size: number, bounds: Vector2) {
+function initializePoints(count: number, bounds: Vector2) {
   const data = new Float32Array(count * 4);
   for (let i = 0; i < count * 4; i += 4)
-    getPoint(new Vector4(), size, data, i, bounds);
+    getPoint(new Vector4(), data, i, bounds);
   return data;
 }
 
 function cssColorToGLSLVec3(cssVarName: string) {
-  return new Vector3(...cssVarToRGB(cssVarName));
+  const res = new Vector3(...cssVarToRGB(cssVarName));
+  console.log(
+    `%cColor: rgb(${res.x * 255}, ${res.y * 255}, ${res.z * 255})`,
+    `color: rgb(${res.x * 255}, ${res.y * 255}, ${res.z * 255})`
+  );
+  return res;
 }
 
-const ParticleScene = () => {
+const ParticleScene = (props: { gpuTier?: TierResult }) => {
+  const { gpuTier } = props;
   const coords = useRef({ x: 0, y: 0 });
-  const particleLength = 100;
-  const { gl, size, camera } = useThree();
+  const particleLength = (5 - (gpuTier?.tier ?? 5)) * 30;
+  const { gl, size, camera, scene } = useThree();
   const renderRef = useRef<DofPointsMaterial>(null!);
   const sceneRef = useRef<Scene>(null);
   const { resolvedTheme } = useTheme();
@@ -112,36 +121,43 @@ const ParticleScene = () => {
   const accentColor = useMemo(
     () =>
       cssColorToGLSLVec3(
-        resolvedTheme === "light" ? "--accent-1" : "--accent-12"
+        resolvedTheme === "light" ? "--accent-8" : "--accent-12"
       ),
     [resolvedTheme]
   );
   const grayColor = useMemo(
     () =>
-      cssColorToGLSLVec3(resolvedTheme === "light" ? "--gray-1" : "--gray-12"),
+      cssColorToGLSLVec3(
+        resolvedTheme === "light" ? "--accent-8" : "--gray-12"
+      ),
     [resolvedTheme]
   );
 
   // SHADER CONFIGURATION
   const options = useRef({
-    dt: 0.001,
+    dt: 0.0025,
     cursorSize: 0.03,
     mouseForce: 4.0,
     resolution: 0.5,
-    viscous: 200,
+    viscous: 400,
     iterations: 2,
     isViscous: true,
-    aperture: 40.0,
+    aperture: 12.0,
     fov: 3.5,
-    focus: 2.6,
+    focus: 3.1,
     accent: accentColor,
     color: grayColor,
+    valuesUpdated: true,
   });
 
-  const type = useRef(
-    (/(iPad|iPhone|iPod)/g.test(navigator.userAgent)
-      ? HalfFloatType
-      : FloatType) as TextureDataType
+  const bloomOptions = useRef({
+    luminanceThreshold: 0.1,
+    intensity: 1.8,
+    radius: 1.0,
+  });
+
+  const type = useRef<TextureDataType>(
+    /(iPad|iPhone|iPod)/g.test(navigator.userAgent) ? HalfFloatType : FloatType
   );
   const width = useRef(Math.round(size.width * options.current.resolution));
   const height = useRef(Math.round(size.height * options.current.resolution));
@@ -149,6 +165,17 @@ const ParticleScene = () => {
   const fboSize = useRef(new Vector2(width.current, height.current));
   const povSize = useRef(
     calculateVisibleDimensions(camera as PerspectiveCamera)
+  );
+
+  const particleTexture = new DataTexture(
+    initializePoints(
+      particleLength * particleLength,
+      calculateVisibleDimensions(camera as PerspectiveCamera)
+    ),
+    particleLength,
+    particleLength,
+    RGBAFormat,
+    type.current
   );
 
   const fluidFbos = useRef<FBOs>({
@@ -162,29 +189,32 @@ const ParticleScene = () => {
   });
 
   const particleFbos = useRef<Record<string, WebGLRenderTarget>>({
-    position_0: createRenderTarget({ size: particleLength, gl }),
-    position_1: createRenderTarget({ size: particleLength, gl }),
+    position_0: createRenderTarget({ texture: particleTexture }),
+    position_1: createRenderTarget({ texture: particleTexture }),
   });
 
   // useEffect(() => {
-  //   const optionsCur = options.current;
+  //   const optionsCur = bloomOptions.current;
   //   const gui = new GUI();
-  //   gui.add(optionsCur, "dt", 0, 0.3);
-  //   gui.add(optionsCur, "cursorSize", 0, 0.3);
-  //   gui.add(optionsCur, "mouseForce", 0, 20);
-  //   gui.add(optionsCur, "focus", 0, 4);
-  //   gui.add(optionsCur, "aperture", 0, 40);
-  //   gui.add(optionsCur, "fov", 0, 0);
+  //   gui.add(optionsCur, "luminanceThreshold", 0, 1, 0.05);
+  //   gui.add(optionsCur, "intensity", 0, 3, 0.05);
+  //   gui.add(optionsCur, "radius", 0, 1, 0.05);
+  //   gui.add(options.current, "dt", 0, 0.3);
+  //   gui.add(options.current, "cursorSize", 0, 0.3);
+  //   gui.add(options.current, "mouseForce", 0, 20);
+  //   gui.add(options.current, "focus", 0, 4);
+  //   gui.add(options.current, "aperture", 0, 40);
+  //   gui.add(options.current, "fov", 0, 10);
   //   return () => {
   //     gui.destroy();
   //   };
   // });
 
-  function createRenderTarget(options?: { size: number; gl: WebGLRenderer }) {
-    const { size, gl } = options ?? {};
+  function createRenderTarget(options?: { texture: DataTexture }) {
+    const { texture } = options ?? {};
     const target = new WebGLRenderTarget(
-      size ?? fboSize.current.x,
-      size ?? fboSize.current.y,
+      texture?.image.width ?? fboSize.current.x,
+      texture?.image.height ?? fboSize.current.y,
       {
         type: type.current,
         minFilter: NearestFilter,
@@ -194,32 +224,12 @@ const ParticleScene = () => {
         format: RGBAFormat,
       }
     );
-    if (size && gl) {
-      const texture = new DataTexture(
-        initializePoints(
-          size * size,
-          128,
-          calculateVisibleDimensions(camera as PerspectiveCamera)
-        ),
-        size,
-        size,
-        RGBAFormat,
-        FloatType
-      );
-
-      texture.needsUpdate = true;
-      target.texture = texture;
+    if (texture) {
+      // texture.needsUpdate = true;
+      target.texture = texture.clone();
     }
     return target;
   }
-
-  const resizeAllFBO = useCallback(() => {
-    const allKeys = Object.keys(fluidFbos.current);
-
-    allKeys.forEach((key) => {
-      fluidFbos.current[key].setSize(fboSize.current.x, fboSize.current.y);
-    });
-  }, [fluidFbos]);
 
   const boundarySpace = useMemo(() => cellScale.current, []);
 
@@ -247,6 +257,7 @@ const ParticleScene = () => {
 
   const viscous = new Viscous({
     ...defaultProps,
+    iterations: options.current.iterations,
     velocity: fluidFbos.current.vel_1,
     v: options.current.viscous,
     dt: options.current.dt,
@@ -266,6 +277,7 @@ const ParticleScene = () => {
     divergence: fluidFbos.current.div,
     dst: fluidFbos.current.pressure_1,
     dst1: fluidFbos.current.pressure_0,
+    iterations: options.current.iterations,
   });
 
   const pressurePass = new Pressure({
@@ -284,6 +296,19 @@ const ParticleScene = () => {
     cameraPos: camera.position.z,
     cameraFov: (camera as PerspectiveCamera).fov,
     cameraAspect: (camera as PerspectiveCamera).aspect,
+  });
+
+  const bloomOutput = new WebGLRenderTarget(width.current, height.current, {});
+
+  const bloom = new Bloom({
+    dst: bloomOutput,
+    gl,
+    camera,
+    width: width.current / 2,
+    height: height.current / 2,
+    renderer: gl,
+    scene,
+    ...bloomOptions.current,
   });
 
   useEffect(() => {
@@ -305,34 +330,46 @@ const ParticleScene = () => {
   }, []);
 
   useFrame(({ clock }) => {
-    advection.update({ dt: options.current.dt });
+    if (options.current.valuesUpdated) {
+      externalForce.updateUniforms({
+        cellScale: defaultProps.cellScale,
+        factor: options.current.mouseForce,
+        cursorSize: options.current.cursorSize,
+      });
+      advection.updateUniforms({ dt: options.current.dt });
+      viscous.updateUniforms({
+        viscous: options.current.viscous,
+        iterations: options.current.iterations,
+        dt: options.current.dt,
+      });
+      poisson.updateUniform({ iterations: options.current.iterations });
+      const render = renderRef.current;
+      if (render) {
+        render.uniforms.uFocus.value = options.current.focus;
+        render.uniforms.uBlur.value = options.current.aperture;
+      }
+      options.current.valuesUpdated = false;
+    }
+    const time = clock.elapsedTime;
+    advection.update();
     externalForce.update({
       pointer: new Vector2(coords.current.x, coords.current.y),
-      cursorSize: options.current.cursorSize,
-      factor: options.current.mouseForce,
-      cellScale: cellScale.current,
-      time: clock.getElapsedTime(),
+      time,
     });
 
     const velocity = options.current.isViscous
-      ? viscous.update({
-          viscous: options.current.viscous,
-          iterations: options.current.iterations,
-          dt: options.current.dt,
-        })
+      ? viscous.update()
       : fluidFbos.current.vel_1;
 
     divergence.update({ velocity });
 
-    const pressure = poisson.update({
-      iterations: options.current.iterations,
-    });
+    const pressure = poisson.update();
 
     pressurePass.update({ velocity, pressure });
 
     position.update({
       velocity: fluidFbos.current.vel_0,
-      time: clock.getElapsedTime(),
+      time,
       camera: camera as PerspectiveCamera,
     });
 
@@ -341,46 +378,54 @@ const ParticleScene = () => {
       render.uniforms.positions.value = particleFbos.current.position_0.texture;
       render.uniforms.uTime.value = clock.elapsedTime;
       render.uniforms.uFboSize.value = fboSize.current;
-      render.uniforms.uFocus.value = MathUtils.lerp(
-        render.uniforms.uFocus.value,
-        options.current.focus,
-        0.1
-      );
-      render.uniforms.uBlur.value = MathUtils.lerp(
-        render.uniforms.uBlur.value,
-        options.current.aperture,
-        0.1
-      );
     }
+
+    bloom.update(bloomOptions.current);
   });
+
+  useEffect(() => {
+    console.log({ options });
+  }, [options.current, renderRef.current]);
 
   useEffect(() => {
     const render = renderRef.current;
     if (render) {
       render.uniforms.uColor.value = grayColor;
       render.uniforms.uAccent.value = accentColor;
+      renderRef.current.blending =
+        resolvedTheme === "light" ? NormalBlending : AdditiveBlending;
     }
   }, [accentColor, grayColor, resolvedTheme]);
 
   useEffect(() => {
     gl.autoClear = false;
     gl.setClearColor(0x000000);
-    gl.setPixelRatio(window.devicePixelRatio);
+    gl.setPixelRatio(window.devicePixelRatio * 0.5);
+    console.log(window.devicePixelRatio);
   }, [gl]);
 
   useEffect(() => {
-    const recalcSize = () => {
-      width.current = Math.round(size.width * options.current.resolution);
-      height.current = Math.round(size.height * options.current.resolution);
-      fboSize.current.set(width.current, height.current);
-      cellScale.current.set(1 / width.current, 1 / height.current);
-      resizeAllFBO();
-    };
-    document.body.addEventListener("resize", recalcSize, false);
+    Object.keys(fluidFbos.current).forEach((key) => {
+      fluidFbos.current[key].dispose();
+      fluidFbos.current[key] = createRenderTarget();
+    });
+    Object.keys(particleFbos.current).forEach((key) => {
+      particleFbos.current[key].dispose();
+      particleFbos.current[key] = createRenderTarget({
+        texture: particleTexture,
+      });
+    });
     return () => {
-      document.body.removeEventListener("resize", recalcSize);
+      Object.values(fluidFbos.current).forEach((fbo) => {
+        fbo.dispose();
+        fbo.texture.dispose();
+      });
+      Object.values(particleFbos.current).forEach((fbo) => {
+        fbo.dispose();
+        fbo.texture.dispose();
+      });
     };
-  }, [camera, resizeAllFBO, size, size.height, size.width]);
+  }, []);
 
   return (
     <>
@@ -423,7 +468,7 @@ const DebugView = ({
   const material = new MeshBasicMaterial({
     map: texture,
     side: DoubleSide,
-    opacity: resolvedTheme == "light" ? 0.1 : 0.2,
+    opacity: resolvedTheme == "light" ? 0.2 : 0.2,
     transparent: true,
     color: new Color(0x145750),
   });
@@ -435,18 +480,36 @@ const DebugView = ({
 };
 
 const ParticleCanvas = () => {
+  const [gpuTier, setGpuTier] = useState<TierResult>();
+  const webGLSupport = useWebGLSupport();
+
+  useEffect(() => {
+    const detectGPU = async () => {
+      let gpuTier;
+      if (webGLSupport) {
+        gpuTier = await getGPUTier();
+        setGpuTier(gpuTier);
+      }
+    };
+    detectGPU();
+  }, [webGLSupport]);
+
+  if (!webGLSupport || !gpuTier) {
+    return <></>;
+  }
+
   return (
     <Canvas
       id="particle-canvas"
       style={{ position: "absolute" }}
-      className="left-0 z-0 opacity-80"
-      gl={{ antialias: true, alpha: true, autoClear: false }}
+      className="top-0 left-0 z-0 opacity-20 dark:opacity-40"
+      gl={{ antialias: false, alpha: true, autoClear: false }}
       camera={{
         position: [0, 0, 1],
-        // fov: 75,
       }}
+      dpr={0.5}
     >
-      <ParticleScene />
+      <ParticleScene gpuTier={gpuTier} />
     </Canvas>
   );
 };
