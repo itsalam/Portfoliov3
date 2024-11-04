@@ -26,6 +26,7 @@ const nextConfig = {
     // Important: return the modified config
     return config;
   },
+  reactStrictMode: false,
 };
 
 module.exports = nextConfig;

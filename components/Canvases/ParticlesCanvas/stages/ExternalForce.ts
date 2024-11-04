@@ -17,9 +17,9 @@ type UpdateProps = {
   time: number;
 };
 
-export default class ExternalForce extends BasePass<UpdateProps> {
+export default class ExternalForce extends BasePass<any, UpdateProps> {
   oldMousePos: Vector2;
-
+  cellScale: Vector2;
   constructor(simProps: ExternalForceProps) {
     const { cellScale, cursorSize, factor, ...baseProps } = simProps;
     super({
@@ -31,43 +31,50 @@ export default class ExternalForce extends BasePass<UpdateProps> {
         fragmentShader: externalForceGlsl,
         uniforms: {
           px: { value: cellScale },
-          center: {
-            value: new Vector2(-2.0, -2.0),
-          },
-          oldCenter: {
-            value: new Vector2(-2.0, -2.0),
-          },
-          scale: {
-            value: cursorSize,
-          },
-          factor: {
-            value: factor,
-          },
-          time: {
-            value: 0.0,
-          },
+          center: { value: new Vector2(-2.0, -2.0) },
+          oldCenter: { value: new Vector2(-2.0, -2.0) },
+          scale: { value: cursorSize },
+          factor: { value: factor },
+          time: { value: 0.0 },
         },
       },
     });
     this.oldMousePos = new Vector2(0, 0);
+    this.cellScale = cellScale;
   }
 
-  update({ pointer, cursorSize, factor, cellScale, time }: UpdateProps) {
+  // Frame update for frequently changing uniforms (e.g., pointer position, time)
+  update({ pointer, time }: Pick<UpdateProps, "pointer" | "time">) {
+    if (!this.material) return;
+
+    // Set pointer/clamped position
     const centerX = Math.min(
-      Math.max(pointer.x, -1 + cellScale.x * 2),
-      1 - cellScale.x * 2
+      Math.max(pointer.x, -1 + this.cellScale.x * 2),
+      1 - this.cellScale.x * 2
     );
     const centerY = Math.min(
-      Math.max(pointer.y, -1 + cellScale.y * 2),
-      1 - cellScale.y * 2
+      Math.max(pointer.y, -1 + this.cellScale.y * 2),
+      1 - this.cellScale.y * 2
     );
-
     this.material.uniforms["center"].value.set(centerX, centerY);
-    this.material.uniforms["oldCenter"].value.set(...this.oldMousePos);
+
+    // Set old center and time values
+    this.material.uniforms["oldCenter"].value.copy(this.oldMousePos);
+    this.material.uniforms["time"].value = time;
+    this.oldMousePos.copy(this.material.uniforms["center"].value);
+
+    super.update();
+  }
+
+  // Called only when cursorSize or factor changes
+  updateUniforms({
+    cellScale,
+    cursorSize,
+    factor,
+  }: Pick<UpdateProps, "cursorSize" | "factor" | "cellScale">) {
+    this.cellScale = cellScale;
     this.material.uniforms["scale"].value = cursorSize;
     this.material.uniforms["factor"].value = factor;
-    this.material.uniforms["time"].value = time;
-    this.oldMousePos = this.material.uniforms["center"].value.clone();
     super.update();
   }
 }

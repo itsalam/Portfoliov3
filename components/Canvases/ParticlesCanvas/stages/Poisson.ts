@@ -8,23 +8,26 @@ type PoissonProps = {
   dst1: WebGLRenderTarget;
   divergence: WebGLRenderTarget;
   cellScale: Vector2;
+  iterations: number;
 } & Omit<BasePassProps, "material">;
 
 type UpdateProps = {
   iterations: number;
 };
 
-export default class Poisson extends BasePass<UpdateProps> {
+export default class Poisson extends BasePass<any, UpdateProps> {
   output0: WebGLRenderTarget;
   output1: WebGLRenderTarget;
-  constructor(simProps: PoissonProps) {
-    const {
-      boundarySpace,
-      dst1: output1,
-      divergence,
-      cellScale,
-      ...baseProps
-    } = simProps;
+  iterations: number;
+
+  constructor({
+    boundarySpace,
+    dst1: output1,
+    divergence,
+    cellScale,
+    iterations,
+    ...baseProps
+  }: PoissonProps) {
     super({
       ...baseProps,
       material: {
@@ -48,12 +51,13 @@ export default class Poisson extends BasePass<UpdateProps> {
     });
     this.output0 = output1;
     this.output1 = this.dst;
+    this.iterations = iterations;
   }
 
-  update({ iterations }: UpdateProps) {
+  update() {
     let p_in = this.output0,
       p_out = this.output1;
-    for (let i = 0; i < iterations; i++) {
+    for (let i = 0; i < this.iterations; i++) {
       if (i % 2 == 0) {
         p_in = this.output0;
         p_out = this.output1;
@@ -68,5 +72,9 @@ export default class Poisson extends BasePass<UpdateProps> {
     }
 
     return p_out;
+  }
+
+  updateUniform({ iterations }: UpdateProps) {
+    this.iterations = iterations;
   }
 }

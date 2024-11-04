@@ -4,7 +4,8 @@ import "@radix-ui/themes/styles.css";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { DM_Sans, Space_Grotesk } from "next/font/google";
 import localFont from "next/font/local";
-import React from "react";
+import "./globals.css";
+import Main from "./main";
 import { Providers } from "./providers";
 
 // If loading a variable font, you don't need to specify the font weight
@@ -22,27 +23,23 @@ const grotesk = Space_Grotesk({
 
 const Favorit = localFont({
   variable: "--font-favorit",
-  src: "/fonts/Favorit.ttf",
+  src: "./fonts/Favorit.ttf",
   display: "swap",
 });
 
 const Vercetti = localFont({
   variable: "--font-vercetti",
-  src: "/fonts/Vercetti-Regular.ttf",
+  src: "./fonts/Vercetti-Regular.ttf",
   display: "swap",
 });
 
 const DanhDa = localFont({
   variable: "--font-danh-da",
-  src: "/fonts/DanhDa-Bold.otf",
+  src: "./fonts/DanhDa-Bold.otf",
   display: "swap",
 });
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout() {
   return (
     <html
       lang="en"
@@ -56,24 +53,25 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body>
-        <Providers>
-          <Theme
-            grayColor="sage"
-            accentColor="teal"
-            id="theme"
-            className="overflow-hidden"
-          >
+        <Theme
+          grayColor="sage"
+          accentColor="teal"
+          id="theme"
+          className="overflow-hidden"
+        >
+          <Providers>
             <main
               id="main"
               className={cn(
-                "container flex h-screen max-h-[100dvh]", // sizing
-                "flex-col overflow-hidden" // layout, overflowControl
+                "z-10", // layoutControl
+                "flex h-screen max-h-[100dvh] container", // sizing
+                "flex-col items-center justify-center overflow-hidden" // layout, overflowControl
               )}
             >
-              {children}
+              <Main />
             </main>
-          </Theme>
-        </Providers>
+          </Providers>
+        </Theme>
       </body>
     </html>
   );

@@ -1,7 +1,7 @@
-import { motion, useAnimation } from "framer-motion";
+import { useAnimation } from "framer-motion";
 import React, { useEffect } from "react";
 
-type LineProps = Parameters<typeof motion.line>[0] & {
+type LineProps = Parameters<typeof m.line>[0] & {
   orientation: "horizontal" | "vertical";
   length: number;
   thickness?: number;
@@ -24,7 +24,7 @@ const Line: React.FC<LineProps> = (props) => {
   }, [controls]);
 
   return (
-    <motion.line
+    <m.line
       initial={"initial"}
       animate={controls}
       variants={{

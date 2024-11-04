@@ -12,18 +12,18 @@ import {
 
 export type BasePassProps = {
   gl: WebGLRenderer;
-  material: ShaderMaterialParameters;
+  material?: ShaderMaterialParameters;
   geometry?: PlaneGeometry;
   dst: WebGLRenderTarget;
   raw?: boolean;
 };
 
-export default class BasePass<T> {
+export default class BasePass<T, P> {
   scene: Scene;
   camera: Camera;
   plane: Mesh;
   material: ShaderMaterial;
-  geometry: PlaneGeometry;
+  geometry?: PlaneGeometry;
   raw?: boolean;
   props: Omit<BasePassProps, "material" | "dst">;
   dst: WebGLRenderTarget;
@@ -43,7 +43,7 @@ export default class BasePass<T> {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  update(args?: Partial<T>) {
+  update(props?: Partial<P & BasePassProps>) {
     this.props.gl.setRenderTarget(this.dst);
     this.props.gl.render(this.scene, this.camera);
     this.props.gl.setRenderTarget(null);

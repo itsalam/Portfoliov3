@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import {
   Link as BaseLink,
   MoveDownLeft as BaseMoveDownLeft,
@@ -6,12 +6,11 @@ import {
 import { ComponentProps, FC } from "react";
 import { BaseRolloutButton } from "./BaseRolloutButton";
 
-const Link = motion(BaseLink);
-const MoveDownLeft = motion(BaseMoveDownLeft);
+const Link = m(BaseLink);
+const MoveDownLeft = m(BaseMoveDownLeft);
 
 export const LinkButton: FC<
-  ComponentProps<typeof motion.a> &
-    Partial<ComponentProps<typeof BaseRolloutButton>>
+  ComponentProps<typeof m.a> & Partial<ComponentProps<typeof BaseRolloutButton>>
 > = (props) => {
   return (
     <BaseRolloutButton

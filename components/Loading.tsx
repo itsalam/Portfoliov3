@@ -1,35 +1,32 @@
 "use client";
 import { useDebounce } from "@/lib/clientUtils";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import {
   ComponentPropsWithoutRef,
   Dispatch,
   ElementRef,
   SetStateAction,
   forwardRef,
-  useCallback,
+  useMemo,
 } from "react";
-import { DIRECTION, DigitSpinner } from "./motion/DigitSpinner";
+import DigitSpinner, { DIRECTION } from "./motion/DigitSpinner";
 
 const Loading = forwardRef<
-  ElementRef<typeof motion.div>,
-  ComponentPropsWithoutRef<typeof motion.div> & {
+  ElementRef<typeof m.div>,
+  ComponentPropsWithoutRef<typeof m.div> & {
     prog: number;
     setLoading: Dispatch<SetStateAction<boolean>>;
   }
 >((props, ref) => {
   const { prog, setLoading, ...motionProps } = props;
-  const debounceProg = useDebounce<number>(prog, 1500);
-  // todo: make HOC control the animation, digit component should have digits based on digit size (1s get 100 numbers)
+  const debounceProg = useDebounce<number>(prog, 900, 200);
 
-  // Callback to be invoked when an animation completes
-
-  const Spinner = useCallback(() => {
+  const Spinner = useMemo(() => {
     const handleAnimationComplete = () => {
       if (debounceProg >= 100) {
         setTimeout(() => {
-          setLoading(false); // Or any other action you need to perform
+          setLoading(false);
         }, 1000);
       }
     };
@@ -37,31 +34,33 @@ const Loading = forwardRef<
     return (
       <>
         <DigitSpinner
+          key="hundreds"
           digit={~~(debounceProg / 100)}
           onAnimationComplete={handleAnimationComplete}
         />
         <DigitSpinner
-          direction={DIRECTION.UP}
+          key="tens"
+          direction={DIRECTION.DOWN}
           digit={~~(debounceProg / 10) % 10}
         />
-        <DigitSpinner digit={~~debounceProg % 10} />
+        <DigitSpinner key="units" digit={~~debounceProg % 10} />
       </>
     );
   }, [debounceProg, setLoading]);
 
   return (
-    <motion.div
+    <m.div
       ref={ref}
       className={cn(
         "absolute", // basicStyles
-        "bottom-4 right-10 flex h-36", // positioning, sizing
+        "right-10 bottom-4 flex h-36", // positioning, sizing
         "items-start justify-center gap-1 overflow-hidden", // layout, overflowControl
-        "font-favorit text-8xl text-[--gray-a7]" // textStyles
+        "text-8xl text-[--gray-a7]" // textStyles
       )}
       {...motionProps}
     >
-      <Spinner />
-    </motion.div>
+      {Spinner}
+    </m.div>
   );
 });
 

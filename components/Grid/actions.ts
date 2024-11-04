@@ -1,4 +1,4 @@
-import { GridInfo, GridStore } from "@/lib/state";
+import { GridContext, GridInfo, GridStore } from "@/lib/clientState";
 import { useAnimate } from "framer-motion";
 import { debounce } from "lodash";
 import {
@@ -6,10 +6,11 @@ import {
   MutableRefObject,
   SetStateAction,
   useCallback,
+  useContext,
   useEffect,
   useRef,
 } from "react";
-import { StoreApi } from "zustand";
+import { StoreApi, useStore } from "zustand";
 import { CARD_TYPES } from "../Cards/types";
 import { GridElement, GridElements, SCROLL_TO_CARD_DELAY } from "./consts";
 import { binpackElements, getDefaultGridElement } from "./util";
@@ -20,7 +21,9 @@ export const useActions = (
   setGridElements: Dispatch<SetStateAction<GridElements>>,
   gridInfoRef: MutableRefObject<GridInfo>
 ) => {
-  const { addListener } = context.getInitialState();
+  const { addListener, toggleCard } = context.getInitialState();
+  const store = useContext(GridContext);
+  const activeCard = useStore(store!).activeCard;
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const [gridRef] = useAnimate();
 
@@ -28,15 +31,17 @@ export const useActions = (
   const scrollToGridElement = useCallback(
     debounce(
       (gridElement: GridElement, delay = 100) => {
-        setTimeout(() => {
-          scrollAreaRef.current?.scrollTo({
-            top: Math.max(
-              0,
-              gridElement.coords[1] - gridInfoRef.current.gridUnitSize
-            ),
-            behavior: "smooth",
-          });
-        }, delay);
+        return new Promise<void>((res) =>
+          setTimeout(() => {
+            scrollAreaRef.current?.scrollTo({
+              top: Math.max(
+                0,
+                gridElement.coords[1] - gridInfoRef.current.gridUnitSize
+              ),
+              behavior: "smooth",
+            });
+            res();
+          }, delay));
       },
       SCROLL_TO_CARD_DELAY,
       { trailing: true }
@@ -46,18 +51,59 @@ export const useActions = (
 
   const pushElements = useCallback(
     (gridInfo: GridInfo, gridElements: GridElements) => (ids: CARD_TYPES[]) => {
-      ids.forEach((id) => {
-        const gridElem = gridElements.get(id);
-        if (gridElem) {
-          // binpackElements(gridElements, gridInfo);
-          scrollToGridElement(gridElem);
+      // On basic view, immediately move to other card
+      if (activeCard) {
+        const newGridElements = new Map();
+        if (ids.includes(activeCard)) {
+          return;
         } else {
-          gridElements.set(id, getDefaultGridElement(id, gridInfo));
-          setGridElements(new Map(gridElements));
+          ids.forEach((id) => {
+            const gridElem = getDefaultGridElement(id, gridInfo);
+            newGridElements.set(id, gridElem);
+            if (gridElem?.canExpand) {
+              toggleCard(id);
+            }
+          });
         }
-      });
+        setGridElements(newGridElements);
+        return;
+      }
+      //if there is an active card, return to main view
+      if (activeCard) {
+        toggleCard(null);
+
+        if (ids.includes(activeCard)) {
+          return;
+        }
+      }
+
+      //otherwise, find first element that can expand and toggle it.
+      setTimeout(
+        () =>
+          ids
+            .filter((id) => {
+              return id !== CARD_TYPES.Location;
+            })
+            .forEach((id) => {
+              const gridElem = gridElements.get(id);
+              if (gridElem) {
+                setTimeout(
+                  () => {
+                    if (gridElem.canExpand) {
+                      toggleCard(gridElem.id);
+                    }
+                  },
+                  activeCard ? 100 : 50
+                );
+              } else {
+                gridElements.set(id, getDefaultGridElement(id, gridInfo));
+                setGridElements(new Map(gridElements));
+              }
+            }),
+        600
+      );
     },
-    [scrollToGridElement, setGridElements]
+    [setGridElements, toggleCard, activeCard]
   );
 
   const closeElements = useCallback(
@@ -69,22 +115,10 @@ export const useActions = (
         }
       });
       setGridElements(new Map(gridElements));
-      // if (gridElements.size) {
-      //   const lowestElem = [...gridElements.values()].reduce((acc, curr) =>
-      //     acc.height + acc.coords[1] > curr.height + curr.coords[1] ? acc : curr);
-      //   setLowestElem(lowestElem);
-      // }
       binpackElements(gridElements, gridInfoRef.current);
     },
     [gridInfoRef, setGridElements]
   );
-
-  //   const toggleCard = useCallback(
-  //     (id: CARD_TYPES) => {
-  //       controls.start("expand").then(() => console.log("!!"));
-  //     },
-  //     [animate, controls]
-  //   );
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const adjustElements = useCallback(

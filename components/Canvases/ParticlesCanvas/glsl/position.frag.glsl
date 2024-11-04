@@ -244,7 +244,7 @@ void main() {
     vec3 curl = computeCurl(pos.x, pos.y, pos.z, t) * snoise3(vec3(pos.z, pos.z, t*10.0));
     flow.xy *= 3.0;
     curl *= 10.0;
-    vec3 forces = (flow * 0.2 + curl*4.0)/1200.0;
+    vec3 forces = (flow * 0.6 + curl*4.0)/1000.0;
     forces.x = clamp(forces.x, -MAX_SPEED, MAX_SPEED);
     forces.y = clamp(forces.y, -MAX_SPEED, MAX_SPEED);
     forces.z = clamp(forces.z, -MAX_SPEED, MAX_SPEED);
@@ -253,7 +253,7 @@ void main() {
     vec3 mouseForces = texture2D(velocity, vec2(clamp((pos.x + bounds.x/2.0)/bounds.x, 0.01, 0.99), clamp((pos.y + bounds.y/2.0)/bounds.y, 0.01, 0.99))).xyz * 0.0015; // Reduced influence of velocity
     pos.xyz += mouseForces;
     forces *= mix(1.0, mix(0.3, 0.1, smoothstep(0.0, 1.0, (0.8-pos.z) * 5.0)), step(0.8, pos.z));
-
+    forces.x += 0.0005;
     gl_FragColor = vec4(pos.xyz + forces, pos.w);
 }
          

@@ -1,150 +1,72 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import { GridContext } from "@/lib/state";
-import { AnimatePresence, motion, useScroll } from "framer-motion";
-import { useContext, useEffect, useRef, useState } from "react";
-import { useStore } from "zustand";
-import GridBackdrop from "../Backdrop";
-// import ScrollArea from "./ScrollArea";
+import { GridContext } from "@/lib/clientState";
+import { isWebGLSupported } from "@/lib/clientUtils";
+import { useScrollMask } from "@/lib/hooks";
 import { ScrollArea } from "@radix-ui/themes";
-import { useSearchParams } from "next/navigation";
+import { AnimatePresence, m, useScroll } from "framer-motion";
+import { useCallback, useContext, useRef, useState } from "react";
+import { useStore } from "zustand";
 import { TracingBeam } from "../Aceternity/TracingBeam";
+import GridBackdrop from "../Backdrop";
 import { CARD_TYPES } from "../Cards/types";
-import { useActions } from "./actions";
 import { GridCard } from "./card";
-import {
-  DRAG_TIMEOUT,
-  GridElement,
-  GridElements,
-  SCROLL_TO_CARD_DELAY,
-} from "./consts";
-import {
-  initializeGridElements,
-  resolveIntersections,
-  updateDraggedElement,
-  useNavigation,
-} from "./util";
+import { GridElement, GridElements } from "./consts";
+import { initializeGridElements } from "./util";
 
-const MScrollArea = motion(ScrollArea);
+const MScrollArea = m(ScrollArea);
 
 const Grid = () => {
-  const searchParams = useSearchParams();
-  const context = useContext(GridContext)!;
-  const { setDimensions } = context.getInitialState();
-  const { gridInfo, dimensions } = useStore(context);
-  const store = useContext(GridContext)!;
-  const { activeCard } = useStore(store);
+  const webgl = isWebGLSupported();
+  const gridStore = useContext(GridContext)!;
+  const { setDimensions, initialCards } = gridStore.getInitialState();
+  const { activeCard, gridInfo, dimensions } = useStore(gridStore);
   const gridInfoRef = useRef(gridInfo);
   const dimensionsRef = useRef(dimensions);
   const [lowestElem, setLowestElem] = useState<GridElement>();
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
   const [gridElements, setGridElements] = useState<GridElements>(() => {
-    const elemMap = initializeGridElements(gridInfo, searchParams);
+    console.log({ initialCards })
+    const elemMap = initializeGridElements(gridInfo, initialCards, webgl);
+    elemMap.delete(CARD_TYPES.Location);
     const lowestElem = [...elemMap.values()].reduce((acc, curr) =>
-      acc.height + acc.coords[1] > curr.height + curr.coords[1] ? acc : curr
-    );
+      acc.height + acc.coords[1] > curr.height + curr.coords[1] ? acc : curr);
     setLowestElem(lowestElem);
     return elemMap;
   });
 
-  const { adjustElements, gridRef, scrollToGridElement, scrollAreaRef } =
-    useActions(context, gridElements, setGridElements, gridInfoRef);
-
-  useNavigation(searchParams, gridElements);
-
   const { scrollYProgress, scrollY } = useScroll({
     container: scrollAreaRef,
-    // offset: ["start start", "end start"],
   });
 
-  useEffect(() => {
-    const { gridUnitSize, oldVals } = gridInfo;
-    if (oldVals && oldVals.gridUnitSize !== gridUnitSize) {
-      adjustElements(gridInfo);
-    }
-    gridInfoRef.current = gridInfo;
-  }, [gridInfo]);
+  const y = useScrollMask(scrollAreaRef, "bottom", true);
 
-  useEffect(() => {
-    const gridInfo = gridInfoRef.current;
-    const elemArr = Array.from(gridElements.values());
-    const unPositionedElements = elemArr.filter((e) => !e.hasPositioned);
-    if (unPositionedElements.length) {
-      unPositionedElements.forEach((e) => {
-        const newGridElem = resolveIntersections(e, gridElements, gridInfo);
-        gridElements.set(newGridElem.id, newGridElem);
-      });
-      setGridElements(new Map(gridElements));
-      const closestNewElem = unPositionedElements.reduce((acc, curr) =>
-        acc.height + acc.coords[1] < curr.height + curr.coords[1] ? acc : curr
-      );
-      scrollToGridElement(closestNewElem);
-    }
+  const Card = useCallback((props: { gridElement: GridElement }) => {
+    const { gridElement } = props;
+    return <GridCard gridElement={gridElement} />;
+  }, []);
 
-    const lowestElem = elemArr.length
-      ? elemArr.reduce((acc, curr) =>
-          acc.height + acc.coords[1] > curr.height + curr.coords[1] ? acc : curr
-        )
-      : undefined;
-    setLowestElem(lowestElem);
-  }, [gridElements, scrollToGridElement]);
-
-  useEffect(() => {
-    const gridInfo = gridInfoRef.current;
-    const dimensions = dimensionsRef.current;
-    if (lowestElem) {
-      const lowestElemHeight = lowestElem.height + lowestElem.coords[1];
-      if (lowestElemHeight > dimensions.height) {
-        setDimensions({
-          containerHeight: Math.max(
-            dimensions.height,
-            lowestElem.height +
-              lowestElem.coords[1] +
-              Math.max(64, gridInfo.gridCellSize * 1)
-          ),
-        });
-      } else if (lowestElemHeight < dimensions.height) {
-        setDimensions({
-          containerHeight: dimensions.height,
-        });
-      }
-    }
-  }, [lowestElem, setDimensions]);
-
-  useEffect(() => {
-    const themeElement = document.getElementById("theme");
-    if (activeCard && activeCard !== CARD_TYPES.Home && themeElement) {
-      themeElement.classList.add("focus");
-    } else if (themeElement) {
-      themeElement.classList.remove("focus");
-    }
-  }, [activeCard]);
+  console.log({ dimensions, activeCard })
 
   return (
-    <motion.div
+    <m.div
       ref={gridRef}
       id="grid"
-      className="container relative z-10 h-full"
+      className="relative z-10 h-full container"
     >
-      <MScrollArea
+      <ScrollArea
         className="h-full w-full"
         ref={scrollAreaRef}
-        animate={{
-          height: activeCard ? dimensions.containerHeight : dimensions.height,
-        }}
         style={{
-          height: activeCard ? dimensions.containerHeight : dimensions.height,
-        }}
-        transition={{
-          duration: 0.5,
+          height: activeCard ? dimensions.containerHeight : "90%",
         }}
       >
         <TracingBeam
+          disableScroll
           scrollYProgress={scrollYProgress}
-          height={dimensions.containerHeight}
-          transition={{
-            duration: (SCROLL_TO_CARD_DELAY * 0.5) / 1000,
-          }}
+          height={0}
           offset={gridInfo.gridCellSize}
           initial={"initial"}
           variants={{
@@ -161,28 +83,14 @@ const Grid = () => {
           }}
         >
           <AnimatePresence>
-            {[...gridElements.values()].map((gridElement) => {
-              return (
-                <GridCard
-                  dimensions={dimensions}
-                  key={gridElement.id}
-                  gridElement={gridElement}
-                  gridInfo={gridInfo}
-                  activeCard={activeCard}
-                  onDragEnd={(e, i) =>
-                    setTimeout(() => {
-                      console.log(e, i);
-                      updateDraggedElement(gridElement.id, gridElements);
-                    }, DRAG_TIMEOUT * 1.1)
-                  }
-                />
-              );
-            })}
+            {Array.from(gridElements.values()).map((gridElement, index) => (
+              <Card key={`${gridElement.id}`} gridElement={gridElement} />
+            ))}
           </AnimatePresence>
-          <GridBackdrop scrollY={scrollY} />
+          {webgl && <GridBackdrop scrollY={scrollY} />}
         </TracingBeam>
-      </MScrollArea>
-    </motion.div>
+      </ScrollArea>
+    </m.div>
   );
 };
 

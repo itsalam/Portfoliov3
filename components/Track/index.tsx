@@ -3,7 +3,7 @@ import { useResizeCallBack } from "@/lib/hooks";
 import { cn } from "@/lib/utils";
 import {
   animate,
-  motion,
+  m,
   useMotionTemplate,
   useMotionValue,
   useTransform,
@@ -25,11 +25,10 @@ import {
   useState,
 } from "react";
 import { TrackBar } from "./Trackbar";
-
 const Track = (
-  props: ComponentPropsWithRef<typeof motion.div> & {
+  props: ComponentPropsWithRef<"div"> & {
     dragRef: MutableRefObject<boolean>;
-    clickedIndex: MutableRefObject<number>;
+    clickedIndex: number;
   }
 ) => {
   const { className, children, dragRef, clickedIndex, ...restProps } = props;
@@ -66,7 +65,6 @@ const Track = (
     const trackSize = trackRef.current?.getBoundingClientRect().width || 0,
       containerSize = containerRef.current?.getBoundingClientRect().width || 0;
 
-    console.log({ containerSize, trackSize });
     setMaxDist(containerSize - trackSize);
     setMaxPercentage(Math.abs((containerSize - trackSize) / trackSize));
     setItemWidth(
@@ -95,18 +93,19 @@ const Track = (
     [dist, maxDist]
   );
 
-  const panToElement =
-    (index: number, priorOnClick?: MouseEventHandler) => (e?: MouseEvent) => {
+  const panToElement = (index: number, priorOnClick?: MouseEventHandler) =>
+    (e?: MouseEvent) => {
       const track = trackRef.current;
       const elem = track?.children[index];
       const container = containerRef.current;
+      console.log(elem, track, container, dragRef)
       if (elem && track && container && !dragRef.current) {
         setTrackDist(
           track.getBoundingClientRect().x -
-            elem.getBoundingClientRect().x +
-            (container.getBoundingClientRect().width -
-              elem.getBoundingClientRect().width) /
-              2,
+          elem.getBoundingClientRect().x +
+          (container.getBoundingClientRect().width -
+            elem.getBoundingClientRect().width) /
+          2,
           0,
           true
         );
@@ -117,16 +116,20 @@ const Track = (
   const trackChildren = Children.map(children as ReactNode, (child, index) =>
     isValidElement(child) && typeof child.type !== "string"
       ? cloneElement(child, {
-          onTap: panToElement(index, child.props.onTap),
-        } as HTMLAttributes<HTMLElement>)
-      : child
-  );
+        onTap: panToElement(index, child.props.onTap),
+      } as HTMLAttributes<HTMLElement>)
+      : child);
 
   useEffect(() => {
     const containerElement = containerRef.current;
     if (!containerElement) return;
     maskScrollArea("right", containerElement, 0);
   }, []);
+
+  useEffect(() => {
+    panToElement(clickedIndex)()
+    console.log(clickedIndex, " UHHUH")
+  }, [clickedIndex])
 
   useEffect(() => {
     const containerElement = containerRef.current;
@@ -147,53 +150,53 @@ const Track = (
 
   return (
     <>
-      <TrackBar
-        dist={dist}
-        trackRef={trackRef}
-        itemWidth={itemWidth}
-        containerWidth={
-          containerRef.current?.getBoundingClientRect().width || 0
-        }
-        numItems={numItems}
-      />
-      <motion.div
+      <div
         {...restProps}
         className={cn(
-          "track-container relative flex w-full overflow-visible",
+          "track-container flex w-full overflow-visible",
           className,
           {
             "cursor-grabbing": startDrag.current,
             "cursor-grab": !startDrag.current,
           }
         )}
-        // onWheel={handleWheelMove}
         onMouseLeave={() => {
-          if (!startDrag.current && clickedIndex.current !== -1) {
-            panToElement(clickedIndex.current)();
+          if (!startDrag.current && clickedIndex !== -1) {
+            panToElement(clickedIndex)();
           }
         }}
         ref={containerRef}
         id="container"
       >
-        <motion.div
+        <m.div
           ref={trackRef}
           drag="x"
           style={{
             x: useMotionTemplate`${distPercent}%`,
-            // x: dist,
           }}
-          className={cn("track relative flex items-start gap-g-2/8", {})}
+          className={cn(
+            "track flex w-max items-start gap-g-2/8 px-4",
+            {}
+          )}
           suppressHydrationWarning
           id="track"
           dragConstraints={{
             left: maxDist,
             right: 0,
           }}
-          // dragTransition={{ power: 0.1 }}
         >
           {trackChildren}
-        </motion.div>
-      </motion.div>
+        </m.div>
+      </div>
+      <TrackBar
+        distPercent={distPercent}
+        trackRef={trackRef}
+        itemWidth={itemWidth}
+        containerWidth={
+          containerRef.current?.getBoundingClientRect().width || 1
+        }
+        numItems={numItems}
+      />
     </>
   );
 };

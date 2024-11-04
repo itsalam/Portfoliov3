@@ -32,42 +32,53 @@ const Clock: React.FC = () => {
 
   return (
     <Text
-      className="flex-start relative flex items-center gap-1 text-right"
-      size={"7"}
+      className={
+        "flex-start relative flex items-center gap-0 text-right font-sans"
+      }
+      size={"9"}
     >
-      <DigitSpinner digit={~~(hours / 10)} textProps={{ size: "7" }} />
-      <DigitSpinner digit={~~(hours % 10)} textProps={{ size: "7" }} />
+      <DigitSpinner
+        digit={~~(hours / 10)}
+        textProps={{ size: "9", trim: "end" }}
+      />
+      <DigitSpinner
+        digit={~~(hours % 10)}
+        textProps={{ size: "9", trim: "end" }}
+      />
       <Text
         className="relative bottom-0"
         size={"3"}
       >
         :
       </Text>
-      <DigitSpinner digit={~~(minutes / 10)} textProps={{ size: "7" }} />
-      <DigitSpinner digit={~~(minutes % 10)} textProps={{ size: "7" }} />
-      {/* <DigitSpinner digit={~~(seconds / 10)} textProps={{ size: "7" }} />
-      <DigitSpinner digit={~~(seconds % 10)} textProps={{ size: "7" }} /> */}
-      {/* {currentTime} */}
-      <div className="flex flex-col">
+      <DigitSpinner
+        digit={~~(minutes / 10)}
+        textProps={{ size: "9", trim: "end" }}
+      />
+      <DigitSpinner
+        digit={~~(minutes % 10)}
+        textProps={{ size: "9", trim: "end" }}
+      />
+      <div className="flex flex-col items-start">
         <Text
           className={cn(
-            "block w-full text-right leading-4",
+            "block h-4 w-full text-right leading-4",
             {
               "text-[--gray-a6]": isAm,
             }
           )}
-          size={"2"}
+          size={"3"}
         >
           AM
         </Text>
         <Text
           className={cn(
-            "block w-full text-right leading-4",
+            "block h-4 w-full text-right leading-4",
             {
               "text-[--gray-a6]": !isAm,
             }
           )}
-          size={"2"}
+          size={"3"}
         >
           PM
         </Text>
