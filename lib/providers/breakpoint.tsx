@@ -29,6 +29,7 @@ export const BreakpointProvider: React.FC<{
   const searchBreakpoint = useCallback((
     breakpoints: { key: string; value: number }[]
   ) => {
+    if (typeof window === "undefined") return;
     return breakpoints.find((x) => window.innerWidth < x.value)?.key;
   }, []);
 

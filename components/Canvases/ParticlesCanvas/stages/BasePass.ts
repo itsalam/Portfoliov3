@@ -18,7 +18,7 @@ export type BasePassProps = {
   raw?: boolean;
 };
 
-export default class BasePass<T, P> {
+export default class BasePass<P> {
   scene: Scene;
   camera: Camera;
   plane: Mesh;

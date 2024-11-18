@@ -24,7 +24,9 @@ import { CARD_TYPES } from "../Cards/types";
 import { GridElement } from "./consts";
 
 const expandTransition = {
-  duration: 0.3,
+  height: {
+    delay: 0.3,
+  },
   opacity: {
     duration: 0.6,
     ease: "easeInOut",
@@ -32,7 +34,7 @@ const expandTransition = {
 };
 
 const minimizeTransition = {
-  duration: 0.1,
+  duration: 0.3,
   opacity: {
     duration: 0.3,
     ease: "easeInOut",
@@ -41,7 +43,6 @@ const minimizeTransition = {
 
 export const GridCard = ({
   gridElement,
-  ...otherProps
 }: {
   gridElement: GridElement;
   onDragEnd?: DragHandlers["onDragEnd"];
@@ -53,7 +54,7 @@ export const GridCard = ({
     useStore(context);
   const breakpoint = useBreakpoints();
   const isSmall = breakpoint === "xs" || breakpoint === "sm";
-  const { gridUnitSize, bounds } = gridInfo;
+  const { gridUnitSize } = gridInfo;
   const controls = useAnimation();
   const CardContent = ELEMENT_MAP[id];
   const lastCard = useRef<CARD_TYPES | null>();
@@ -117,7 +118,7 @@ export const GridCard = ({
       style={
         {
           "--card-width": `${width}px`,
-          "--card-height": `${height}px`,
+          "--card-height": `${heightValue}px`,
           left: x,
           top: y,
           width: widthValue,
@@ -170,7 +171,7 @@ export const GridCard = ({
                 width: [null, width],
                 height: [null, height],
                 "--card-width": `${width}px`,
-                "--card-height": `${height}px`,
+                "--card-height": `${heightValue}px`,
                 borderWidth: [null, 1.0],
                 zIndex: 0,
               }
@@ -192,7 +193,14 @@ export const GridCard = ({
           : []),
         { Icon: X, onClick: () => id && closeElements([id as CARD_TYPES]) },
       ].filter(Boolean)}
-      {...otherProps}
+      containerProps={{
+        onClick: (e) => {
+          if (activeCard !== id && !activeCard && canExpand) {
+            e.stopPropagation();
+            toggleCard(id);
+          }
+        },
+      }}
     >
       <CardContent />
     </BaseCard>
@@ -201,7 +209,7 @@ export const GridCard = ({
 
 export const ELEMENT_MAP: Record<
   CARD_TYPES,
-  ComponentType<ComponentProps<typeof m.div>>
+  ComponentType<ComponentProps<typeof m.div>> & { active?: boolean }
 > = {
   home: HeroCard,
   projects: dynamic(() => import("../Cards/ProjectsCard"), {

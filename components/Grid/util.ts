@@ -216,7 +216,7 @@ export const binpackElements = (
       resolveIntersections(element, gridElements, gridInfo)
     );
   });
-
+  return gridElements;
   // console.log(JSON.parse(JSON.stringify([...gridElements.values()])));
 };
 

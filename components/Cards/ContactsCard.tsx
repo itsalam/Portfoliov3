@@ -1,8 +1,8 @@
 "use client";
 
+import Link from "@/components/Link";
 import { CMSContext } from "@/lib/providers/state";
 import { cn } from "@/lib/utils";
-import { Separator as BaseSeparator, Text as BaseText } from "@radix-ui/themes";
 import {
   AnimatePresence,
   CustomDomComponent,
@@ -10,26 +10,15 @@ import {
   useAnimate,
 } from "framer-motion";
 import {
-  ArrowUpRight as ArrowUpRightBase,
   Mail as EmailIcon,
   Github as GithubIcon,
   Linkedin as LinkedinIcon,
   LucideProps,
   MessageCircleQuestion as MessageCircleQuestionIcon,
 } from "lucide-react";
-import {
-  ComponentProps,
-  ComponentPropsWithoutRef,
-  ElementRef,
-  forwardRef,
-  useContext,
-  useState,
-} from "react";
+import { ComponentProps, useContext, useState } from "react";
 import { useStore } from "zustand";
 
-const Text = m(BaseText);
-const Separator = m(BaseSeparator);
-const ArrowUpRight = m(ArrowUpRightBase);
 const email = m(EmailIcon);
 const github = m(GithubIcon);
 const linkedin = m(LinkedinIcon);
@@ -41,85 +30,6 @@ const CONTACTS: Record<string, CustomDomComponent<LucideProps>> = {
   github,
   email,
 };
-
-const Link = forwardRef<
-  ElementRef<typeof m.div>,
-  ComponentPropsWithoutRef<typeof m.div> & { text: string; value?: string }
->((props, ref) => {
-  const { text, value, onHoverStart, ...rest } = props;
-  const [isHovered, setIsHovered] = useState(false);
-
-  return (
-    <m.div
-      initial="initial"
-      onHoverStart={(e, i) => {
-        onHoverStart?.(e, i);
-      }}
-      onHoverEnd={() => setIsHovered(false)}
-      className="group flex flex-col gap-y-1"
-      ref={ref}
-      {...rest}
-    >
-      <a
-        href={value}
-        className="relative w-min overflow-hidden"
-        target="_blank"
-        rel="noreferrer"
-      >
-        <Text
-          size="2"
-          className={cn(
-            "flex", // sizing
-            "items-center overflow-hidden", // layout, overflowControl
-            "text-[--gray-11] group-hover:text-[--accent-10]", // textStyles
-            "transition-colors duration-300" // transitionsAnimations
-          )}
-        >
-          {text}
-          <div className="overflow-hidden">
-            <ArrowUpRight
-              size={16}
-              variants={{
-                hover: {
-                  x: ["0%", "100%", "-100%", "0%"],
-                  y: ["0%", "-100%", "100%", "0%"],
-                  transition: {
-                    times: [0, 0.5, 0.5, 1],
-                    duration: 0.33,
-                  },
-                },
-                initial: {
-                  x: "0%",
-                },
-              }}
-            />
-          </div>
-        </Text>
-        <Separator
-          size="3"
-          variants={{
-            initial: {
-              width: "100%",
-            },
-            hover: {
-              width: [null, "100%", "0%", "100%"],
-              marginLeft: [null, "100%", "0%", "0%"],
-              transition: {
-                times: [0, 0.5, 0.5, 1],
-                duration: 0.33,
-              },
-            },
-            exit: {
-              width: "100%",
-            },
-          }}
-        />
-      </a>
-    </m.div>
-  );
-});
-
-Link.displayName = "Link";
 
 export default function ContactCard(props: ComponentProps<typeof m.div>) {
   const { className, ...rest } = props;

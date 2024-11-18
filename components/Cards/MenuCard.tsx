@@ -9,6 +9,7 @@ import {
   LucideIcon,
   Moon,
   Sun,
+  Users,
 } from "lucide-react";
 import { useContext } from "react";
 
@@ -23,6 +24,7 @@ const MENU_CARD_ICONS: Record<keyof typeof CARD_MENU_GROUP, LucideIcon> = {
   home: Home,
   projects: FlaskRound,
   experience: Briefcase,
+  info: Users,
 };
 
 export default function Menu() {

@@ -63,6 +63,7 @@ type GridElementListener = {
 
 export type GridStore = {
   activeCard?: CARD_TYPES | null;
+  gridRef?: RefObject<HTMLElement>;
   dimensions: Dimensions;
   listener: GridElementListener | null;
   initialCards?: CARD_TYPES[];
@@ -77,25 +78,24 @@ export type GridStore = {
 export const GridContext = createContext<StoreApi<GridStore> | null>(null);
 export const createGridStore = (defaults: Partial<GridStore>) =>
   createStore<GridStore>()((set, get) => {
-    const updateDimensions = (ref?: RefObject<HTMLElement>) => {
-      const rect = ref?.current?.getBoundingClientRect() ?? null;
+    const updateDimensions = ({
+      ref,
+      rect,
+    }: {
+      ref?: RefObject<HTMLElement>;
+      rect?: { height: number; width: number };
+    }) => {
+      rect = rect ?? ref?.current?.getBoundingClientRect();
       const dimensions: Dimensions = rect
         ? {
             width: rect.width,
             height: rect.height,
             containerHeight: rect.height,
           }
-        : typeof window !== "undefined"
-          ? {
-              width: window.innerWidth,
-              height: window.innerHeight,
-              containerHeight: window.innerHeight,
-            }
-          : { width: 0, height: 0, containerHeight: 0 };
-      console.log({ rect, dimensions });
+        : { width: 0, height: 0, containerHeight: 0 };
       return dimensions;
     };
-    const dimensions = updateDimensions();
+    const dimensions = updateDimensions({});
 
     return {
       ...defaults,
@@ -127,9 +127,8 @@ export const createGridStore = (defaults: Partial<GridStore>) =>
         const fullDimensions = {
           ...oldDimensions,
           ...dimensions,
-          ...updateDimensions(ref),
+          ...updateDimensions({ ref }),
         } as Dimensions;
-        console.log({ fullDimensions });
         const newVals = getGridProps(fullDimensions);
         const oldVals = getGridProps(oldDimensions);
         const root = document.documentElement;
@@ -137,6 +136,7 @@ export const createGridStore = (defaults: Partial<GridStore>) =>
         root.style.setProperty("--cell-padding", `${newVals.gapSize / 4}px`);
         root.style.setProperty("--width", `${fullDimensions.width}px`);
         set(() => ({
+          gridRef: ref,
           dimensions: fullDimensions,
           gridInfo: { ...newVals, oldVals },
         }));

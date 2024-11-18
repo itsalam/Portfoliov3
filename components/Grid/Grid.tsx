@@ -1,12 +1,12 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import { useResizeGridUpdateRef, useScrollMask } from "@/lib/hooks";
+import { useScrollMask } from "@/lib/hooks";
 import { GridContext } from "@/lib/providers/clientState";
 import { isWebGLSupported } from "@/lib/providers/clientUtils";
 import { ScrollArea } from "@radix-ui/themes";
 import { AnimatePresence, m, useScroll } from "framer-motion";
-import { useCallback, useContext, useRef } from "react";
+import { useCallback, useContext } from "react";
 import { useStore } from "zustand";
 import GridBackdrop from "../Backdrop";
 import { useGrid } from "./actions";
@@ -16,13 +16,10 @@ import { GridCard } from "./GridCard";
 const Grid = () => {
   const webgl = isWebGLSupported();
   const gridStore = useContext(GridContext)!;
-  const { activeCard, gridInfo, dimensions } = useStore(gridStore);
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const gridRef = useResizeGridUpdateRef<HTMLDivElement>(gridStore);
+  const { activeCard, dimensions } = useStore(gridStore);
+  const { gridElements, scrollAreaRef } = useGrid(gridStore);
 
-  const { gridElements } = useGrid(gridStore);
-
-  const { scrollYProgress, scrollY } = useScroll({
+  const { scrollY } = useScroll({
     container: scrollAreaRef,
   });
 
@@ -35,7 +32,6 @@ const Grid = () => {
 
   return (
     <m.div
-      ref={gridRef}
       id="grid"
       className="relative z-10 h-full container"
     >

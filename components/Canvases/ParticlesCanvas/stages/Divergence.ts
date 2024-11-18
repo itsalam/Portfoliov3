@@ -14,7 +14,7 @@ type UpdateProps = {
   velocity: WebGLRenderTarget;
 };
 
-export default class Divergence extends BasePass<any, UpdateProps> {
+export default class Divergence extends BasePass<UpdateProps> {
   constructor(simProps: DivergenceProps) {
     const { boundarySpace, velocity, cellScale, dt, ...baseProps } = simProps;
 

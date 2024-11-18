@@ -1,4 +1,4 @@
-import { useAnimation } from "framer-motion";
+import { m, useAnimation } from "framer-motion";
 import React, { useEffect } from "react";
 
 type LineProps = Parameters<typeof m.line>[0] & {

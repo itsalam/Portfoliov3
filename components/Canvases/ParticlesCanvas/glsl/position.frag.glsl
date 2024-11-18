@@ -233,11 +233,11 @@ void main() {
     float t = time * SPEED;
     vec4 pos = texture2D(particles, vUv).xyzw;
     vec2 bounds = getBounds(pos);
-    if (pos.x > BOUNDS * bounds.x || pos.x < -(BOUNDS * 1.2) * bounds.x || pos.y > BOUNDS * bounds.y || pos.y < -BOUNDS * bounds.y || pos.z > 2.0 || pos.z < -2.0){
+    if (pos.x > BOUNDS * bounds.x || pos.x < -(BOUNDS * 2.5) * bounds.x || pos.y > BOUNDS * bounds.y || pos.y < -BOUNDS * bounds.y || pos.z > 2.0 || pos.z < -2.0){
         pos.z = (rand(pos.yz) - 0.5) * 2.0;
         bounds = getBounds(pos);
         pos.y = (rand(pos.xy)-0.5) * bounds.y;
-        pos.x = (-0.5 - rand(pos.xz) * 0.1) * bounds.x;
+        pos.x = (-0.75 - rand(pos.xz) * 0.1) * bounds.x;
         pos.w = 1.0;
     }
     vec3 flow = computeFlow(pos.x, pos.y, pos.z, t) * snoise3(vec3(pos.x, pos.y, t*10.0));
@@ -253,7 +253,7 @@ void main() {
     vec3 mouseForces = texture2D(velocity, vec2(clamp((pos.x + bounds.x/2.0)/bounds.x, 0.01, 0.99), clamp((pos.y + bounds.y/2.0)/bounds.y, 0.01, 0.99))).xyz * 0.0015; // Reduced influence of velocity
     pos.xyz += mouseForces;
     forces *= mix(1.0, mix(0.3, 0.1, smoothstep(0.0, 1.0, (0.8-pos.z) * 5.0)), step(0.8, pos.z));
-    forces.x += 0.0005;
+    forces.x += 0.0005 * max(min(rand(pos.xy), 0.7), 1.0);
     gl_FragColor = vec4(pos.xyz + forces, pos.w);
 }
          

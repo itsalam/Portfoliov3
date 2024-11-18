@@ -119,7 +119,6 @@ export function isWebGLSupported() {
     canvas.remove();
     return webGLSupportCache;
   } catch (e) {
-    console.log({ e });
     webGLSupportCache = false;
     return false;
   }

@@ -218,7 +218,7 @@ export default function ProjectsCard(props: ComponentProps<typeof m.div>) {
             isSmall ? "" : "flex-col h-[--card-height]"
           )}
         >
-          <AnimatePresence mode="wait">
+          <AnimatePresence>
             {project.thumbnails.map((thumbnail, index) => (
               <ProjectCardComponent
                 project={project}
@@ -514,7 +514,7 @@ export default function ProjectsCard(props: ComponentProps<typeof m.div>) {
                 />
               </>
             )}
-            <div
+            <m.div
               style={{ perspective: "20cm" }}
               className={cn(
                 "flex h-max w-full min-w-[20%x]", // sizing
@@ -522,6 +522,12 @@ export default function ProjectsCard(props: ComponentProps<typeof m.div>) {
                 isSmall ? "w-[90%] gap-g-1 justify-center" : "max-w-[50%] pr-8 gap-g-4/8"
               )}
               ref={thumbnailContainerRef}
+              animate={{
+                transition:{
+                staggerChildren: 0.1,
+                delayChildren: 0.2,
+                }
+              }}
             >
               {projects.map((project, index) =>
                 isSmall && index === selectedProject ? (
@@ -547,7 +553,7 @@ export default function ProjectsCard(props: ComponentProps<typeof m.div>) {
                       "cursor-pointer", // interactions,
                       isSmall ? "mx-g-1/8" : ""
                     )}
-                    initial={{ opacity: 0, x: "100%", rotateY: -20 }}
+                    initial={{ opacity: 0, x: "200%", rotateY: -20, rotateX: 3, }}
                     variants={{
                       animate: {
                         opacity:
@@ -555,6 +561,9 @@ export default function ProjectsCard(props: ComponentProps<typeof m.div>) {
                         x: -16,
                         rotateY: -10,
                         rotateX: 3,
+                        transition: {
+                          delay: 0.1,
+                        }
                       },
                       focused: {
                         rotateY: [null, 0],
@@ -564,8 +573,6 @@ export default function ProjectsCard(props: ComponentProps<typeof m.div>) {
                       },
                     }}
                     transition={{
-                      duration: 0.15,
-                      delay: 0.1 * index,
                       // x: {
                       //   type: "spring",
                       //   stiffness: 300,
@@ -585,7 +592,7 @@ export default function ProjectsCard(props: ComponentProps<typeof m.div>) {
                     }
                   />
                 ))}
-            </div>
+            </m.div>
           </div>
         </ProjectTrack>
       </m.div>

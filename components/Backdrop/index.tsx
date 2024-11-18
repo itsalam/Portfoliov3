@@ -54,26 +54,6 @@ const GridBackdrop: FC<{ scrollY: MotionValue<number> }> = ({
   useMotionValueEvent(x, "change", updateAttribute("data-circle-x"));
   useMotionValueEvent(y, "change", updateAttribute("data-circle-y"));
 
-  // useEffect(() => {
-  //   const canvasElem = canvas.current?.getBoundingClientRect();
-  //   const followMouse = (e: { clientX: number; clientY: number }) => {
-  //     baseX.set(e.clientX - (canvasElem?.left ?? 0));
-  //     baseY.set(e.clientY - (canvasElem?.top ?? 0));
-  //   };
-
-  //   const followTouch = (e: TouchEvent) => {
-  //     followMouse(e.touches[0]);
-  //   };
-
-  //   window.addEventListener("mousemove", followMouse);
-  //   window.addEventListener("touchmove", followTouch);
-
-  //   return () => {
-  //     window.removeEventListener("mousemove", followMouse);
-  //     window.removeEventListener("touchmove", followTouch);
-  //   };
-  // });
-
   useEffect(() => {
     updateAttribute("data-circle-radius")("64");
   }, []);

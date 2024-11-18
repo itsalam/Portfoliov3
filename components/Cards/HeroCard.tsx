@@ -40,14 +40,11 @@ export default function HeroCard(props: ComponentProps<typeof m.div>) {
 
   useEffect(() => {
     let timeout: NodeJS.Timeout;
-    console.log(activeCard);
     if (activeCard !== CARD_TYPES.Home) {
       controls.start("stop");
     } else {
-      console.log("HUH");
       timeout = setTimeout(() => {
         controls.start("show").then(() => {
-          console.log("HUH", webgl);
           if (!webgl) {
             return;
           }
@@ -55,7 +52,7 @@ export default function HeroCard(props: ComponentProps<typeof m.div>) {
             controls.start("rotate");
           }, 700);
         });
-      }, 200);
+      }, 0);
     }
     return () => timeout && clearTimeout(timeout);
   }, [activeCard, controls, webgl]);

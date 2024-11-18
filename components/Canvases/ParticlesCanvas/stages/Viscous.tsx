@@ -19,7 +19,7 @@ type UpdateProps = {
   dt: number;
 };
 
-export default class Viscous extends BasePass<any, UpdateProps> {
+export default class Viscous extends BasePass<UpdateProps> {
   output0: WebGLRenderTarget;
   output1: WebGLRenderTarget;
   iterations: number;

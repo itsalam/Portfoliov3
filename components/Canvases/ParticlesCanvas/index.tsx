@@ -74,7 +74,7 @@ function getPoint(
   bounds: Vector2
 ) {
   v.set(
-    (-0.45 - Math.random() * 0.049) * bounds.x,
+    (-0.75 - Math.random()) * bounds.x,
     (Math.random() - 0.5) * bounds.y,
     Math.random() - 0.5,
     1000
@@ -383,9 +383,7 @@ const ParticleScene = (props: { gpuTier?: TierResult }) => {
     bloom.update(bloomOptions.current);
   });
 
-  useEffect(() => {
-    console.log({ options });
-  }, [options.current, renderRef.current]);
+  useEffect(() => {}, [options.current, renderRef.current]);
 
   useEffect(() => {
     const render = renderRef.current;
@@ -401,7 +399,6 @@ const ParticleScene = (props: { gpuTier?: TierResult }) => {
     gl.autoClear = false;
     gl.setClearColor(0x000000);
     gl.setPixelRatio(window.devicePixelRatio * 0.5);
-    console.log(window.devicePixelRatio);
   }, [gl]);
 
   useEffect(() => {

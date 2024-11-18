@@ -24,8 +24,9 @@ const BaseCard: FC<
   ComponentProps<typeof m.div> & {
     title?: string | ReactNode;
     buttons?: ButtonArgs[];
+    containerProps?: ComponentProps<typeof m.div>;
   }
-> = ({ className, children, title, buttons, ...rest }) => {
+> = ({ containerProps, className, children, title, buttons, ...rest }) => {
   const breakpoint = useBreakpoints();
   const isSmall = breakpoint === "xs" || breakpoint === "sm";
   return (
@@ -133,6 +134,7 @@ const BaseCard: FC<
             },
           } as Variants
         }
+        {...containerProps}
       >
         {children}
       </m.div>

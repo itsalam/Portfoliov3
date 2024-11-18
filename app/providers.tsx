@@ -7,7 +7,11 @@ import {
   DEFAULT_GRID_ELEMENTS,
 } from "@/components/Grid/consts";
 import Loading from "@/components/Loading";
-import { useCMSStoreInitializer, useWebGLSupport } from "@/lib/hooks";
+import {
+  useCMSStoreInitializer,
+  useResizeGridUpdateRef,
+  useWebGLSupport,
+} from "@/lib/hooks";
 import { BreakpointProvider } from "@/lib/providers/breakpoint";
 import { GridContext, createGridStore } from "@/lib/providers/clientState";
 import { CMSContext, useCMSStore } from "@/lib/providers/state";
@@ -69,6 +73,8 @@ export function Providers() {
     })
   );
 
+  const mainRef = useResizeGridUpdateRef<HTMLDivElement>(gridStore.current);
+
   const cmsRef = useRef(useCMSStore(loadingRef));
   const currLoaded = useRef(0);
 
@@ -108,25 +114,26 @@ export function Providers() {
           <GridContext.Provider value={gridStore.current}>
             <LazyMotion features={webgl ? domMax : domAnimation}>
               <AnimatePresence mode="wait">
-                {loading ? (
-                  <Loading
-                    key={"loading"}
-                    prog={loadingProgress ?? 0}
-                    setLoading={setLoading}
-                  />
-                ) : (
-                  <main
-                    key="main"
-                    id="main"
-                    className={cn(
-                      "z-10", // layoutControl
-                      "flex h-screen max-h-[100dvh] container", // sizing
-                      "flex-col items-center justify-center overflow-hidden" // layout, overflowControl
-                    )}
-                  >
+                <main
+                  ref={mainRef}
+                  key="main"
+                  id="main"
+                  className={cn(
+                    "z-10", // layoutControl
+                    "flex h-screen max-h-[100dvh] container", // sizing
+                    "flex-col items-center justify-center overflow-hidden" // layout, overflowControl
+                  )}
+                >
+                  {loading ? (
+                    <Loading
+                      key={"loading"}
+                      prog={loadingProgress ?? 0}
+                      setLoading={setLoading}
+                    />
+                  ) : (
                     <Main />
-                  </main>
-                )}
+                  )}
+                </main>
               </AnimatePresence>
             </LazyMotion>
             <Canvas />

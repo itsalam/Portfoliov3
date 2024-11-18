@@ -15,7 +15,7 @@ type UpdateProps = {
   iterations: number;
 };
 
-export default class Poisson extends BasePass<any, UpdateProps> {
+export default class Poisson extends BasePass<UpdateProps> {
   output0: WebGLRenderTarget;
   output1: WebGLRenderTarget;
   iterations: number;

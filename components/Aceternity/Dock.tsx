@@ -66,8 +66,6 @@ export const Dock = ({
 const FloatingDockSimple = ({
   items,
   className,
-  orientation = "vertical",
-  showTitle = false,
 }: {
   items: DockItem[];
   className?: string;
@@ -80,7 +78,7 @@ const FloatingDockSimple = ({
       className={cn(
         "md:-translate-x-1/2 md:w-fit md:h-auto md:flex-row md:bottom-2",
         "md:left-1/2",
-        "fixed bottom-3 block flex h-fit w-auto", // basicStyles, positioning, sizing
+        "fixed bottom-3 flex h-fit w-auto", // basicStyles, positioning, sizing
         "flex-col-reverse rounded-full", // layout, border
         "bg-gray-50 dark:bg-neutral-800 p-1", // background, padding
         className
@@ -132,7 +130,7 @@ const FloatingDockSimple = ({
           >
             {items.map((item, idx) => (
               <IconContainerSimple
-                orientation={orientation}
+                key={idx}
                 showTitle
                 className="md:mx-1 md:my-0 my-1 mx-0"
                 {...item}
@@ -267,14 +265,9 @@ function IconContainerFull({
 const IconContainerSimple = ({
   href,
   title,
-  onClick,
   Icon,
-  motionProps,
-  showTitle,
-  orientation = "vertical",
   className,
-  ...otherProps
-}: { showTitle: boolean; orientation: "horizontal" | "vertical" } & DockItem &
+}: { showTitle: boolean } & DockItem &
   Omit<ComponentPropsWithoutRef<typeof Link>, "href" | "onClick">) => {
   const [hovered, setHovered] = useState<boolean>(false);
 
@@ -286,7 +279,6 @@ const IconContainerSimple = ({
         "text-[--gray-9] hover:text-[--accent-9] hover:dark:text-[--accent-11] dark:text-white", // textStyles
         className
       )}
-      onClick={onClick}
       key={title}
     >
       {hovered && (
@@ -297,8 +289,8 @@ const IconContainerSimple = ({
             "absolute top-2 right-12 w-fit", // basicStyles, positioning, sizing
             "whitespace-pre rounded-md border-current", // textWrapping, border
             "bg-gray-100 dark:bg-neutral-800 py-0.5 px-2", // background, padding
-            "text-sm opacity-0 opacity-0 group-hover:opacity-100", // textStyles, transparency
-            "transition-all transition-opacity duration-300 duration-700 ease-in", // transitionsAnimations
+            "text-sm opacity-0 group-hover:opacity-100", // textStyles, transparency
+            "transition-all duration-700 ease-in", // transitionsAnimations
             hovered && "opacity-100"
           )}
         >
@@ -316,7 +308,6 @@ const IconContainerSimple = ({
           "bg-gray-50 dark:bg-neutral-900", // background
           "transition-all" // transitionsAnimations
         )}
-        {...otherProps}
       >
         <div className="h-4 w-4">
           <Icon

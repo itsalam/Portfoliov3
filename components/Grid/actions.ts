@@ -4,12 +4,14 @@ import { debounce } from "lodash";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { StoreApi } from "zustand";
 import { CARD_TYPES } from "../Cards/types";
-import { GridElement, GridElements, SCROLL_TO_CARD_DELAY } from "./consts";
+import { GridElement, GridElements } from "./consts";
 import {
   binpackElements,
   getDefaultGridElement,
   initializeGridElements,
 } from "./util";
+
+const SCROLL_TO_CARD_DELAY = 100;
 
 export const useGrid = (context: StoreApi<GridStore>) => {
   const webgl = isWebGLSupported();
@@ -23,7 +25,6 @@ export const useGrid = (context: StoreApi<GridStore>) => {
       initialCards,
       webgl
     );
-    // elemMap.delete(CARD_TYPES.Location);
     return elemMap;
   });
 
@@ -43,56 +44,50 @@ export const useGrid = (context: StoreApi<GridStore>) => {
           height,
         });
       });
-      binpackElements(newGridElements, gridInfo);
-      return newGridElements;
+      return binpackElements(newGridElements, gridInfo);
     });
   }, []);
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const scrollToGridElement = useCallback(
-    debounce(
-      (gridElement: GridElement, delay = 100) => {
-        return new Promise<void>((res) =>
-          setTimeout(() => {
-            scrollAreaRef.current?.scrollTo({
-              top: Math.max(
-                0,
-                gridElement.coords[1] - gridInfoRef.current.gridUnitSize
-              ),
-              behavior: "smooth",
-            });
-            res();
-          }, delay));
-      },
-      SCROLL_TO_CARD_DELAY,
-      { trailing: true }
-    ),
-    []
-  );
 
   const pushElements = useCallback(
     (gridInfo: GridInfo, gridElements: GridElements) => (ids: CARD_TYPES[]) => {
       // On basic view, immediately move to other card
       if (activeCard) {
-        const newGridElements = new Map();
+        let newGridElements = new Map(gridElements);
         if (ids.includes(activeCard)) {
           return;
         } else {
-          ids.forEach((id) => {
+          const cards = ids.map((id) => {
             const gridElem = getDefaultGridElement(id, gridInfo);
             newGridElements.set(id, gridElem);
-            if (gridElem?.canExpand) {
-              toggleCard(id);
-            }
+            return gridElem;
           });
+          const toggleableCard = cards.find((gridElem) => gridElem.canExpand);
+          if (toggleableCard) {
+            toggleCard(toggleableCard.id);
+          } else {
+            const reorderedMap = new Map();
+            cards.forEach((card) => {
+              reorderedMap.set(card.id, card);
+            });
+            for (const [key, value] of newGridElements) {
+              if (!reorderedMap.has(key)) {
+                reorderedMap.set(key, value);
+              }
+            }
+            newGridElements = reorderedMap;
+            setGridElements(newGridElements);
+            adjustElements(gridInfo);
+            toggleCard(null);
+            return;
+          }
         }
         setGridElements(newGridElements);
         return;
       }
       //if there is an active card, return to main view
       if (activeCard) {
+        adjustElements(gridInfoRef.current);
         toggleCard(null);
-
         if (ids.includes(activeCard)) {
           return;
         }
@@ -101,22 +96,20 @@ export const useGrid = (context: StoreApi<GridStore>) => {
       //otherwise, find first element that can expand and toggle it.
       setTimeout(
         () =>
-          ids
-            .filter((id) => {
-              return id !== CARD_TYPES.Location;
-            })
-            .forEach((id) => {
-              const gridElem = gridElements.get(id);
-              if (gridElem) {
-                if (gridElem.canExpand) {
-                  toggleCard(gridElem.id);
-                }
-              } else {
-                gridElements.set(id, getDefaultGridElement(id, gridInfo));
-                setGridElements(new Map(gridElements));
-                adjustElements(gridInfoRef.current);
+          ids.map((id, i) => {
+            let gridElem = gridElements.get(id);
+            if (gridElem) {
+              if (gridElem.canExpand) {
+                toggleCard(gridElem.id);
               }
-            }),
+            } else {
+              gridElem = getDefaultGridElement(id, gridInfo);
+              gridElements.set(id, gridElem);
+              setGridElements(new Map(gridElements));
+              adjustElements(gridInfoRef.current);
+            }
+            return gridElem;
+          }),
         0
       );
     },
@@ -154,12 +147,33 @@ export const useGrid = (context: StoreApi<GridStore>) => {
     setGridElements,
   ]);
 
+  const scrollToGridElement = useCallback(
+    debounce(
+      (gridElement: GridElement, delay = 100) => {
+        return new Promise<void>((res) =>
+          setTimeout(() => {
+            scrollAreaRef.current?.scrollTo({
+              top: Math.max(
+                0,
+                gridElement.coords[1] - gridInfoRef.current.gridUnitSize
+              ),
+              behavior: "smooth",
+            });
+            res();
+          }, delay));
+      },
+      SCROLL_TO_CARD_DELAY,
+      { trailing: true }
+    ),
+    []
+  );
+
   useEffect(() => {
-    console.log({ gridInfo, dimensions, adjustElements });
     adjustElements(gridInfo);
   }, [adjustElements, gridInfo, dimensions]);
 
   return {
     gridElements,
+    scrollAreaRef,
   };
 };

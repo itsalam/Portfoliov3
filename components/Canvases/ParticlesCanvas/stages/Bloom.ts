@@ -21,7 +21,7 @@ type UpdateProps = {
   radius: number;
 };
 
-export default class Bloom extends BasePass<any, UpdateProps> {
+export default class Bloom extends BasePass<UpdateProps> {
   camera: Camera;
   particleEffect: EffectComposer;
   //   baseEffect: EffectComposer;

@@ -1,4 +1,4 @@
-import { useAnimation } from "framer-motion";
+import { m, useAnimation } from "framer-motion";
 import React, { useEffect } from "react";
 
 type VertexProps = Parameters<typeof m.rect>[0] & {

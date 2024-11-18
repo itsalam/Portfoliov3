@@ -17,7 +17,7 @@ type UpdateProps = {
   time: number;
 };
 
-export default class ExternalForce extends BasePass<any, UpdateProps> {
+export default class ExternalForce extends BasePass<UpdateProps> {
   oldMousePos: Vector2;
   cellScale: Vector2;
   constructor(simProps: ExternalForceProps) {

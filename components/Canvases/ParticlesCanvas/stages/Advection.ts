@@ -22,7 +22,7 @@ type UpdateProps = {
   dt: number;
 };
 
-export default class Advection extends BasePass<any, UpdateProps> {
+export default class Advection extends BasePass<UpdateProps> {
   line: LineSegments = new LineSegments();
   constructor(simProps: SimProps) {
     const { cellScale, src, fboSize, dt, ...baseProps } = simProps;

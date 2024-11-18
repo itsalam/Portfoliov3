@@ -4,7 +4,7 @@ export const CARD_MENU_GROUP: Record<string, CARD_TYPES[]> = {
   home: [CARD_TYPES.Home],
   projects: [CARD_TYPES.Projects],
   experience: [CARD_TYPES.Experience],
-  info: [CARD_TYPES.Location, CARD_TYPES.Resume],
+  info: [CARD_TYPES.Resume, CARD_TYPES.Location, CARD_TYPES.Contacts],
 };
 
 export const SCROLL_TO_CARD_DELAY = 200;
@@ -93,8 +93,6 @@ export const DEFAULT_GRID_ELEMENTS: Record<CARD_TYPES, DefaultGridElement> = {
   contacts: {
     id: CARD_TYPES.Contacts,
     initialCoords: DEFAULT_COORDS,
-
-    canExpand: true,
     initialDimensions: {
       width: 220,
       height: 145,
