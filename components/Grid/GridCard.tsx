@@ -6,7 +6,6 @@ import { GridContext } from "@/lib/providers/clientState";
 import { useBreakpoints } from "@/lib/providers/breakpoint";
 import { cn } from "@/lib/utils";
 import { DragHandlers, m, useAnimation } from "framer-motion";
-import { debounce } from "lodash";
 import { Maximize, X } from "lucide-react";
 import dynamic from "next/dynamic";
 import {
@@ -67,44 +66,24 @@ export const GridCard = ({
   const opacityValue = isActive ? 1 : activeCard ? 0 : 1;
 
   useEffect(() => {
-    if (!initialLoad && lastCard.current) {
+    if (activeCard === lastCard.current) {
       controls.start({
-        x: x,
-        y: y,
-        width: widthValue,
-        height: heightValue,
+        left: [null, x],
+        top: [null, y],
+        width: [null, widthValue],
+        height: [null, heightValue],
       });
-    } else {
-      controls.start({
-        width: widthValue,
-        height: heightValue,
-      });
+      return;
     }
-  }, [coords, width, height]);
-
-  useEffect(() => {
     if (activeCard === id) {
       controls.start("expand");
-    } else if (
-      (!initialLoad.current && activeCard && activeCard !== id) ||
-      lastCard.current
-    ) {
+    } else if ((activeCard && activeCard !== id) || lastCard.current) {
       controls.start("minimize");
     } else if (!activeCard) {
       controls.start("open");
     }
     lastCard.current = activeCard;
-  }, [activeCard]);
-
-  const animation = debounce(() => {
-    if (initialLoad.current) {
-      initialLoad.current = false;
-    }
-  }, 10);
-
-  useEffect(() => {
-    animation();
-  }, [animation]);
+  }, [activeCard, coords, width, height]);
 
   return (
     <BaseCard
@@ -119,10 +98,6 @@ export const GridCard = ({
         {
           "--card-width": `${width}px`,
           "--card-height": `${heightValue}px`,
-          left: x,
-          top: y,
-          width: widthValue,
-          height: heightValue,
         } as React.CSSProperties
       }
       className={cn(
@@ -135,6 +110,7 @@ export const GridCard = ({
       animate={controls}
       custom={id}
       initial={activeCard && initialLoad.current ? "expand" : { opacity: 0 }}
+      onAnimationStart={(e) => console.log({ id, x, y, e })}
       variants={{
         exit: {
           opacity: 0,
@@ -143,8 +119,6 @@ export const GridCard = ({
         },
         expand: (id) => {
           return {
-            "--card-width": `${widthValue}px`,
-            "--card-height": `${heightValue}px`,
             width: initialLoad.current
               ? [widthValue, widthValue]
               : [null, widthValue],
@@ -152,7 +126,7 @@ export const GridCard = ({
               ? [heightValue, heightValue]
               : [null, heightValue],
             borderWidth: [0.0, 0.0],
-            zIndex: id === activeCard ? 10 : 0,
+            zIndex: [null, 10],
             left: [null, isSmall ? 0 : 0],
             top: [null, isSmall ? 0 : 0],
             opacity: initialLoad.current
@@ -164,14 +138,12 @@ export const GridCard = ({
         minimize: (id) => ({
           transition: minimizeTransition,
           opacity: activeCard === id ? 1 : activeCard ? 0 : 1,
+          left: [null, x],
+          top: [null, y],
           ...(lastCard.current === id
             ? {
-                left: [null, x],
-                top: [null, y],
                 width: [null, width],
                 height: [null, height],
-                "--card-width": `${width}px`,
-                "--card-height": `${heightValue}px`,
                 borderWidth: [null, 1.0],
                 zIndex: 0,
               }

@@ -51,67 +51,38 @@ export const useGrid = (context: StoreApi<GridStore>) => {
   const pushElements = useCallback(
     (gridInfo: GridInfo, gridElements: GridElements) => (ids: CARD_TYPES[]) => {
       // On basic view, immediately move to other card
-      if (activeCard) {
-        let newGridElements = new Map(gridElements);
-        if (ids.includes(activeCard)) {
-          return;
+
+      let newGridElements = new Map(gridElements);
+      if (activeCard && ids.includes(activeCard)) {
+        return;
+      } else {
+        const cards = ids.map((id) => {
+          const gridElem =
+            newGridElements.get(id) ?? getDefaultGridElement(id, gridInfo);
+          newGridElements.set(id, gridElem);
+          return gridElem;
+        });
+        const toggleableCard = cards.find((gridElem) => gridElem.canExpand);
+        if (toggleableCard) {
+          toggleCard(toggleableCard.id);
         } else {
-          const cards = ids.map((id) => {
-            const gridElem = getDefaultGridElement(id, gridInfo);
-            newGridElements.set(id, gridElem);
-            return gridElem;
+          toggleCard(null);
+          const reorderedMap = new Map();
+          cards.forEach((card) => {
+            reorderedMap.set(card.id, card);
           });
-          const toggleableCard = cards.find((gridElem) => gridElem.canExpand);
-          if (toggleableCard) {
-            toggleCard(toggleableCard.id);
-          } else {
-            const reorderedMap = new Map();
-            cards.forEach((card) => {
-              reorderedMap.set(card.id, card);
-            });
-            for (const [key, value] of newGridElements) {
-              if (!reorderedMap.has(key)) {
-                reorderedMap.set(key, value);
-              }
+          console.log({ cards });
+          for (const [key, value] of newGridElements) {
+            if (!reorderedMap.has(key)) {
+              reorderedMap.set(key, value);
             }
-            newGridElements = reorderedMap;
-            setGridElements(newGridElements);
-            adjustElements(gridInfo);
-            toggleCard(null);
-            return;
           }
+          console.log({ newGridElements, reorderedMap });
+          newGridElements = reorderedMap;
         }
         setGridElements(newGridElements);
-        return;
+        adjustElements(gridInfo);
       }
-      //if there is an active card, return to main view
-      if (activeCard) {
-        adjustElements(gridInfoRef.current);
-        toggleCard(null);
-        if (ids.includes(activeCard)) {
-          return;
-        }
-      }
-
-      //otherwise, find first element that can expand and toggle it.
-      setTimeout(
-        () =>
-          ids.map((id, i) => {
-            let gridElem = gridElements.get(id);
-            if (gridElem) {
-              if (gridElem.canExpand) {
-                toggleCard(gridElem.id);
-              }
-            } else {
-              gridElem = getDefaultGridElement(id, gridInfo);
-              gridElements.set(id, gridElem);
-              setGridElements(new Map(gridElements));
-              adjustElements(gridInfoRef.current);
-            }
-            return gridElem;
-          }),
-        0
-      );
     },
     [activeCard, toggleCard, adjustElements]
   );

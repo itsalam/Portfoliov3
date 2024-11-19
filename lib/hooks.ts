@@ -97,7 +97,7 @@ export const useScrollMask = (
   spring?: boolean,
   targetRef?: RefObject<HTMLElement>
 ) => {
-  const [offset, setOffset] = useState(0);
+  const offset = useMotionValue(0);
 
   // A spring that will control the "bounce-back" effect
   const bounceSpring = useSpring(offset, {
@@ -106,31 +106,35 @@ export const useScrollMask = (
   });
 
   const handleScroll: EventListener = () => {
-    if (ref.current) {
-      const scrollTop = ref.current.scrollTop;
-      const maxScroll = ref.current.scrollHeight - ref.current.clientHeight;
+    const elem = ref.current;
+    if (elem) {
+      const scrollTop = elem.scrollTop;
+      const maxScroll = elem.scrollHeight - elem.clientHeight;
       const percent = scrollTop / maxScroll;
-      maskScrollArea(
-        direction,
-        (targetRef ?? ref).current as HTMLElement,
-        percent,
-        10
-      );
+      if (percent >= 0) {
+        maskScrollArea(
+          direction,
+          (targetRef ?? ref).current as HTMLElement,
+          percent,
+          5
+        );
+      }
+
       if (!spring) return;
 
       // If the user scrolls beyond the top or bottom boundaries
       if (scrollTop < 0) {
-        setOffset(-scrollTop); // Set offset to create bounce-back effect
+        offset.set(-scrollTop); // Set offset to create bounce-back effect
       } else if (scrollTop > maxScroll) {
-        setOffset(maxScroll - scrollTop);
+        offset.set(maxScroll - scrollTop);
       } else {
-        setOffset(0); // Reset offset when within bounds
+        offset.set(0); // Reset offset when within bounds
       }
     }
   };
 
   useEffect(() => {
-    maskScrollArea(direction, ref.current as HTMLElement, 0, 10);
+    maskScrollArea(direction, ref.current as HTMLElement, 0, 5);
 
     const container = ref.current;
     container?.addEventListener("wheel", handleScroll);

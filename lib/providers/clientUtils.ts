@@ -19,8 +19,12 @@ export const maskScrollArea = (
   const maskImageStep1 = percentage > 0 ? "rgba(0, 0, 0, 0) 0%, " : "";
   const maskImageStep2 = percentage < 1 ? ", rgba(0, 0, 0, 0) 100%" : "";
   const middleSteps = `rgb(0, 0, 0, 1) ${percentage * threshold}%, rgb(0, 0, 0, 1) ${percentage * threshold + 100 - threshold}%`;
-  element.style.setProperty("--scrollProgress", `${percentage * 100}%`);
-  element.style.maskImage = `linear-gradient(to ${direction}, ${maskImageStep1}${middleSteps}${maskImageStep2})`;
+  element.animate(
+    {
+      maskImage: `linear-gradient(to ${direction}, ${maskImageStep1}${middleSteps}${maskImageStep2})`,
+    },
+    { fill: "forwards" }
+  );
 };
 
 export function useDebounce<T>(value: T, delay: number, variance = 0) {

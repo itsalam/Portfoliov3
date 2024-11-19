@@ -30,6 +30,17 @@ const Grid = () => {
     return <GridCard gridElement={gridElement} />;
   }, []);
 
+  const Cards = useCallback(
+    ({ gridElements }: { gridElements: Map<string, GridElement> }) => (
+      <AnimatePresence>
+        {Array.from(gridElements.values()).map((gridElement) => (
+          <Card key={`${gridElement.id}`} gridElement={gridElement} />
+        ))}
+      </AnimatePresence>
+    ),
+    []
+  );
+
   return (
     <m.div
       id="grid"
@@ -47,11 +58,7 @@ const Grid = () => {
             position: activeCard ? "initial" : "relative",
           }}
         >
-          <AnimatePresence>
-            {Array.from(gridElements.values()).map((gridElement) => (
-              <Card key={`${gridElement.id}`} gridElement={gridElement} />
-            ))}
-          </AnimatePresence>
+          <Cards gridElements={gridElements} />
         </div>
         {webgl && <GridBackdrop scrollY={scrollY} />}
       </ScrollArea>
