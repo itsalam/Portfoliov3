@@ -243,12 +243,6 @@ body {
   object-position: var(--x-Pos) center;
 }
 
-.track-card {
-  /* --card-width: 3.5; */
-  /* min-width: 288px;
-  width: calc(var(--cell-size) * var(--card-width)); */
-}
-
 .no-shadow .card {
   --tw-shadow-color: transparent;
   --tw-shadow: var(--tw-shadow-colored);

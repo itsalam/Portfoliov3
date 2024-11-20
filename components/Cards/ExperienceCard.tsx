@@ -1,12 +1,14 @@
 "use client";
 
 import { useScrollMask } from "@/lib/hooks";
+import { GridContext } from "@/lib/providers/clientState";
 import { CMSContext } from "@/lib/providers/state";
 import { cn, formatDate } from "@/lib/utils";
 import { ScrollArea, Separator, Text } from "@radix-ui/themes";
 import { m } from "framer-motion";
 import { Fragment, useContext, useRef } from "react";
 import { useStore } from "zustand";
+import { CARD_TYPES } from "./types";
 
 const MScrollArea = m(ScrollArea);
 
@@ -15,6 +17,8 @@ export default function ExperienceCard() {
   const y = useScrollMask(scrollRef, "bottom", true);
   const cms = useContext(CMSContext)!;
   const experiences = useStore(cms, (cms) => cms.works ?? []);
+  const store = useContext(GridContext)!;
+  const { activeCard } = useStore(store);
 
   return (
     <div
@@ -25,14 +29,19 @@ export default function ExperienceCard() {
       <MScrollArea
         type="always"
         scrollbars="vertical"
-        className="py-4 pl-4"
+        className={cn(
+          "py-4 pl-4"
+        )}
         ref={scrollRef}
         style={{ y }}
       >
         {experiences.map((experience, i) => (
           <div
             key={i}
-            className="mr-4 flex flex-col gap-y-2 pb-12"
+            className={cn(
+              "mr-4 mx-auto flex flex-col gap-y-2 pb-12",
+              activeCard === CARD_TYPES.Experience && "max-w-g-8"
+            )}
           >
             <Text
               size="8"

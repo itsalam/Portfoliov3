@@ -39,7 +39,7 @@ const BaseCard = forwardRef<
         e.preventDefault();
       }}
       className={cn(
-        "card group/card border-[1px]",
+        "card group border-[1px]",
         "flex origin-top-left flex-col", // sizing, transforms, layout
         "overflow-hidden", // overflowControl
         "border-[--accent-a3] hover:border-[--accent-10] dark:hover:border-[--accent-a7]", // border
@@ -54,10 +54,10 @@ const BaseCard = forwardRef<
           "glass",
           "relative z-10 flex", // basicStyles, layoutControl, sizing
           "flex-col justify-center", // layout
-          "group-hover/card:dark:bg-[--accent-a3]", // background
-          "group-hover/card:bg-[--accent-a7] bg-[--gray-surface]",
-          "font-light group-hover/card:text-[--gray-contrast]", // textStyles
-          "group-hover/card:dark:text-[--accent-11]",
+          "group-[:hover>]:dark:bg-[--accent-a3]", // background
+          "group-[:hover>]:bg-[--accent-a7] bg-[--gray-surface]",
+          "font-light group-[:hover>]:text-[--gray-contrast]", // textStyles
+          "group-[:hover>]:dark:text-[--accent-11]",
           "opacity-100 transition-opacity", // transparency, transitionsAnimations
           isSmall ? "h-12" : "h-8"
         )}
@@ -75,7 +75,7 @@ const BaseCard = forwardRef<
         <Text
           size={isSmall ? "4" : "2"}
           className={cn(
-            "color-[--gray-a4] user-select-none select-none",
+            "user-select-none select-none",
             "pointer-events-none w-fit", // basicStyles, sizing
             "text-ellipsis text-nowrap py-1 px-3", // textWrapping, padding
             "transition-colors" // transitionsAnimations
@@ -88,8 +88,8 @@ const BaseCard = forwardRef<
           className={cn(
             "absolute", // basicStyles
             "bottom-0 left-0 w-full", // positioning, sizing
-            "bg-[--gray-a3] group-hover/card:bg-[--gray-10]", // background
-            "group-hover/card:dark:bg-[--gray-a7]",
+            "bg-[--gray-a3] group-[:hover>div]:bg-[--gray-10]", // background
+            "group-[:hover>div]:dark:bg-[--gray-a7]",
             "transition-all" // transitionsAnimations
           )}
           size="4"
@@ -106,7 +106,7 @@ const BaseCard = forwardRef<
       <m.div
         className={cn(
           "card-bg",
-          "z-30 h-full overflow-hidden", // layoutControl, sizing, overflowControl
+          "isolate z-30 h-full overflow-hidden", // layoutControl, sizing, overflowControl
           "text-[unset] transition-colors" // textStyles, transitionsAnimations
         )}
         variants={

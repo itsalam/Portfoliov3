@@ -10,7 +10,7 @@ import { CMSContext } from "@/lib/providers/state";
 import { cn } from "@/lib/utils";
 import { urlForImage } from "@/sanity/lib/image";
 import { Badge, Separator } from "@radix-ui/themes";
-import { AnimatePresence, m, useInView } from "framer-motion";
+import { animate, AnimatePresence, inView, m, Variants } from "framer-motion";
 import { debounce } from "lodash";
 import { ArrowLeft, ArrowRight, Github, Link, X } from "lucide-react";
 import Image from "next/image";
@@ -19,10 +19,10 @@ import {
   FC,
   forwardRef,
   ReactNode,
-  RefObject,
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -36,6 +36,23 @@ const MotionBadge = m(Badge);
 const MImage = m(Image);
 
 const DEFAULT_TEXT = "Scroll or drag to navigate.";
+
+const cardVariants = {
+  animate: {
+    opacity: [null, 1],
+    x: [null, -16],
+    rotateY: [null, -10],
+    rotateX: [null, 3],
+    z: [null, -40],
+  },
+  focused: {
+    rotateY: [null, 0],
+    rotateX: [null, 0],
+    opacity: [null, 1],
+    x: [null, -8],
+    z: [null, 0],
+  },
+};
 
 const ImageComponent = ({
   src,
@@ -101,63 +118,63 @@ const SubCard = forwardRef<
 
 SubCard.displayName = "SubCard";
 
-const TrackCard = ({
-  containerRef,
-  callBack,
-  ...props
-}: {
-  containerRef?: RefObject<HTMLDivElement>;
-  callBack?: () => void;
-} & ComponentProps<typeof SubCard>) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, {
-    root: containerRef,
-    amount: "some",
-    margin: "-48% 0% -48% 0%",
-  });
+// const TrackCard = ({
+//   containerRef,
+//   callBack,
+//   ...props
+// }: {
+//   containerRef?: RefObject<HTMLDivElement>;
+//   callBack?: () => void;
+// } & ComponentProps<typeof SubCard>) => {
+//   const ref = useRef<HTMLDivElement>(null);
+//   const inView = useInView(ref, {
+//     root: containerRef,
+//     amount: "some",
+//     margin: "-48% 0% -48% 0%",
+//   });
 
-  useEffect(() => {
-    if (inView && callBack) {
-      callBack();
-    }
-    return () => {};
-  }, [inView, callBack]);
+//   useEffect(() => {
+//     if (inView && callBack) {
+//       callBack();
+//     }
+//     return () => {};
+//   }, [inView, callBack]);
 
-  const Card = useCallback(
-    (props: ComponentProps<typeof SubCard>) => (
-      <SubCard
-        variants={{
-          animate: {
-            opacity: [null, 1],
-            x: [null, -16],
-            rotateY: [null, -10],
-            rotateX: [null, 3],
-            z: [null, -40],
-          },
-          focused: {
-            rotateY: [null, 0],
-            rotateX: [null, 0],
-            opacity: [null, 1],
-            x: [null, -8],
-            z: [null, 0],
-          },
-        }}
-        initial={{
-          opacity: 0,
-          x: -400,
-          z: -40,
-          originX: "50%",
-          originY: "50%",
-        }}
-        whileHover={"focused"}
-        ref={ref}
-        {...props}
-      />
-    ),
-    []
-  );
-  return <Card {...props} animate={inView ? "focused" : "animate"} />;
-};
+//   const Card = useCallback(
+//     (props: ComponentProps<typeof SubCard>) => (
+//       <SubCard
+//         variants={{
+//           animate: {
+//             opacity: [null, 1],
+//             x: [null, -16],
+//             rotateY: [null, -10],
+//             rotateX: [null, 3],
+//             z: [null, -40],
+//           },
+//           focused: {
+//             rotateY: [null, 0],
+//             rotateX: [null, 0],
+//             opacity: [null, 1],
+//             x: [null, -8],
+//             z: [null, 0],
+//           },
+//         }}
+//         initial={{
+//           opacity: 0,
+//           x: -400,
+//           z: -40,
+//           originX: "50%",
+//           originY: "50%",
+//         }}
+//         whileHover={"focused"}
+//         ref={ref}
+//         {...props}
+//       />
+//     ),
+//     []
+//   );
+//   return <Card {...props} animate={inView ? "focused" : "animate"} />;
+// };
 
 export default function ProjectsCard(props: ComponentProps<typeof m.div>) {
   const gridContext = useContext(GridContext);
@@ -261,15 +278,36 @@ export default function ProjectsCard(props: ComponentProps<typeof m.div>) {
 
   const changeSelectedProject = useCallback((i: number) => {
     setSelectedProject((curr) => (curr !== i ? i : -1));
-  }, []);
-
-  useEffect(() => {
     resolveTitle();
-  }, [resolveTitle, selectedProject]);
+  }, []);
 
   useEffect(() => {
     activeCard === CARD_TYPES.Projects && changeSelectedProject(-1);
   }, [activeCard, changeSelectedProject]);
+
+  useLayoutEffect(() => {
+    const container = containerRef.current;
+    const unsub = inView(
+      "#projects .track-card",
+      (info) => {
+        const index = Number(
+          info.target.attributes.getNamedItem("data-index")?.value
+        );
+        animate(info.target as Element, cardVariants.focused);
+        !Number.isNaN(index) && handleProjectHover(index)();
+
+        return () => {
+          animate(info.target as Element, cardVariants.animate);
+        };
+      },
+      {
+        root: container ?? undefined,
+        amount: "some",
+        margin: "-48% 0% -48% 0%",
+      }
+    );
+    return () => unsub();
+  }, []);
 
   const ProjectThumbnails = useCallback(
     ({ project }: { project: Project }) => (
@@ -558,7 +596,20 @@ export default function ProjectsCard(props: ComponentProps<typeof m.div>) {
   );
 
   const FullTrackCard = useCallback(
-    (props: ComponentProps<typeof TrackCard>) => <TrackCard {...props} />,
+    (props: ComponentProps<typeof SubCard>) => (
+      <SubCard
+        variants={cardVariants as Variants}
+        initial={{
+          opacity: 0,
+          x: -400,
+          z: -40,
+          originX: "50%",
+          originY: "50%",
+        }}
+        whileHover={"focused"}
+        {...props}
+      />
+    ),
     []
   );
 
@@ -622,16 +673,16 @@ export default function ProjectsCard(props: ComponentProps<typeof m.div>) {
                   </div>
                 ) : (
                   <FullTrackCard
-                    containerRef={projectsRef}
+                    data-index={index}
                     project={project}
                     key={index}
                     className={cn(
                       "track-card group/track-card",
-                      "aspect-video w-full origin-center", // sizing, transforms
+                      "isolate aspect-video w-full origin-center", // layoutControl, sizing, transforms
                       "cursor-pointer", // interactions
                       isSmall ? "mx-g-1/8" : ""
                     )}
-                    callBack={handleProjectHover(index)}
+                    // callBack={handleProjectHover(index)}
                     {...(webgl ? {} : { variants: {} })}
                     onMouseEnter={() => handleProjectHover(index)}
                     onMouseLeave={() => handleProjectHover(-1)}
