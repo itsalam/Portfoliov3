@@ -96,8 +96,12 @@
   }
 
   .card {
-    @apply hover:shadow-xl shadow-[--black-a2] dark:shadow-[--accent-a2];
+    @apply shadow-[--black-a2] dark:shadow-[--accent-a2];
     border-radius: var(--radius-5);
+  }
+
+  .webgl .card:not(.focus-card) {
+    @apply hover:shadow-xl;
   }
 
   #projDesc {
@@ -108,7 +112,16 @@
     position: relative !important;
   }
 
-  #projects #track > * {
+  /* #projects #track > * {
+    height: 100%;
+  } */
+
+  #projects [data-radix-scroll-area-viewport] {
+    overflow-x: hidden !important;
+    overflow-y: scroll !important;
+  }
+
+  #projects [data-radix-scroll-area-viewport] > div {
     width: 100%;
   }
 
@@ -209,7 +222,7 @@ body {
   translate: -50% -50%;
 }
 
-.glass {
+.webgl .glass {
   -webkit-backdrop-filter: blur(2px);
   backdrop-filter: blur(1px);
   box-shadow: 2px 4px 20px #0000000a;

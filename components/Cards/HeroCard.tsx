@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimateText, RotateText } from "@/components/motion/TextEffects";
+import { HeroText, MotionText } from "@/components/motion/TextEffects";
 import { useWebGLSupport } from "@/lib/hooks";
 import { GridContext } from "@/lib/providers/clientState";
 import { cn } from "@/lib/utils";
@@ -67,9 +67,9 @@ export default function HeroCard(props: ComponentProps<typeof m.div>) {
         <Text
           size={"7"}
           className="relative top-1 mb-1 flex overflow-hidden"
-          style={{ perspective: "20cm" }}
+          style={{ perspective: "30cm" }}
         >
-          <AnimateText
+          <MotionText
             size={"4"}
             className="w-min whitespace-nowrap"
             text="Hi there, I&lsquo;m"
@@ -78,7 +78,7 @@ export default function HeroCard(props: ComponentProps<typeof m.div>) {
           <span className="relative w-1">
             {" "}
           </span>
-          <RotateText
+          <HeroText
             size={"4"}
             className="relative top-0 text-inherit"
             range={[0, 2]}
@@ -91,12 +91,12 @@ export default function HeroCard(props: ComponentProps<typeof m.div>) {
             "relative flex flex-col gap-0", // basicStyles, sizing, layout
             "overflow-hidden pr-0 font-bold" // overflowControl, padding, textStyles
           )}
-          style={{ perspective: "10cm" }}
+          style={{ perspective: "2cm" }}
         >
           {/* <div className="absolute top-0 flex h-full flex-row gap-0"> */}
           <div className="xs:flex-row absolute flex flex-col flex-wrap gap-x-4">
             <div className="relative overflow-hidden">
-              <RotateText
+              <HeroText
                 size={"9"}
                 className="relative top-0 left-0 flex h-16 items-center"
                 range={[2, 0]}
@@ -110,7 +110,7 @@ export default function HeroCard(props: ComponentProps<typeof m.div>) {
             className={"xs:flex-row relative flex flex-col flex-wrap gap-x-4"}
           >
             <div className="relative overflow-hidden">
-              <RotateText
+              <HeroText
                 size={"9"}
                 className="relative top-0 left-0 flex h-16 items-center"
                 range={[0, 1]}
@@ -119,7 +119,7 @@ export default function HeroCard(props: ComponentProps<typeof m.div>) {
             </div>
 
             <div className="relative overflow-hidden">
-              <RotateText
+              <HeroText
                 size={"9"}
                 className="relative flex h-16 items-center font-bold"
                 range={[0, 2]}
@@ -129,7 +129,7 @@ export default function HeroCard(props: ComponentProps<typeof m.div>) {
           </div>
 
           <div className="absolute h-16 w-full overflow-hidden">
-            <RotateText
+            <HeroText
               size={"9"}
               className="absolute top-0 left-0 flex h-16 items-start"
               range={[1, 2]}

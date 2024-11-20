@@ -1,22 +1,25 @@
 "use client";
 
-import { AnimateText, AnimatedText } from "@/components/motion/TextEffects";
+import { AnimatedText, MotionText } from "@/components/motion/TextEffects";
 import { useScrollMask } from "@/lib/hooks";
 import { useBreakpoints } from "@/lib/providers/breakpoint";
 import { GridContext } from "@/lib/providers/clientState";
+import { isWebGLSupported } from "@/lib/providers/clientUtils";
 import { Project } from "@/lib/providers/fetchData";
 import { CMSContext } from "@/lib/providers/state";
 import { cn } from "@/lib/utils";
 import { urlForImage } from "@/sanity/lib/image";
 import { Badge, Separator } from "@radix-ui/themes";
-import { AnimatePresence, m, useScroll } from "framer-motion";
+import { AnimatePresence, m, useInView } from "framer-motion";
 import { debounce } from "lodash";
 import { ArrowLeft, ArrowRight, Github, Link, X } from "lucide-react";
 import Image from "next/image";
 import {
   ComponentProps,
   FC,
+  forwardRef,
   ReactNode,
+  RefObject,
   useCallback,
   useContext,
   useEffect,
@@ -65,36 +68,96 @@ const ImageComponent = ({
   );
 };
 
-const ProjectCardComponent = ({
-  project,
-  className,
-  index = 0,
-  ...props
-}: { project: Project; index?: number } & ComponentProps<typeof m.div>) => (
-  <BaseCard
-    title={project.name}
-    animate={"animate"}
-    layoutId={`selected-project-${project._id}-${index}`}
-    layout="preserve-aspect"
-    exit={{
-      opacity: 0,
-      // x: 100,
-    }}
-    className={className}
-    {...props}
-  >
-    <ImageComponent
-      src={urlForImage(project.thumbnails[index])}
-      variants={{
-        focused: {
-          opacity: 1,
-          objectFit: "cover",
-        },
+const SubCard = forwardRef<
+  HTMLDivElement,
+  { project: Project; index?: number } & ComponentProps<typeof m.div>
+>(({ project, className, index = 0, ...props }, ref) => {
+  return (
+    <BaseCard
+      title={project.name}
+      animate={"animate"}
+      layoutId={`selected-project-${project._id}-${index}`}
+      layout="preserve-aspect"
+      exit={{
+        opacity: 0,
       }}
-      alt="project image"
-    />
-  </BaseCard>
-);
+      className={className}
+      ref={ref}
+      {...props}
+    >
+      <ImageComponent
+        src={urlForImage(project.thumbnails[index])}
+        variants={{
+          focused: {
+            opacity: 1,
+            objectFit: "cover",
+          },
+        }}
+        alt="project image"
+      />
+    </BaseCard>
+  );
+});
+
+SubCard.displayName = "SubCard";
+
+const TrackCard = ({
+  containerRef,
+  callBack,
+  ...props
+}: {
+  containerRef?: RefObject<HTMLDivElement>;
+  callBack?: () => void;
+} & ComponentProps<typeof SubCard>) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, {
+    root: containerRef,
+    amount: "some",
+    margin: "-48% 0% -48% 0%",
+  });
+
+  useEffect(() => {
+    if (inView && callBack) {
+      callBack();
+    }
+    return () => {};
+  }, [inView, callBack]);
+
+  const Card = useCallback(
+    (props: ComponentProps<typeof SubCard>) => (
+      <SubCard
+        variants={{
+          animate: {
+            opacity: [null, 1],
+            x: [null, -16],
+            rotateY: [null, -10],
+            rotateX: [null, 3],
+            z: [null, -40],
+          },
+          focused: {
+            rotateY: [null, 0],
+            rotateX: [null, 0],
+            opacity: [null, 1],
+            x: [null, -8],
+            z: [null, 0],
+          },
+        }}
+        initial={{
+          opacity: 0,
+          x: -400,
+          z: -40,
+          originX: "50%",
+          originY: "50%",
+        }}
+        whileHover={"focused"}
+        ref={ref}
+        {...props}
+      />
+    ),
+    []
+  );
+  return <Card {...props} animate={inView ? "focused" : "animate"} />;
+};
 
 export default function ProjectsCard(props: ComponentProps<typeof m.div>) {
   const gridContext = useContext(GridContext);
@@ -105,6 +168,27 @@ export default function ProjectsCard(props: ComponentProps<typeof m.div>) {
   const thumbnailContainerRef = useRef<HTMLDivElement>(null);
   const breakpoint = useBreakpoints();
   const isSmall = breakpoint === "xs" || breakpoint === "sm";
+  const webgl = isWebGLSupported();
+  const hasScrolled = useRef<boolean>(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      hasScrolled.current = true;
+    };
+
+    const refCurrent = projectsRef.current;
+    if (refCurrent) {
+      refCurrent.addEventListener("scroll", handleScroll);
+      refCurrent.addEventListener("wheel", handleScroll);
+    }
+
+    return () => {
+      if (refCurrent) {
+        refCurrent.removeEventListener("scroll", handleScroll);
+        refCurrent.removeEventListener("wheel", handleScroll);
+      }
+    };
+  }, [hasScrolled]);
 
   useScrollMask(projectsRef, "bottom", false);
 
@@ -115,84 +199,73 @@ export default function ProjectsCard(props: ComponentProps<typeof m.div>) {
     : { activeCard: null };
 
   const prevFocusedProject = useRef<number>();
-  const [focusedProject, setFocusedProject] = useState<number>(-1);
+  const focusedProject = useRef<number>(-1);
   const [selectedProject, setSelectedProject] = useState<number>(-1);
-  const [clickedProject, setClickedProject] = useState<number>(-1);
   const [titleText, setTitleText] = useState<{
     text: string;
-    reversed: boolean;
-  }>({ text: projects[focusedProject]?.name || "Projects.", reversed: false });
-
-  const { scrollYProgress } = useScroll({
-    container: trackRef,
-  });
-
-  scrollYProgress.on("change", (value) => {
-    const index = Math.min(
-      Math.floor(value * projects.length),
-      projects.length - 1
-    );
-    changeFocusTitle.current(index);
-  });
+    reverse: boolean;
+  }>({ text: "Projects.", reverse: false });
 
   const changeFocusTitle = useRef(
     debounce(
       (projectIdx: number) => {
-        if (focusedProject === projectIdx) return;
-        setFocusedProject((prevProj) => {
-          prevFocusedProject.current = prevProj;
-          return projectIdx;
-        });
+        if (focusedProject.current === projectIdx) return;
+        prevFocusedProject.current = focusedProject.current;
+        focusedProject.current = projectIdx;
+        resolveTitle();
       },
       10,
-      { trailing: true, leading: true, maxWait: 600 }
+      { trailing: true }
     )
   );
 
-  const resolveTitle = useRef(
+  const resolveTitle = useCallback(
     debounce(
-      (selectedProject: number, focusedProject: number) => {
-        if (focusedProject >= 0 && focusedProject !== selectedProject) {
+      () => {
+        if (!hasScrolled.current) return;
+        const curFocusedProject = focusedProject.current;
+        if (curFocusedProject >= 0 && curFocusedProject !== selectedProject) {
           setTitleText({
-            text: projects[focusedProject]?.name || "Projects.",
-            reversed: focusedProject > selectedProject,
+            text: projects[curFocusedProject]?.name || "Projects.",
+            reverse: curFocusedProject > selectedProject,
           });
         } else if (selectedProject >= 0) {
           const project = projects[selectedProject];
           setTitleText({
             text: project?.name ?? "Projects.",
-            reversed: false,
+            reverse: false,
           });
         } else {
           setTitleText({
             text: "Projects.",
-            reversed: true,
+            reverse: true,
           });
         }
       },
       500,
-      { trailing: true, maxWait: 600 }
-    )
+      { trailing: true }
+    ),
+    [selectedProject]
   );
 
-  const handleProjectHover = (projectIdx: number) => () => {
-    if (focusedProject >= 0 && focusedProject !== selectedProject)
-      changeFocusTitle.current(projectIdx);
-    else if (!(selectedProject >= 0 && projectIdx === selectedProject))
-      changeFocusTitle.current(projectIdx);
-  };
-
-  const changeSelectedProject = useCallback(
-    (projectIdx: number) => {
-      setClickedProject(projectIdx);
-      setSelectedProject(projectIdx);
+  const handleProjectHover = useCallback(
+    (i: number) => () => {
+      if (i < 0 && prevFocusedProject.current) {
+        changeFocusTitle.current(prevFocusedProject.current);
+      } else {
+        changeFocusTitle.current(i);
+      }
     },
-    [projects]
+    []
   );
+
+  const changeSelectedProject = useCallback((i: number) => {
+    setSelectedProject((curr) => (curr !== i ? i : -1));
+  }, []);
 
   useEffect(() => {
-    resolveTitle.current(selectedProject, focusedProject);
-  }, [focusedProject, resolveTitle, selectedProject]);
+    resolveTitle();
+  }, [resolveTitle, selectedProject]);
 
   useEffect(() => {
     activeCard === CARD_TYPES.Projects && changeSelectedProject(-1);
@@ -204,7 +277,9 @@ export default function ProjectsCard(props: ComponentProps<typeof m.div>) {
         className={cn(
           "top-0 bottom-0",
           isSmall ? "" : "sticky min-w-[25%] h-full",
-          isSmall && project.thumbnails.length > 1 && "w-screen px-8 py-4 relative overflow-x-scroll -left-[5%]"
+          isSmall &&
+            project.thumbnails.length > 1 &&
+            "w-screen px-8 py-4 relative overflow-x-scroll -left-[5%]"
         )}
       >
         <m.div
@@ -219,8 +294,8 @@ export default function ProjectsCard(props: ComponentProps<typeof m.div>) {
           )}
         >
           <AnimatePresence>
-            {project.thumbnails.map((thumbnail, index) => (
-              <ProjectCardComponent
+            {project.thumbnails.map((_thumbnail, index) => (
+              <SubCard
                 project={project}
                 index={index}
                 className="md:h-auto flex aspect-video w-full flex-col"
@@ -235,7 +310,7 @@ export default function ProjectsCard(props: ComponentProps<typeof m.div>) {
         </m.div>
       </div>
     ),
-    [selectedProject]
+    [isSmall]
   );
 
   const ProjectTitle = useCallback((
@@ -245,7 +320,7 @@ export default function ProjectsCard(props: ComponentProps<typeof m.div>) {
       className,
       text,
     }) => (
-      <AnimateText
+      <MotionText
         size={"8"}
         className={cn(
           "w-full text-balance font-bold",
@@ -260,16 +335,6 @@ export default function ProjectsCard(props: ComponentProps<typeof m.div>) {
 
   const ProjectDescription = useCallback((props: { project: Project }) => {
     const { project } = props;
-    const Text: FC<{ className?: string; text: string }> = ({ className }) => (
-      <AnimateText
-        className={cn(
-          "w-inherit whitespace-normal",
-          className
-        )}
-        size={"5"}
-        text={project?.description ?? DEFAULT_TEXT}
-      />
-    );
 
     return (
       <div
@@ -278,10 +343,12 @@ export default function ProjectsCard(props: ComponentProps<typeof m.div>) {
           "flex w-full flex-col"
         )}
       >
-        <AnimatedText
+        <MotionText
+          className={cn(
+            "w-inherit whitespace-normal"
+          )}
+          size={"5"}
           text={project?.description ?? DEFAULT_TEXT}
-          reverse={!project}
-          textChild={Text}
         />
         <AnimatePresence mode="wait">
           <div
@@ -446,7 +513,7 @@ export default function ProjectsCard(props: ComponentProps<typeof m.div>) {
         </div>
       );
     },
-    [changeSelectedProject, projects, selectedProject]
+    [changeSelectedProject, isSmall, projects, selectedProject]
   );
 
   const Body = useCallback(
@@ -456,13 +523,11 @@ export default function ProjectsCard(props: ComponentProps<typeof m.div>) {
       selectedProject,
     }: {
       projects: Project[];
-      titleText: { text: string; reversed: boolean };
+      titleText: { text: string; reverse: boolean };
       selectedProject: number;
     }) => (
       <>
         <div
-          
-          // style={{ height: dimensions.height }}
           key={"body"}
           className={cn(
             "top-0 left-0 flex flex-1 flex-col justify-center",
@@ -478,6 +543,7 @@ export default function ProjectsCard(props: ComponentProps<typeof m.div>) {
             className={cn(
               "xs:flex-row flex justify-between gap-2 pr-8"
             )}
+            style={{ perspective: "5cm" }}
           >
             <ProjectTitle {...titleText} />
           </div>
@@ -489,6 +555,11 @@ export default function ProjectsCard(props: ComponentProps<typeof m.div>) {
       </>
     ),
     [isSmall, UrlNalBar, ProjectTitle, ProjectDescription, ProjectThumbnails]
+  );
+
+  const FullTrackCard = useCallback(
+    (props: ComponentProps<typeof TrackCard>) => <TrackCard {...props} />,
+    []
   );
 
   return (
@@ -503,8 +574,13 @@ export default function ProjectsCard(props: ComponentProps<typeof m.div>) {
           setTimeout(() => handleProjectHover(selectedProject)(), 1000)
         }
       >
-        <ProjectTrack clickedProject={clickedProject}>
-          <div className={cn("flex w-full flex-1 justify-center", isSmall?"" : "gap-8")}>
+        <ProjectTrack clickedProject={0}>
+          <div
+            className={cn(
+              "flex w-full flex-1 justify-center",
+              isSmall ? "" : "gap-8"
+            )}
+          >
             {!isSmall && (
               <>
                 <Body
@@ -515,18 +591,21 @@ export default function ProjectsCard(props: ComponentProps<typeof m.div>) {
               </>
             )}
             <m.div
-              style={{ perspective: "20cm" }}
+              style={webgl ? { perspective: "30cm" } : {}}
               className={cn(
-                "flex h-max w-full min-w-[20%x]", // sizing
-                "flex-col items-start py-12", // layout, padding
-                isSmall ? "w-[90%] gap-g-1 justify-center" : "max-w-[50%] pr-8 gap-g-4/8"
+                "flex h-max min-w-[20%] flex-col items-start py-12",
+                isSmall
+                  ? "w-[90%] gap-g-1 justify-center"
+                  : "max-w-[50%] pr-8 gap-g-4/8",
+                activeCard === CARD_TYPES.Projects &&
+                  "my-[calc(var(--card-height)_/_5)]"
               )}
               ref={thumbnailContainerRef}
               animate={{
-                transition:{
-                staggerChildren: 0.1,
-                delayChildren: 0.2,
-                }
+                transition: {
+                  staggerChildren: 0.1,
+                  delayChildren: 0.2,
+                },
               }}
             >
               {projects.map((project, index) =>
@@ -542,54 +621,21 @@ export default function ProjectsCard(props: ComponentProps<typeof m.div>) {
                     />
                   </div>
                 ) : (
-                  <ProjectCardComponent
-                    animate={index === focusedProject ? "focused" : "animate"}
-                    whileHover={"focused"}
+                  <FullTrackCard
+                    containerRef={projectsRef}
                     project={project}
-                    key={`project-${index}`}
+                    key={index}
                     className={cn(
-                      "card track-card group/track-card",
+                      "track-card group/track-card",
                       "aspect-video w-full origin-center", // sizing, transforms
-                      "cursor-pointer", // interactions,
+                      "cursor-pointer", // interactions
                       isSmall ? "mx-g-1/8" : ""
                     )}
-                    initial={{ opacity: 0, x: "200%", rotateY: -20, rotateX: 3, }}
-                    variants={{
-                      animate: {
-                        opacity:
-                          index === selectedProject ? 0.2 : isSmall ? 0.5 : 1,
-                        x: -16,
-                        rotateY: -10,
-                        rotateX: 3,
-                        transition: {
-                          delay: 0.1,
-                        }
-                      },
-                      focused: {
-                        rotateY: [null, 0],
-                        rotateX: [null, 0],
-                        opacity: [null, 1],
-                        x: [null, -8],
-                      },
-                    }}
-                    transition={{
-                      // x: {
-                      //   type: "spring",
-                      //   stiffness: 300,
-                      //   damping: 30,
-                      //   delay: 0.5 + 0.1 * index,
-                      // },
-                    }}
+                    callBack={handleProjectHover(index)}
+                    {...(webgl ? {} : { variants: {} })}
                     onMouseEnter={() => handleProjectHover(index)}
-                    onMouseLeave={() =>
-                      prevFocusedProject.current &&
-                      handleProjectHover(prevFocusedProject.current)
-                    }
-                    onClick={() =>
-                      changeSelectedProject(
-                        index === selectedProject ? -1 : index
-                      )
-                    }
+                    onMouseLeave={() => handleProjectHover(-1)}
+                    onClick={() => changeSelectedProject(index)}
                   />
                 ))}
             </m.div>

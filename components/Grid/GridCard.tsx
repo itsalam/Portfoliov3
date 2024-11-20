@@ -16,6 +16,7 @@ import {
   useRef,
 } from "react";
 import { useStore } from "zustand";
+import { BackButton } from "../Buttons/BackButton";
 import BaseCard from "../Cards/BaseCard";
 import HeroCard from "../Cards/HeroCard";
 import LoadingCard from "../Cards/LoadingCard";
@@ -61,7 +62,7 @@ export const GridCard = ({
   const isActive = activeCard === id;
   const x = isActive && isSmall ? 0 : coords[0];
   const y = isActive && isSmall ? 0 : coords[1];
-  const widthValue = isActive ? dimensions.width : width;
+  const widthValue = isActive ? dimensions.width - gridUnitSize : width;
   const heightValue = isActive ? dimensions.height - gridUnitSize * 3 : height;
   const opacityValue = isActive ? 1 : activeCard ? 0 : 1;
 
@@ -117,23 +118,22 @@ export const GridCard = ({
           width: 0,
           height: 0,
         },
-        expand: (id) => {
-          return {
-            width: initialLoad.current
-              ? [widthValue, widthValue]
-              : [null, widthValue],
-            height: initialLoad.current
-              ? [heightValue, heightValue]
-              : [null, heightValue],
-            borderWidth: [0.0, 0.0],
-            zIndex: [null, 10],
-            left: [null, isSmall ? 0 : 0],
-            top: [null, isSmall ? 0 : 0],
-            opacity: initialLoad.current
-              ? [0, opacityValue]
-              : [null, opacityValue],
-            transition: expandTransition,
-          };
+        expand: {
+          width: initialLoad.current
+            ? [widthValue, widthValue]
+            : [null, widthValue],
+          height: initialLoad.current
+            ? [heightValue, heightValue]
+            : [null, heightValue],
+          borderColor: [null, "transparent"],
+          // borderWidth: [0.0, 0.0],
+          zIndex: [null, 10],
+          left: [null, isSmall ? 0 : 0],
+          top: [null, isSmall ? 0 : 0],
+          opacity: initialLoad.current
+            ? [0, opacityValue]
+            : [null, opacityValue],
+          transition: expandTransition,
         },
         minimize: (id) => ({
           transition: minimizeTransition,
@@ -145,6 +145,7 @@ export const GridCard = ({
                 width: [null, width],
                 height: [null, height],
                 borderWidth: [null, 1.0],
+                borderColor: [null, undefined],
                 zIndex: 0,
               }
             : {}),
@@ -155,6 +156,7 @@ export const GridCard = ({
           width,
           height,
           borderWidth: 1.0,
+          borderColor: [null, undefined],
           transition: minimizeTransition,
           opacity: 1,
         },
@@ -174,6 +176,12 @@ export const GridCard = ({
         },
       }}
     >
+      {id === activeCard ? (
+        <BackButton
+          className="absolute top-g-2/8 right-g-2/8 z-50"
+          onClick={() => toggleCard(null)}
+        />
+      ) : null}
       <CardContent />
     </BaseCard>
   );

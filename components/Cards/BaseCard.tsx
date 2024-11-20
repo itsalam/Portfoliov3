@@ -8,9 +8,9 @@ import { LucideIcon } from "lucide-react";
 import {
   CSSProperties,
   ComponentProps,
-  FC,
   MouseEventHandler,
   ReactNode,
+  forwardRef,
 } from "react";
 import { Button } from "../Buttons/Button";
 
@@ -20,17 +20,20 @@ type ButtonArgs = {
   onClick?: MouseEventHandler<HTMLButtonElement>;
 };
 
-const BaseCard: FC<
+const BaseCard = forwardRef<
+  HTMLDivElement,
   ComponentProps<typeof m.div> & {
     title?: string | ReactNode;
     buttons?: ButtonArgs[];
     containerProps?: ComponentProps<typeof m.div>;
   }
-> = ({ containerProps, className, children, title, buttons, ...rest }) => {
+>(({ containerProps, className, children, title, buttons, ...rest }, ref) => {
   const breakpoint = useBreakpoints();
   const isSmall = breakpoint === "xs" || breakpoint === "sm";
+
   return (
     <m.div
+      ref={ref}
       onMouseDown={(e) => {
         e.stopPropagation();
         e.preventDefault();
@@ -102,7 +105,9 @@ const BaseCard: FC<
       </m.div>
       <m.div
         className={cn(
-          "card-bg z-30 h-full overflow-hidden transition-colors"
+          "card-bg",
+          "z-30 h-full overflow-hidden", // layoutControl, sizing, overflowControl
+          "text-[unset] transition-colors" // textStyles, transitionsAnimations
         )}
         variants={
           {
@@ -140,6 +145,8 @@ const BaseCard: FC<
       </m.div>
     </m.div>
   );
-};
+});
+
+BaseCard.displayName = "BaseCard";
 
 export default BaseCard;

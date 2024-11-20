@@ -57,10 +57,9 @@ export default function ContactCard(props: ComponentProps<typeof m.div>) {
       >
         <m.div
           className={cn(
-            "bg-blur-md",
-            "relative aspect-square max-h-full max-w-full", // basicStyles, sizing
-            "overflow-hidden rounded-full", // overflowControl, border
-            "bg-[--gray-a5]" // background
+            "relative", // basicStyles
+            "aspect-square max-h-full max-w-full overflow-hidden", // sizing, overflowControl
+            "rounded-full bg-[--gray-a5]" // border, background
           )}
           variants={{}}
         >
@@ -78,16 +77,11 @@ export default function ContactCard(props: ComponentProps<typeof m.div>) {
               strokeDasharray={100}
               strokeDashoffset={100}
               animate={{
-                // strokeDasharray: [0, 100],
                 strokeDashoffset: [100, 0],
-                // y: [-20, 0],
-                // rotate: [-30, 0],
                 opacity: [null, 1],
               }}
               exit={{
                 strokeDashoffset: [0, 100],
-                // y: [0, 20],
-                // rotate: [0, 30],
                 opacity: [null, 0],
               }}
               transition={{

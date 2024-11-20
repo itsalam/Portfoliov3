@@ -20,6 +20,7 @@ export default function Main() {
       router.replace("/" + activeCard?.toLocaleLowerCase());
     }
 
+    // TODO: sometimes doesnt work?
     const themeElement = document.getElementById("theme");
     if (themeElement) {
       if (activeCard) {

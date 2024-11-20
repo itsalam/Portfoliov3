@@ -4,6 +4,7 @@
 import { useScrollMask } from "@/lib/hooks";
 import { GridContext } from "@/lib/providers/clientState";
 import { isWebGLSupported } from "@/lib/providers/clientUtils";
+import { cn } from "@/lib/utils";
 import { ScrollArea } from "@radix-ui/themes";
 import { AnimatePresence, m, useScroll } from "framer-motion";
 import { useCallback, useContext } from "react";
@@ -44,7 +45,10 @@ const Grid = () => {
   return (
     <m.div
       id="grid"
-      className="relative z-10 h-full container"
+      className={cn(
+        "relative z-10 h-full container",
+        { webgl: webgl }
+      )}
     >
       <ScrollArea
         className="h-full w-full overflow-hidden"

@@ -167,15 +167,19 @@ const ParticleScene = (props: { gpuTier?: TierResult }) => {
     calculateVisibleDimensions(camera as PerspectiveCamera)
   );
 
-  const particleTexture = new DataTexture(
-    initializePoints(
-      particleLength * particleLength,
-      calculateVisibleDimensions(camera as PerspectiveCamera)
-    ),
-    particleLength,
-    particleLength,
-    RGBAFormat,
-    type.current
+  const particleTexture = useMemo(
+    () =>
+      new DataTexture(
+        initializePoints(
+          particleLength * particleLength,
+          calculateVisibleDimensions(camera as PerspectiveCamera)
+        ),
+        particleLength,
+        particleLength,
+        RGBAFormat,
+        type.current
+      ),
+    [camera, particleLength]
   );
 
   const fluidFbos = useRef<FBOs>({
@@ -383,8 +387,6 @@ const ParticleScene = (props: { gpuTier?: TierResult }) => {
     bloom.update(bloomOptions.current);
   });
 
-  useEffect(() => {}, [options.current, renderRef.current]);
-
   useEffect(() => {
     const render = renderRef.current;
     if (render) {
@@ -402,27 +404,29 @@ const ParticleScene = (props: { gpuTier?: TierResult }) => {
   }, [gl]);
 
   useEffect(() => {
-    Object.keys(fluidFbos.current).forEach((key) => {
+    const curFluidFbos = fluidFbos.current;
+    const curParticleFbos = particleFbos.current;
+    Object.keys(curFluidFbos).forEach((key) => {
       fluidFbos.current[key].dispose();
       fluidFbos.current[key] = createRenderTarget();
     });
-    Object.keys(particleFbos.current).forEach((key) => {
+    Object.keys(curParticleFbos).forEach((key) => {
       particleFbos.current[key].dispose();
       particleFbos.current[key] = createRenderTarget({
         texture: particleTexture,
       });
     });
     return () => {
-      Object.values(fluidFbos.current).forEach((fbo) => {
+      Object.values(curFluidFbos).forEach((fbo) => {
         fbo.dispose();
         fbo.texture.dispose();
       });
-      Object.values(particleFbos.current).forEach((fbo) => {
+      Object.values(curParticleFbos).forEach((fbo) => {
         fbo.dispose();
         fbo.texture.dispose();
       });
     };
-  }, []);
+  }, [particleTexture]);
 
   return (
     <>

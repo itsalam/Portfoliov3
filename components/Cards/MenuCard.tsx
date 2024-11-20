@@ -42,6 +42,7 @@ export default function Menu() {
 
   const toggleThemeIcon: DockItem = {
     onClick: () => {
+      console.log("???");
       setTheme(
         themes[themes.findIndex((theme) => theme === resolvedTheme) ^ 1]
       );

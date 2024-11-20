@@ -1,17 +1,14 @@
 import { GridInfo, GridStore } from "@/lib/providers/clientState";
 import { isWebGLSupported } from "@/lib/providers/clientUtils";
-import { debounce } from "lodash";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { StoreApi } from "zustand";
 import { CARD_TYPES } from "../Cards/types";
-import { GridElement, GridElements } from "./consts";
+import { GridElements } from "./consts";
 import {
   binpackElements,
   getDefaultGridElement,
   initializeGridElements,
 } from "./util";
-
-const SCROLL_TO_CARD_DELAY = 100;
 
 export const useGrid = (context: StoreApi<GridStore>) => {
   const webgl = isWebGLSupported();
@@ -51,7 +48,7 @@ export const useGrid = (context: StoreApi<GridStore>) => {
   const pushElements = useCallback(
     (gridInfo: GridInfo, gridElements: GridElements) => (ids: CARD_TYPES[]) => {
       // On basic view, immediately move to other card
-
+      console.log(ids);
       let newGridElements = new Map(gridElements);
       if (activeCard && ids.includes(activeCard)) {
         return;
@@ -117,27 +114,6 @@ export const useGrid = (context: StoreApi<GridStore>) => {
     pushElements,
     setGridElements,
   ]);
-
-  const scrollToGridElement = useCallback(
-    debounce(
-      (gridElement: GridElement, delay = 100) => {
-        return new Promise<void>((res) =>
-          setTimeout(() => {
-            scrollAreaRef.current?.scrollTo({
-              top: Math.max(
-                0,
-                gridElement.coords[1] - gridInfoRef.current.gridUnitSize
-              ),
-              behavior: "smooth",
-            });
-            res();
-          }, delay));
-      },
-      SCROLL_TO_CARD_DELAY,
-      { trailing: true }
-    ),
-    []
-  );
 
   useEffect(() => {
     adjustElements(gridInfo);

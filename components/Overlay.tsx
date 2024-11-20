@@ -86,7 +86,7 @@ const OverlayInfo: React.FC = () => {
           className={cn(
             "flex", // sizing
             "items-center gap-1 rounded-lg bg-[--gray-a2]", // layout, border, background
-            "p-2 text-sm" // padding, textStyles
+            "p-2 text-xs" // padding, textStyles
           )}
         >
           <Info /> For intended UX, enable hardware acceleration.

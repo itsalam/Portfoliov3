@@ -2,7 +2,7 @@
 import React, { ComponentProps, useRef, useState } from "react";
 
 import { cn } from "@/lib/utils";
-import { animate, m, useMotionValue, useScroll } from "framer-motion";
+import { animate, m, useMotionValue } from "framer-motion";
 import Image, { ImageProps } from "next/image";
 
 export const Carousel = ({
@@ -10,7 +10,7 @@ export const Carousel = ({
   className,
 }: ComponentProps<typeof m.ul>) => {
   const ref = useRef<HTMLUListElement>(null);
-  const { scrollXProgress } = useScroll({ container: ref });
+  // const { scrollXProgress } = useScroll({ container: ref });
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
   const [trackMouse, setTrackMouse] = useState(false);

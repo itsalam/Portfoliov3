@@ -30,7 +30,7 @@ export type DockItem = {
   title: string;
   Icon: CustomDomComponent<LucideProps>;
   href?: string;
-  onClick?: MouseEventHandler<HTMLDivElement>;
+  onClick?: MouseEventHandler<HTMLButtonElement>;
   motionProps?: Omit<
     ComponentProps<CustomDomComponent<LucideProps>>,
     "key" | "ref"
@@ -177,7 +177,7 @@ function IconContainerFull({
   mouseX: MotionValue;
   item: DockItem;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLButtonElement>(null);
   const { title, Icon, href, onClick, motionProps } = item;
 
   const distance = useTransform(mouseX, (val) => {
@@ -224,7 +224,7 @@ function IconContainerFull({
 
   const [hovered, setHovered] = useState(false);
   const innerDiv = (
-    <m.div
+    <m.button
       ref={ref}
       style={{ width, height }}
       onMouseEnter={() => setHovered(true)}
@@ -252,7 +252,7 @@ function IconContainerFull({
           />
         </AnimatePresence>
       </m.div>
-    </m.div>
+    </m.button>
   );
 
   return href ? (
@@ -267,12 +267,13 @@ const IconContainerSimple = ({
   title,
   Icon,
   className,
+  onClick,
 }: { showTitle: boolean } & DockItem &
   Omit<ComponentPropsWithoutRef<typeof Link>, "href" | "onClick">) => {
   const [hovered, setHovered] = useState<boolean>(false);
 
   return (
-    <div
+    <button
       className={cn(
         "group",
         "relative", // basicStyles
@@ -280,6 +281,7 @@ const IconContainerSimple = ({
         className
       )}
       key={title}
+      onClick={onClick}
     >
       {hovered && (
         <div
@@ -319,7 +321,7 @@ const IconContainerSimple = ({
           />
         </div>
       </Link>
-    </div>
+    </button>
   );
 };
 

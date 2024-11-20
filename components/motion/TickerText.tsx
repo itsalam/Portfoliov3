@@ -27,7 +27,7 @@ export const TickerText = ({
         repeat: Infinity,
       }
     );
-  }, []);
+  }, [animate, scope]);
 
   const handleMouseMove = (event: React.MouseEvent) => {
     // Calculate new x position based on mouse position within the container
