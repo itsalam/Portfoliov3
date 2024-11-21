@@ -30,7 +30,7 @@ export default function ExperienceCard() {
         type="always"
         scrollbars="vertical"
         className={cn(
-          "py-4 pl-4"
+          "py-4 px-4"
         )}
         ref={scrollRef}
         style={{ y }}

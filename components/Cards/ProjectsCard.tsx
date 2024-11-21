@@ -118,64 +118,6 @@ const SubCard = forwardRef<
 
 SubCard.displayName = "SubCard";
 
-// const TrackCard = ({
-//   containerRef,
-//   callBack,
-//   ...props
-// }: {
-//   containerRef?: RefObject<HTMLDivElement>;
-//   callBack?: () => void;
-// } & ComponentProps<typeof SubCard>) => {
-//   const ref = useRef<HTMLDivElement>(null);
-//   const inView = useInView(ref, {
-//     root: containerRef,
-//     amount: "some",
-//     margin: "-48% 0% -48% 0%",
-//   });
-
-//   useEffect(() => {
-//     if (inView && callBack) {
-//       callBack();
-//     }
-//     return () => {};
-//   }, [inView, callBack]);
-
-//   const Card = useCallback(
-//     (props: ComponentProps<typeof SubCard>) => (
-//       <SubCard
-//         variants={{
-//           animate: {
-//             opacity: [null, 1],
-//             x: [null, -16],
-//             rotateY: [null, -10],
-//             rotateX: [null, 3],
-//             z: [null, -40],
-//           },
-//           focused: {
-//             rotateY: [null, 0],
-//             rotateX: [null, 0],
-//             opacity: [null, 1],
-//             x: [null, -8],
-//             z: [null, 0],
-//           },
-//         }}
-//         initial={{
-//           opacity: 0,
-//           x: -400,
-//           z: -40,
-//           originX: "50%",
-//           originY: "50%",
-//         }}
-//         whileHover={"focused"}
-//         ref={ref}
-//         {...props}
-//       />
-//     ),
-//     []
-//   );
-//   return <Card {...props} animate={inView ? "focused" : "animate"} />;
-// };
-
 export default function ProjectsCard(props: ComponentProps<typeof m.div>) {
   const gridContext = useContext(GridContext);
   const { ...rest } = props;
@@ -290,6 +232,7 @@ export default function ProjectsCard(props: ComponentProps<typeof m.div>) {
     const unsub = inView(
       "#projects .track-card",
       (info) => {
+        if (!webgl) return;
         const index = Number(
           info.target.attributes.getNamedItem("data-index")?.value
         );
@@ -601,7 +544,7 @@ export default function ProjectsCard(props: ComponentProps<typeof m.div>) {
         variants={cardVariants as Variants}
         initial={{
           opacity: 0,
-          x: -400,
+          x: 400,
           z: -40,
           originX: "50%",
           originY: "50%",
@@ -662,7 +605,7 @@ export default function ProjectsCard(props: ComponentProps<typeof m.div>) {
               {projects.map((project, index) =>
                 isSmall && index === selectedProject ? (
                   <div
-                    className="flex w-full flex-col-reverse"
+                    className="flex w-full snap-start flex-col-reverse"
                     key={index}
                   >
                     <Body
@@ -678,12 +621,20 @@ export default function ProjectsCard(props: ComponentProps<typeof m.div>) {
                     key={index}
                     className={cn(
                       "track-card group/track-card",
-                      "isolate aspect-video w-full origin-center", // layoutControl, sizing, transforms
-                      "cursor-pointer", // interactions
+                      "aspect-video w-full origin-center", // sizing, transforms
+                      "cursor-pointer snap-center", // interactions, scrollSnap
                       isSmall ? "mx-g-1/8" : ""
                     )}
                     // callBack={handleProjectHover(index)}
-                    {...(webgl ? {} : { variants: {} })}
+                    {...(webgl
+                      ? {}
+                      : {
+                          variants: {},
+                          initial: {
+                            opacity: 0,
+                          },
+                          animate: { opacity: 1 },
+                        })}
                     onMouseEnter={() => handleProjectHover(index)}
                     onMouseLeave={() => handleProjectHover(-1)}
                     onClick={() => changeSelectedProject(index)}

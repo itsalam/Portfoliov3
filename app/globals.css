@@ -117,6 +117,7 @@
   } */
 
   #projects [data-radix-scroll-area-viewport] {
+    @apply snap-mandatory snap-y;
     overflow-x: hidden !important;
     overflow-y: scroll !important;
   }
