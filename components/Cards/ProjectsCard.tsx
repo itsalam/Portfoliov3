@@ -228,7 +228,7 @@ export default function ProjectsCard(props: ComponentProps<typeof m.div>) {
   }, [activeCard, changeSelectedProject]);
 
   useLayoutEffect(() => {
-    const container = containerRef.current;
+    const container = projectsRef.current;
     const unsub = inView(
       "#projects .track-card",
       (info) => {
@@ -246,7 +246,7 @@ export default function ProjectsCard(props: ComponentProps<typeof m.div>) {
       {
         root: container ?? undefined,
         amount: "some",
-        margin: "-48% 0% -48% 0%",
+        margin: "-45% 0% -45% 0%",
       }
     );
     return () => unsub();
