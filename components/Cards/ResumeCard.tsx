@@ -62,7 +62,7 @@ const DownloadButton: FC<ComponentProps<typeof m.button>> = (props) => {
       )}
       text={"Download"}
       className={
-        "absolute bottom-4 z-50 border-[--accent-11] p-2 text-[--accent-11]"
+        "absolute card-bg bottom-4 z-50 border-[--accent-11] p-2 text-[--accent-11] "
       }
       textSize="3"
       iconSize={32}

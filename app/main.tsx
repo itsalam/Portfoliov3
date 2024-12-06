@@ -17,7 +17,7 @@ export default function Main() {
   const baseName = usePathname().split("/")[1];
   useEffect(() => {
     if (baseName !== (activeCard ?? "")) {
-      router.replace("/" + activeCard?.toLocaleLowerCase());
+      // router.replace("/" + activeCard?.toLocaleLowerCase());
     }
 
     // TODO: sometimes doesnt work?

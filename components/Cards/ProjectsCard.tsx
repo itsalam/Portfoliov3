@@ -224,7 +224,7 @@ export default function ProjectsCard(props: ComponentProps<typeof m.div>) {
   }, []);
 
   useEffect(() => {
-    activeCard === CARD_TYPES.Projects && changeSelectedProject(-1);
+    CARD_TYPES.Projects && changeSelectedProject(-1);
   }, [activeCard, changeSelectedProject]);
 
   useLayoutEffect(() => {

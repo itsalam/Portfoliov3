@@ -30,7 +30,7 @@ export default function ExperienceCard() {
         type="always"
         scrollbars="vertical"
         className={cn(
-          "py-4 px-4"
+          "py-4 px-8"
         )}
         ref={scrollRef}
         style={{ y }}
@@ -82,7 +82,7 @@ export default function ExperienceCard() {
                   <span className="text-xs text-[--gray-10]">
                     {formatDate(tenure.from)} - {formatDate(tenure.to)}
                   </span>
-                  <div
+                  <ol
                     className={cn(
                       "flex", // sizing
                       "list-disc flex-col gap-1 pt-1 pl-4", // listStyles, layout, padding
@@ -93,14 +93,14 @@ export default function ExperienceCard() {
                       description: string,
                       k: number
                     ) => (
-                      <div
+                      <li
                         key={k}
                         className="text-sm text-[--gray-12]"
                       >
                         {description}
-                      </div>
+                      </li>
                     ))}
-                  </div>
+                  </ol>
                 </div>
               </Fragment>
             ))}

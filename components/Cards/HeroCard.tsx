@@ -161,16 +161,26 @@ export default function HeroCard(props: ComponentProps<typeof m.div>) {
   return (
     <m.div
       className={cn(
-        "xs:p-0 relative mx-g-1/8 flex h-full flex-col justify-end"
+        "xs:p-0",
+        "relative mx-g-1/8 flex h-full", // basicStyles, margin, sizing
+        "flex-col justify-end overflow-hidden" // layout, overflowControl
       )}
       ref={heroRef}
+      animate={{
+        width: ["0%", "100%"],
+        filter: ["blur(1rem)", "blur(0rem)"],
+        transition: {
+          duration: 2,
+        },
+      }}
+      onAnimationComplete={(e) => console.log(e)}
       {...props}
     >
       <m.div
         className={cn(
           "relative", // basicStyles
-          "flex h-full max-h-[350px] flex-col justify-center", // sizing, layout
-          "px-2" // padding
+          "flex h-full max-h-[350px] min-w-[--card-width]", // sizing
+          "flex-col justify-center px-6" // layout, padding
         )}
       >
         <TextRotateBody />

@@ -14,8 +14,8 @@ import {
 import { useContext } from "react";
 
 import { useTheme } from "next-themes";
-import { Dock, DockItem } from "../Aceternity/Dock";
 import { CARD_MENU_GROUP } from "../Grid/consts";
+import { Dock, DockItem } from "../motion/Dock";
 
 const MoonIcon = m(Moon);
 const SunIcon = m(Sun);

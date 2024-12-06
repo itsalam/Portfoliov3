@@ -24,10 +24,10 @@ import {
 } from "framer-motion";
 import { ThemeProvider } from "next-themes";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
-import Main from "./main";
+import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import Beams from "../components/Backdrop/Beams";
 
-export function Providers() {
+export function Providers({ children }: { children: ReactNode }) {
   const [loadingProgress, setLoadingProgress] = useState(0);
   const loadingRef = useRef<Promise<void>[]>([]);
   const [loading, setLoading] = useState(true);
@@ -131,11 +131,12 @@ export function Providers() {
                       setLoading={setLoading}
                     />
                   ) : (
-                    <Main />
+                    children
                   )}
                 </main>
               </AnimatePresence>
             </LazyMotion>
+            <Beams />
             <Canvas />
           </GridContext.Provider>
         </CMSContext.Provider>
