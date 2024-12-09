@@ -26,6 +26,7 @@ import { ThemeProvider } from "next-themes";
 import { usePathname } from "next/navigation";
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import Beams from "../components/Backdrop/Beams";
+import Main from "./main";
 
 export function Providers({ children }: { children: ReactNode }) {
   const [loadingProgress, setLoadingProgress] = useState(0);
@@ -85,14 +86,14 @@ export function Providers({ children }: { children: ReactNode }) {
   useEffect(() => {
     const updateProgress = createThrottleQueue(() => {
       currLoaded.current++;
-      setLoadingProgress(
-        ~~((currLoaded.current / loadingRef.current.length) * 100) - 1
-      );
-
       if (currLoaded.current >= loadingRef.current.length) {
         setTimeout(() => {
           setLoadingProgress(100);
-        }, 1200);
+        }, 2000);
+      } else {
+        setLoadingProgress(
+          ~~((currLoaded.current / loadingRef.current.length) * 100) - 1
+        );
       }
     }, [50, 300]);
     loadingRef.current.forEach((promise) => {
@@ -124,15 +125,20 @@ export function Providers({ children }: { children: ReactNode }) {
                     "flex-col items-center justify-center overflow-hidden" // layout, overflowControl
                   )}
                 >
-                  {loading ? (
-                    <Loading
-                      key={"loading"}
-                      prog={loadingProgress ?? 0}
-                      setLoading={setLoading}
-                    />
-                  ) : (
-                    children
-                  )}
+                  <AnimatePresence mode="wait">
+                    {loading ? (
+                      <Loading
+                        key={"loading"}
+                        prog={loadingProgress ?? 0}
+                        setLoading={setLoading}
+                      />
+                    ) : !baseName ||
+                      Object.keys(CARD_MENU_GROUP).includes(baseName) ? (
+                      <Main />
+                    ) : (
+                      children
+                    )}
+                  </AnimatePresence>
                 </main>
               </AnimatePresence>
             </LazyMotion>

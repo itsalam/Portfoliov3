@@ -6,13 +6,15 @@ export function middleware(request: NextRequest) {
 
   // Example: Redirect all dynamic routes to a specific URL
   const baseName = pathname.split("/")[1];
+  const allowedBaseNames = [
+    "_next",
+    "icon.svg",
+    "static",
+    "favicon.svg",
+    "studio",
+  ];
 
-  if (
-    baseName === "_next" ||
-    baseName === "icon.svg" ||
-    baseName === "static" ||
-    baseName === "favicon.svg"
-  ) {
+  if (allowedBaseNames.includes(baseName)) {
     return NextResponse.next();
   } else if (baseName && !(baseName in CARD_MENU_GROUP)) {
     return NextResponse.redirect(new URL("/", request.url));

@@ -274,3 +274,13 @@ body {
     max-width: 1920px;
   }
 }
+
+.thumbnails::-webkit-scrollbar {
+  -webkit-appearance: none;
+  width: 7px;
+}
+
+.thumbnails::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  background-color: initial;
+}

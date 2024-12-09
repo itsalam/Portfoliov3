@@ -100,7 +100,7 @@ export const BaseRolloutButton: FC<BaseRolloutProps> = (props) => {
             paddingRight: "10px",
             transition: {
               duration: 0.2,
-              easing: "easeInOut",
+              easing: "easeOut",
             },
           },
         }}

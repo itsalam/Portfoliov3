@@ -9,6 +9,7 @@ export type DigitSpinnerProps = ComponentProps<typeof m.div> & {
   digit: number;
   direction?: DIRECTION;
   springOptions?: SpringOptions;
+  endLoadingCallback?: () => void;
 };
 
 export enum DIRECTION {

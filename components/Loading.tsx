@@ -3,13 +3,13 @@ import { useWebGLSupport } from "@/lib/hooks";
 import { useDebounce } from "@/lib/providers/clientUtils";
 import { cn } from "@/lib/utils";
 import { m } from "framer-motion";
+import { debounce } from "lodash";
 import {
   ComponentPropsWithoutRef,
   Dispatch,
   ElementRef,
   SetStateAction,
   forwardRef,
-  useEffect,
   useMemo,
 } from "react";
 import { DIRECTION } from "./motion/consts";
@@ -24,15 +24,13 @@ const Loading = forwardRef<
   }
 >((props, ref) => {
   const { prog, setLoading, ...motionProps } = props;
-  const [debounceProg] = useDebounce<number>(prog, 900, 200);
+  const [debounceProg] = useDebounce<number>(prog, 1200, 200);
   const webgl = useWebGLSupport();
   const SpinnerComp = webgl ? SpinDigitSpinner : DigitSpinner;
 
-  useEffect(() => {
-    if (debounceProg == 100) {
-      setTimeout(() => setLoading(false), 1200);
-    }
-  }, [debounceProg, setLoading]);
+  const debounceSetLoading = debounce((b: boolean) => setLoading(b), 100, {
+    maxWait: 1800,
+  });
 
   const Spinner = useMemo(() => {
     return (
@@ -46,13 +44,19 @@ const Loading = forwardRef<
                 : ~~debounceProg % 10;
           const direction = key === "tens" ? DIRECTION.DOWN : undefined;
           const springOptions = {
-            mass: prog >= 99 ? 2 : 2,
+            mass: prog >= 99 ? 6 : 4,
             stiffness: prog >= 99 ? 100 : 100,
-            damping: prog >= 99 ? 20 : 10,
+            damping: prog >= 99 ? 50 : 30,
           };
 
           return (
             <SpinnerComp
+              endLoadingCallback={() => {
+                console.log(debounceProg);
+                if (index === 0 && debounceProg == 100) {
+                  debounceSetLoading(false);
+                }
+              }}
               key={key}
               textProps={{ className: "!leading-none" }}
               direction={direction}
@@ -63,7 +67,7 @@ const Loading = forwardRef<
         })}
       </>
     );
-  }, [SpinnerComp, debounceProg]);
+  }, [SpinnerComp, debounceProg, prog, setLoading]);
 
   return (
     <m.div
@@ -80,6 +84,8 @@ const Loading = forwardRef<
         WebkitMaskImage:
           "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)",
       }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: [null, 1] }}
       exit={{ opacity: 0 }}
       {...motionProps}
     >

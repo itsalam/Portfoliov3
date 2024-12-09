@@ -4,6 +4,7 @@ import {
   m,
   MotionValue,
   SpringOptions,
+  useMotionValueEvent,
   useSpring,
   useTransform,
 } from "framer-motion";
@@ -69,12 +70,15 @@ const Digit = ({
 Digit.displayName = "Digit";
 
 const SpinDigitSpinner: React.FC<
-  DigitSpinnerProps & { springOptions?: SpringOptions }
+  DigitSpinnerProps & {
+    springOptions?: SpringOptions;
+  }
 > = ({
   digit,
   direction = DIRECTION.DOWN,
   textProps,
   springOptions,
+  endLoadingCallback,
   ...motionProps
 }) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -83,18 +87,22 @@ const SpinDigitSpinner: React.FC<
     width: number;
     height: number;
   } | null>(null);
+
   const rotateX = useSpring(0, {
     stiffness: 100,
-    damping: 40,
+    damping: 100,
     mass: 20,
     ...springOptions,
+  });
+
+  useMotionValueEvent(rotateX, "change", () => {
+    endLoadingCallback?.();
   });
 
   useLayoutEffect(() => {
     if (ref.current) {
       const { width, height } = ref.current.getBoundingClientRect();
       setDimensions({ width, height });
-      console.log(`Width: ${width}, Height: ${height}`);
     }
   }, [ref]);
 
@@ -152,6 +160,8 @@ const SpinDigitSpinner: React.FC<
                 position: "absolute",
                 transformOrigin: `center center -${dimensions ? dimensions.height / 2 : 0}px` /* Set origin behind */,
                 transform: `rotateX(${i * 36}deg) translateZ(${dimensions ? dimensions.height / 2 : 0}px)`,
+                width: dimensions ? dimensions.width : 0,
+                height: dimensions ? dimensions.height : 0,
               }}
             >
               {i}

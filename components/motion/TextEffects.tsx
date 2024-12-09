@@ -125,22 +125,39 @@ export const HeroText: React.FC<
 };
 
 export const MotionText: React.FC<
-  React.ComponentProps<typeof MText> & AnimateTextProps
+  React.ComponentProps<typeof MText> &
+    AnimateTextProps & { splitText?: boolean }
 > = (props) => {
-  const { text, className, variants, ...textProps } = props;
+  const { text, className, variants, splitText, ...textProps } = props;
   return (
     <MText
       key={text}
       className={cn(
         "relative", // basicStyles
-        "my-auto flex origin-[50%_50%_-4rem]", // margin, sizing, transforms
-        "overflow-y-hidden whitespace-nowrap", // overflowControl, textWrapping
+        "my-auto origin-[50%_50%_-4rem] flex-wrap", // margin, transforms, layout
+        "overflow-hidden whitespace-nowrap", // overflowControl, textWrapping
+        splitText ? "inline whitespace-pre" : "flex whitespace-nowrap",
         className
       )}
       variants={variants}
       {...textProps}
     >
-      {text}
+      {splitText ? (
+        <>
+          {text.split(" ").map((w, i) => (
+            <m.span
+              className="whitespace-pre"
+              key={`${w}-${i}`}
+              variants={variants}
+            >
+              {i ? " " : ""}
+              {w}
+            </m.span>
+          ))}
+        </>
+      ) : (
+        text
+      )}
     </MText>
   );
 };

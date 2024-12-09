@@ -30,7 +30,7 @@ const MENU_CARD_ICONS: Record<keyof typeof CARD_MENU_GROUP, LucideIcon> = {
 export default function Menu() {
   const { themes, resolvedTheme, setTheme } = useTheme();
   const store = useContext(GridContext)!;
-  const pushElements = store.getState().pushElements;
+  const { pushElements, activeCard } = store.getState();
 
   const DOCK_ITEMS = Object.entries(MENU_CARD_ICONS).map(([title, Icon]) => {
     return {
@@ -58,8 +58,14 @@ export default function Menu() {
     },
   };
 
+  const activeItem = activeCard
+    ? Object.entries(CARD_MENU_GROUP).findIndex(([, cards]) =>
+        cards.includes(activeCard))
+    : undefined;
+
   return (
     <Dock
+      activeItem={activeItem ?? undefined}
       items={[...DOCK_ITEMS, toggleThemeIcon]}
       desktopClassName="fixed z-50 w-fit"
       mobileClassName="fixed z-50 right-[12px]"

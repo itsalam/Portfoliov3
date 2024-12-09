@@ -11,6 +11,7 @@ const DigitSpinner: React.FC<DigitSpinnerProps> = ({
   direction = DIRECTION.DOWN,
   textProps,
   springOptions,
+  endLoadingCallback,
   ...motionProps
 }) => {
   const lastDigit = useRef(digit);
@@ -18,6 +19,10 @@ const DigitSpinner: React.FC<DigitSpinnerProps> = ({
     stiffness: 100,
     damping: 30,
     ...springOptions,
+  });
+
+  yBase.on("animationComplete", () => {
+    endLoadingCallback?.();
   });
 
   const getDigitCoord = useCallback(

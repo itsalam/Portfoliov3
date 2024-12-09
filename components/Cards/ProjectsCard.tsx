@@ -183,7 +183,11 @@ export default function ProjectsCard(props: ComponentProps<typeof m.div>) {
       () => {
         if (!hasScrolled.current) return;
         const curFocusedProject = focusedProject.current;
-        if (curFocusedProject >= 0 && curFocusedProject !== selectedProject) {
+        if (
+          selectedProject === -1 &&
+          curFocusedProject >= 0 &&
+          curFocusedProject !== selectedProject
+        ) {
           setTitleText({
             text: projects[curFocusedProject]?.name || "Projects.",
             reverse: curFocusedProject > selectedProject,
@@ -256,11 +260,11 @@ export default function ProjectsCard(props: ComponentProps<typeof m.div>) {
     ({ project }: { project: Project }) => (
       <div
         className={cn(
-          "top-0 bottom-0",
+          "thumbnails top-0 bottom-0",
           isSmall ? "" : "sticky min-w-[25%] h-full",
           isSmall &&
             project.thumbnails.length > 1 &&
-            "w-screen px-8 py-4 relative overflow-x-scroll -left-[5%]"
+            "w-screen px-8 py-4 relative snap-mandatory snap-x overflow-scroll -left-[5%]"
         )}
       >
         <m.div
@@ -279,7 +283,10 @@ export default function ProjectsCard(props: ComponentProps<typeof m.div>) {
               <SubCard
                 project={project}
                 index={index}
-                className="md:h-auto flex aspect-video w-full flex-col"
+                className={cn(
+                  "md:h-auto",
+                  "flex aspect-video w-full snap-center flex-col" // sizing, scrollSnap, layout
+                )}
                 title={`${project.name}-${index + 1}`}
                 animate={{ opacity: 1 }}
                 key={`selected-project-image-${project._id}-${index + 1}`}
@@ -589,7 +596,7 @@ export default function ProjectsCard(props: ComponentProps<typeof m.div>) {
               className={cn(
                 "flex h-max min-w-[20%] flex-col items-start py-12",
                 isSmall
-                  ? "w-[90%] gap-g-1 justify-center"
+                  ? "w-[90%] gap-g-1-4/8 justify-center"
                   : "max-w-[50%] pr-8 gap-g-4/8",
                 activeCard === CARD_TYPES.Projects &&
                   "my-[calc(var(--card-height)_/_5)]"

@@ -38,10 +38,12 @@ export type DockItem = {
 };
 
 export const Dock = ({
+  activeItem,
   items,
   desktopClassName,
   mobileClassName,
 }: {
+  activeItem?: number;
   items: DockItem[];
   desktopClassName?: string;
   mobileClassName?: string;
@@ -49,6 +51,7 @@ export const Dock = ({
   return (
     <>
       <FloatingDockDesktop
+        activeItem={activeItem}
         items={items}
         className={cn(
           desktopClassName,
@@ -56,6 +59,7 @@ export const Dock = ({
         )}
       />
       <FloatingDockSimple
+        activeItem={activeItem}
         items={items}
         className={cn(isWebGLSupported() ? "md:hidden" : "", mobileClassName)}
       />
@@ -64,9 +68,11 @@ export const Dock = ({
 };
 
 const FloatingDockSimple = ({
+  activeItem,
   items,
   className,
 }: {
+  activeItem?: number;
   items: DockItem[];
   className?: string;
   orientation?: "vertical" | "horizontal";
@@ -131,7 +137,7 @@ const FloatingDockSimple = ({
             {items.map((item, idx) => (
               <IconContainerSimple
                 key={idx}
-                showTitle
+                showTitle={open && activeItem === idx}
                 className="md:mx-1 md:my-0 my-1 mx-0"
                 {...item}
               />
@@ -144,9 +150,11 @@ const FloatingDockSimple = ({
 };
 
 const FloatingDockDesktop = ({
+  activeItem,
   items,
   className,
 }: {
+  activeItem?: number;
   items: DockItem[];
   className?: string;
 }) => {
@@ -163,17 +171,24 @@ const FloatingDockDesktop = ({
         className
       )}
     >
-      {items.map((item) => (
-        <IconContainerFull mouseX={mouseX} key={item.title} item={item} />
+      {items.map((item, index) => (
+        <IconContainerFull
+          active={index === activeItem}
+          mouseX={mouseX}
+          key={item.title}
+          item={item}
+        />
       ))}
     </m.div>
   );
 };
 
 function IconContainerFull({
+  active,
   mouseX,
   item,
 }: {
+  active?: boolean;
   mouseX: MotionValue;
   item: DockItem;
 }) {
@@ -234,10 +249,13 @@ function IconContainerFull({
         "relative", // basicStyles
         "flex aspect-square items-center justify-center", // sizing, layout
         "rounded-full bg-gray-200 dark:bg-neutral-800", // border, background
-        "hover:text-[--accent-9] hover:dark:text-[--accent-9]" // textStyles
+        "hover:text-[--accent-9] hover:dark:text-[--accent-9]", // textStyles
+        {
+          "text-[--accent-9]": active,
+        }
       )}
     >
-      <HoverTitle hovered={hovered} title={title} />
+      <HoverTitle hovered={hovered || !!active} title={title} />
       <m.div
         style={{ width: widthIcon, height: heightIcon }}
         className="flex items-center justify-center"
@@ -263,6 +281,7 @@ function IconContainerFull({
 }
 
 const IconContainerSimple = ({
+  showTitle,
   href,
   title,
   Icon,
@@ -283,7 +302,7 @@ const IconContainerSimple = ({
       key={title}
       onClick={onClick}
     >
-      {hovered && (
+      {(hovered || showTitle) && (
         <div
           className={cn(
             "border md:-translate-x-1/2 md:-top-8 md:right-0 md:left-1/2",

@@ -29,15 +29,17 @@ const expandTransition = {
   },
   opacity: {
     duration: 0.6,
-    ease: "easeInOut",
+    ease: "easeOut",
   },
+
+  delay: 0.5,
 };
 
 const minimizeTransition = {
   duration: 0.3,
   opacity: {
     duration: 0.3,
-    ease: "easeInOut",
+    ease: "easeOut",
   },
 };
 
@@ -62,7 +64,9 @@ export const GridCard = ({
   const isActive = activeCard === id;
   const x = isActive && isSmall ? 0 : coords[0];
   const y = isActive && isSmall ? 0 : coords[1];
-  const widthValue = isActive ? dimensions.width - gridUnitSize : width;
+  const widthValue = isActive
+    ? dimensions.width - (isSmall ? 0 : gridUnitSize)
+    : width;
   const heightValue = isActive ? dimensions.height - gridUnitSize * 3 : height;
   const opacityValue = isActive ? 1 : activeCard ? 0 : 1;
 
@@ -111,7 +115,6 @@ export const GridCard = ({
       animate={controls}
       custom={id}
       initial={activeCard && initialLoad.current ? "expand" : { opacity: 0 }}
-      onAnimationStart={(e) => console.log({ id, x, y, e })}
       variants={{
         exit: {
           opacity: 0,
@@ -128,8 +131,9 @@ export const GridCard = ({
           borderColor: [null, "transparent"],
           // borderWidth: [0.0, 0.0],
           zIndex: [null, 10],
-          left: [null, isSmall ? 0 : 0],
-          top: [null, isSmall ? 0 : 0],
+          left: [0, 0],
+          top: [0, 0],
+          filter: "blur(0px)",
           opacity: initialLoad.current
             ? [0, opacityValue]
             : [null, opacityValue],
@@ -140,6 +144,7 @@ export const GridCard = ({
           opacity: activeCard === id ? 1 : activeCard ? 0 : 1,
           left: [null, x],
           top: [null, y],
+          filter: `blur(${activeCard === id ? 0 : activeCard ? 5 : 0}px)`,
           ...(lastCard.current === id
             ? {
                 width: [null, width],

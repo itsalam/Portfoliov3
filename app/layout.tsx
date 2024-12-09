@@ -38,9 +38,9 @@ const DanhDa = localFont({
   display: "swap",
 });
 
-import { ReactNode } from "react";
+import Main from "./main";
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default function RootLayout() {
   return (
     <html
       lang="en"
@@ -60,7 +60,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           id="theme"
           className="overflow-hidden"
         >
-          <Providers>{children}</Providers>
+          <Providers>
+            <Main />
+          </Providers>
         </Theme>
       </body>
     </html>
