@@ -137,9 +137,9 @@ const ParticleScene = (props: { gpuTier?: TierResult }) => {
   const options = useRef({
     dt: 0.0025,
     cursorSize: 0.03,
-    mouseForce: 4.0,
+    mouseForce: 5.0,
     resolution: 0.5,
-    viscous: 400,
+    viscous: 100,
     iterations: 2,
     isViscous: true,
     aperture: 12.0,

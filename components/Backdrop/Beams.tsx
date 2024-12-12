@@ -12,7 +12,7 @@ const Beams: React.FC = () => {
       }}
     >
       <div
-        className="framer-kplafz h-full w-full"
+        className="h-full w-full"
         style={{
           background:
             "linear-gradient(var(--gray-gradient) 0%, var(--gray-gradient) 83.9344%, var(--accent-gradient) 100%)",
@@ -27,7 +27,7 @@ const Beams: React.FC = () => {
         }}
       ></div>
       <div
-        className="framer-1tecji8 h-full w-full"
+        className="h-full w-full"
         style={{
           background:
             "linear-gradient(var(--gray-gradient) 0%, var(--gray-gradient) 83.9344%, var(--accent-gradient) 100%)",
@@ -42,7 +42,7 @@ const Beams: React.FC = () => {
         }}
       ></div>
       <div
-        className="framer-l1muo6 h-full w-full"
+        className="h-full w-full"
         style={{
           background:
             "linear-gradient(var(--gray-gradient) 0%, var(--gray-gradient) 67%, var(--accent-gradient) 100%)",
@@ -57,7 +57,7 @@ const Beams: React.FC = () => {
         }}
       ></div>
       <div
-        className="framer-1ho51wz h-full w-full"
+        className="h-full w-full"
         style={{
           background:
             "linear-gradient(var(--gray-gradient) 0%, var(--gray-gradient) 83.9344%, var(--accent-gradient) 100%)",
@@ -72,7 +72,7 @@ const Beams: React.FC = () => {
         }}
       ></div>
       <div
-        className="framer-n4wviz h-full w-full"
+        className="h-full w-full"
         style={{
           background:
             "linear-gradient(var(--gray-gradient) 0%, var(--gray-gradient) 83.9344%, var(--accent-gradient) 100%)",

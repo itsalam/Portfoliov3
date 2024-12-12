@@ -227,13 +227,37 @@ vec2 getBounds(vec4 pos) {
   return vec2(width, height * max(1.0/cameraAspect, cameraAspect));
 }
 
+vec3 sampleVelocity(vec2 coords) {
+  vec3 velocitySum = vec3(0.0);
+  float totalWeight = 0.0;
+  float weights[9];
+  vec2 offsets[9];
+
+  offsets[0] = vec2(-1.0, -1.0); offsets[1] = vec2(0.0, -1.0); offsets[2] = vec2(1.0, -1.0);
+  offsets[3] = vec2(-1.0,  0.0); offsets[4] = vec2(0.0,  0.0); offsets[5] = vec2(1.0,  0.0);
+  offsets[6] = vec2(-1.0,  1.0); offsets[7] = vec2(0.0,  1.0); offsets[8] = vec2(1.0,  1.0);
+
+  weights[0] = 1.0; weights[1] = 2.0; weights[2] = 1.0;
+  weights[3] = 2.0; weights[4] = 4.0; weights[5] = 2.0;
+  weights[6] = 1.0; weights[7] = 2.0; weights[8] = 1.0;
+
+  for (int i = 0; i < 9; i++) {
+    vec2 sampleCoords = coords + offsets[i] / vec2(textureSize(velocity, 0));
+    vec3 sampleVelocity = texture2D(velocity, sampleCoords).xyz;
+    velocitySum += sampleVelocity * weights[i];
+    totalWeight += weights[i];
+  }
+
+  return velocitySum / totalWeight;
+}
+
 float BOUNDS = 0.6;
 
 void main() {
     float t = time * SPEED;
     vec4 pos = texture2D(particles, vUv).xyzw;
     vec2 bounds = getBounds(pos);
-    if (pos.x > BOUNDS * bounds.x || pos.x < -(BOUNDS * 2.5) * bounds.x || pos.y > BOUNDS * bounds.y || pos.y < -BOUNDS * bounds.y || pos.z > 2.0 || pos.z < -2.0){
+    if (pos.x > BOUNDS * bounds.x || pos.x < -(BOUNDS * 1.5) * bounds.x || pos.y > BOUNDS * bounds.y || pos.y < -BOUNDS * bounds.y || pos.z > 2.0 || pos.z < -2.0){
         pos.z = (rand(pos.yz) - 0.5) * 2.0;
         bounds = getBounds(pos);
         pos.y = (rand(pos.xy)-0.5) * bounds.y;
@@ -250,7 +274,7 @@ void main() {
     forces.z = clamp(forces.z, -MAX_SPEED, MAX_SPEED);
     forces.x += 3.0 * SPEED*(MAX_SPEED-forces.x)* step(0.0, forces.x);
     // Increased horizontal force
-    vec3 mouseForces = texture2D(velocity, vec2(clamp((pos.x + bounds.x/2.0)/bounds.x, 0.01, 0.99), clamp((pos.y + bounds.y/2.0)/bounds.y, 0.01, 0.99))).xyz * 0.0015; // Reduced influence of velocity
+    vec3 mouseForces = texture2D(velocity, vec2(clamp((pos.x + bounds.x/2.0)/bounds.x, 0.01, 0.99), clamp((pos.y + bounds.y/2.0)/bounds.y, 0.01, 0.99))).xyz * 0.0005; // Reduced influence of velocity
     pos.xyz += mouseForces;
     forces *= mix(1.0, mix(0.3, 0.1, smoothstep(0.0, 1.0, (0.8-pos.z) * 5.0)), step(0.8, pos.z));
     forces.x += 0.0005 * max(min(rand(pos.xy), 0.7), 1.0);
